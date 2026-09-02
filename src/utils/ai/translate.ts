@@ -9,7 +9,7 @@
 //     punctuation) never hit the network;
 //   * results are cached per model+language so scrolling back is free.
 
-import { AiChatConfig, ChatMessage, chatCompletion, estimateTokens } from './chat';
+import { AiChatConfig, ChatMessage, chatCompletion, truncationHint } from './chat';
 
 export const MAX_BATCH_CHARS = 1500;
 export const MAX_BATCH_SEGMENTS = 12;
@@ -193,12 +193,6 @@ export function joinTranslationPieces(pieces: (string | null)[]): string | null 
 	return joined || null;
 }
 
-/** Output budget: CJK targets cost roughly a token per source word, with slack. */
-export function estimateOutputBudget(texts: string[]): number {
-	const sourceTokens = texts.reduce((total, text) => total + estimateTokens(text || ''), 0);
-	return Math.max(160, Math.min(4000, Math.ceil(sourceTokens * 2.2) + 40));
-}
-
 export interface PackOptions {
 	maxChars?: number;
 	maxSegments?: number;
@@ -336,6 +330,12 @@ export function parseTranslateResponse(raw: string, expected: number): (string |
 	if (!entries && expected === 1) {
 		entries = [text];
 	}
+	if (!entries) {
+		// Cut off mid-JSON: an answer that ran out of tokens still contains the
+		// finished translations at the front, and those are worth keeping.
+		const salvaged = salvageArrayElements(text);
+		if (salvaged.length) entries = salvaged;
+	}
 	if (!entries) return out;
 
 	for (let i = 0; i < expected && i < entries.length; i++) {
@@ -343,6 +343,41 @@ export function parseTranslateResponse(raw: string, expected: number): (string |
 		out[i] = value ? stripEchoedIndex(value, i) : null;
 	}
 	return out;
+}
+
+/**
+ * Recover the elements that did finish inside a truncated JSON answer: quoted
+ * strings sitting at an array element position (preceded by `[` or `,`, not
+ * followed by `:`), and only those with a closing quote. That is what makes a
+ * `finish_reason: length` answer still translate the first paragraphs instead of
+ * losing the whole batch.
+ */
+export function salvageArrayElements(text: string): string[] {
+	const start = text.indexOf('[');
+	if (start === -1) return [];
+
+	const fragment = text.slice(start);
+	const token = /"((?:[^"\\]|\\.)*)"/g;
+	const found: string[] = [];
+	let match: RegExpExecArray | null = token.exec(fragment);
+
+	while (match) {
+		const before = fragment.slice(0, match.index).trimEnd();
+		const previous = before.slice(-1);
+		const following = fragment.slice(match.index + match[0].length).replace(/^\s*/, '').slice(0, 1);
+
+		if ((previous === '[' || previous === ',') && following !== ':') {
+			try {
+				found.push(JSON.parse(match[0]) as string);
+			} catch {
+				found.push(match[1]);
+			}
+		}
+
+		match = token.exec(fragment);
+	}
+
+	return found;
 }
 
 /** Result cache: scrolling back up, or re-opening a page, must cost nothing. */
@@ -421,11 +456,24 @@ export async function translateBatch(
 
 	const messages = buildTranslateMessages(texts, options);
 	const result = await chatCompletion(config, messages, {
-		maxTokens: estimateOutputBudget(texts)
+		// No max_tokens: a cap of our own is what truncates thinking models mid-
+		// answer. The batch is already small, and the endpoint's own limit applies.
+		tolerateTruncation: true
 	});
 
+	const translations = parseTranslateResponse(result.text, texts.length);
+
+	if (translations.every(value => value === null)) {
+		// Nothing usable: say why, because "the paragraph stayed in English" gives
+		// the reader nothing to act on. A thinking model that answers only in its
+		// reasoning field is the common case here.
+		if (result.truncated || result.reasoning) {
+			throw new Error(truncationHint(undefined, result.reasoning));
+		}
+	}
+
 	return {
-		translations: parseTranslateResponse(result.text, texts.length),
+		translations,
 		promptTokens: result.promptTokens,
 		completionTokens: result.completionTokens
 	};

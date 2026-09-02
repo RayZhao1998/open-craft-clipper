@@ -1,6 +1,5 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import {
-	estimateOutputBudget,
 	joinTranslationPieces,
 	languageLabel,
 	packSegments,
@@ -205,11 +204,15 @@ describe('joinTranslationPieces', () => {
 	});
 });
 
-describe('estimateOutputBudget', () => {
-	test('grows with the payload and stays bounded', () => {
-		expect(estimateOutputBudget(['tiny'])).toBe(160);
-		expect(estimateOutputBudget(['a'.repeat(4000), 'b'.repeat(4000)])).toBeLessThanOrEqual(4000);
-		expect(estimateOutputBudget([''.repeat(10)])).toBe(160);
+describe('a truncated answer', () => {
+	test('keeps the translations that did finish', () => {
+		// What finish_reason: length actually leaves behind.
+		const partial = '{"t":["第一句","第二句","第三句被截';
+		expect(parseTranslateResponse(partial, 5)).toEqual(['第一句', '第二句', null, null, null]);
+	});
+
+	test('does not mistake an object key for a translation', () => {
+		expect(parseTranslateResponse('{"t":["alpha","beta"', 3)).toEqual(['alpha', 'beta', null]);
 	});
 });
 
@@ -227,6 +230,22 @@ describe('translateTexts', () => {
 
 		expect(out).toEqual(['«one»', '«two»', '«three»', '«four»']);
 		expect(mockedChat).toHaveBeenCalledTimes(2);
+	});
+
+	test('sends no output limit and keeps a partial answer', async () => {
+		let seenOptions: Record<string, unknown> | undefined;
+		mockedChat.mockImplementation(async (_config, _messages, options) => {
+			seenOptions = options as unknown as Record<string, unknown>;
+			// Cut off mid-answer: the finished lines at the front are still usable.
+			return { text: '{"t":["een","twee"', truncated: true };
+		});
+
+		// Unique language and wording: the cache is shared across this file.
+		const out = await translateTexts(['unieke-een', 'unieke-twee'], config, { targetLang: 'nl' });
+
+		expect(seenOptions?.maxTokens).toBeUndefined();
+		expect(seenOptions?.tolerateTruncation).toBe(true);
+		expect(out[0]).toBe('een');
 	});
 
 	test('serves repeat lookups from the cache without a request', async () => {

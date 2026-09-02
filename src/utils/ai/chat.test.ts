@@ -6,6 +6,7 @@ import {
 	maskAiSecrets,
 	normalizeAiBaseUrl,
 	parseChatResponse,
+	pingAiModel,
 	resolveEndpoint
 } from './chat';
 
@@ -211,10 +212,71 @@ describe('chatCompletion', () => {
 		await expect(chatCompletion(config, messages)).rejects.not.toThrow(/sk-secret123456/);
 	});
 
-	test('reports a truncated answer as an output-limit problem', async () => {
+	test('keeps a cut-off answer when the caller can use partial output', async () => {
 		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ choices: [{ message: { content: 'partial' }, finish_reason: 'length' }] })));
 
-		await expect(chatCompletion(config, messages)).rejects.toThrow(/output limit/);
+		const result = await chatCompletion(config, messages, { tolerateTruncation: true });
+		expect(result.text).toBe('partial');
+		expect(result.truncated).toBe(true);
+	});
+
+	test('reports an empty truncated answer as an output-limit problem', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ choices: [{ message: { content: '' }, finish_reason: 'length' }] })));
+
+		await expect(chatCompletion(config, messages, { maxTokens: 120 })).rejects.toThrow(/output limit/);
+	});
+
+	test('says so when a thinking model returns only reasoning text', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockImplementation(async () => jsonResponse({
+			choices: [{ message: { content: '', reasoning_content: 'Let me think…' }, finish_reason: 'length' }]
+		})));
+
+		await expect(chatCompletion(config, messages)).rejects.toThrow(/only its reasoning text/);
+
+		const tolerated = await chatCompletion(config, messages, { tolerateTruncation: true });
+		expect(tolerated.text).toBe('');
+		expect(tolerated.reasoning).toContain('Let me think');
+	});
+});
+
+describe('pingAiModel', () => {
+	const config = { baseUrl: 'https://api.openai.com/v1', apiKey: 'sk-secret123456', model: 'mini' };
+
+	test('sends no output limit, so a thinking model is not truncated', async () => {
+		const fetchMock = vi.fn().mockImplementation(async () => jsonResponse({ choices: [{ message: { content: 'OK' }, finish_reason: 'stop' }] }));
+		vi.stubGlobal('fetch', fetchMock);
+
+		expect(await pingAiModel(config)).toBe('OK');
+
+		const body = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
+		expect(body.max_tokens).toBeUndefined();
+	});
+
+	test('a thinking model is still a working endpoint', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockImplementation(async () => jsonResponse({
+			choices: [{ message: { content: '', reasoning_content: 'Hmm, let me consider…' }, finish_reason: 'length' }]
+		})));
+
+		expect(await pingAiModel(config)).toMatch(/only its reasoning text/);
+	});
+
+	test('reports an endpoint that answers with nothing at all', async () => {
+		const fetchMock = vi.fn().mockImplementation(async () => jsonResponse({ choices: [{ message: { content: '' }, finish_reason: 'length' }] }));
+		vi.stubGlobal('fetch', fetchMock);
+
+		await expect(pingAiModel(config)).rejects.toThrow(/output limit/);
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+	});
+
+	test('does not retry a request that had no output limit to begin with', async () => {
+		const fetchMock = vi.fn().mockImplementation(async () => jsonResponse({ choices: [{ message: { content: 'x' }, finish_reason: 'stop' }] }));
+		vi.stubGlobal('fetch', fetchMock);
+
+		await chatCompletion(config, [{ role: 'user', content: 'hi' }], { timeoutMs: 5000 });
+
+		const body = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
+		expect(body.max_tokens).toBeUndefined();
+		expect(fetchMock).toHaveBeenCalledTimes(1);
 	});
 });
 

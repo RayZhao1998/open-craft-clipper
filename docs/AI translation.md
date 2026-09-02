@@ -55,6 +55,7 @@ Captions are the most expensive part of a video, so they are optional: **Transla
 | Characters per request | ~1,400 |
 | Segments per request | 12 |
 | Requests in flight | 2 |
+| Output cap per request | none — the endpoint's own limit applies; if an answer is still cut off, the translations that did finish are kept |
 | Retries per paragraph | 2, then give up |
 | After consecutive failures | 3 — translating stops and the error is shown |
 | Code, quotes, numbers | never sent |
@@ -81,6 +82,7 @@ Choose the target language from the list, or **Custom code…** and type any lan
 ## Limitations
 
 - Translation runs in Reader only: it is not applied to the markdown that gets saved, and highlights are unaffected by it.
+- A **reasoning ("thinking") model** that answers only in its reasoning field cannot be translated from: the connection test says so, and translation reports it instead of failing silently. Use a model that answers directly, or turn its thinking off at the endpoint.
 - If a model returns fewer lines than it was sent, the affected paragraphs stay in the original language rather than showing a shifted translation.
 - Very long paragraphs are split into request-sized pieces and re-joined, which can occasionally read slightly less smoothly than a whole-paragraph translation.
 

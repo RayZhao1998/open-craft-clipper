@@ -21,6 +21,12 @@ export interface ChatOptions {
 	/** Hard timeout; a stuck socket would otherwise hold a translation slot forever. */
 	timeoutMs?: number;
 	signal?: AbortSignal;
+	/**
+	 * Return a cut-off answer instead of throwing. Translation wants this: a
+	 * truncated answer still contains the whole lines at the front, which the
+	 * tolerant parser recovers, instead of losing the whole batch.
+	 */
+	tolerateTruncation?: boolean;
 }
 
 export interface ChatResult {
@@ -28,6 +34,10 @@ export interface ChatResult {
 	finishReason?: string;
 	promptTokens?: number;
 	completionTokens?: number;
+	/** The model stopped at its output limit; `text` may be incomplete. */
+	truncated?: boolean;
+	/** Chain-of-thought some models return instead of / beside the answer. */
+	reasoning?: string;
 }
 
 export type ChatEndpointKind = 'openai' | 'anthropic' | 'gemini' | 'ollama';
@@ -142,7 +152,9 @@ export function buildChatRequest(
 	if (kind === 'anthropic') {
 		const body: Record<string, unknown> = {
 			model,
-			max_tokens: maxTokens ?? 2048,
+			// The one place a limit is still sent: Anthropic requires max_tokens, and
+			// 4096 is accepted by every Claude model. Callers no longer pass one.
+			max_tokens: maxTokens ?? 4096,
 			messages: turns.map(m => ({ role: m.role, content: m.content }))
 		};
 		if (system) body.system = system;
@@ -158,9 +170,10 @@ export function buildChatRequest(
 
 	if (kind === 'gemini') {
 		const body: Record<string, unknown> = {
-			contents: turns.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })),
-			generationConfig: { maxOutputTokens: maxTokens ?? 2048 }
+			contents: turns.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }))
 		};
+		// No limit means Gemini's own default, not a number of our choosing.
+		if (maxTokens) body.generationConfig = { maxOutputTokens: maxTokens };
 		if (system) body.systemInstruction = { parts: [{ text: system }] };
 		if (apiKey) headers['x-goog-api-key'] = apiKey;
 		return { url, body, headers };
@@ -220,6 +233,7 @@ export function parseChatResponse(kind: ChatEndpointKind, data: any): ParsedChat
 	}
 
 	let text = '';
+	let reasoning = '';
 	let finishReason: string | undefined;
 	let promptTokens: number | undefined;
 	let completionTokens: number | undefined;
@@ -248,12 +262,25 @@ export function parseChatResponse(kind: ChatEndpointKind, data: any): ParsedChat
 			throw new Error('The AI endpoint did not return any choices.');
 		}
 		text = contentToText(choice.message?.content ?? choice.text ?? '');
+		// Thinking models answer in a separate field. It is never usable as a
+		// translation, but it tells us the endpoint itself is working.
+		reasoning = contentToText(choice.message?.reasoning_content ?? choice.message?.reasoning ?? '');
 		finishReason = choice.finish_reason;
 		promptTokens = data.usage?.prompt_tokens;
 		completionTokens = data.usage?.completion_tokens;
 	}
 
-	return { text, finishReason, promptTokens, completionTokens };
+	return { text, reasoning: reasoning || undefined, finishReason, promptTokens, completionTokens };
+}
+
+/**
+ * Why an answer came back empty, in terms of what the user can actually change.
+ */
+export function truncationHint(maxTokens: number | undefined, reasoning?: string): string {
+	if (reasoning?.trim()) {
+		return 'The model returned only its reasoning text and no answer, so there was nothing to translate. This endpoint is a "thinking" model: turn its thinking off, or choose a model that answers directly.';
+	}
+	return `The model hit its output limit${maxTokens ? ` (${maxTokens} tokens)` : ''} before returning any text. Send fewer segments per request, or choose a model with a larger output limit.`;
 }
 
 export class AiApiError extends Error {
@@ -318,7 +345,7 @@ export async function chatCompletion(
 			signal: controller.signal
 		});
 
-		if (!response.ok && request.body.max_tokens !== undefined) {
+		if (!response.ok && options.maxTokens !== undefined) {
 			const errorBody = await response.clone().text().catch(() => '');
 			if (response.status === 400 && /max_tokens|max_completion_tokens|unsupported parameter/i.test(errorBody)) {
 				request = buildChatRequest(config.baseUrl, config.apiKey, config.model, messages, undefined);
@@ -344,14 +371,19 @@ export async function chatCompletion(
 		}
 
 		const parsed = parseChatResponse(kind, data);
-		if (parsed.finishReason && /length|max_tokens|MAX_TOKENS/i.test(parsed.finishReason)) {
-			throw new AiApiError('The response was cut off by the output limit. Try fewer segments per request.', response.status, request.url);
-		}
-		if (!parsed.text.trim()) {
-			throw new AiApiError('The model returned an empty answer.', response.status, request.url);
+		const truncated = Boolean(parsed.finishReason && /length|max_tokens|MAX_TOKENS/i.test(parsed.finishReason));
+
+		if (!parsed.text.trim() && !options.tolerateTruncation) {
+			// A cut-off answer still has the finished lines at the front, so callers
+			// that can use a partial result asked for it instead of an error.
+			throw new AiApiError(
+				truncated || parsed.reasoning ? truncationHint(request.body.max_tokens as number | undefined, parsed.reasoning) : 'The model returned an empty answer.',
+				response.status,
+				request.url
+			);
 		}
 
-		return parsed;
+		return { ...parsed, truncated };
 	} catch (error: unknown) {
 		if (error instanceof DOMException && error.name === 'AbortError') {
 			throw new AiApiError(`The AI endpoint did not answer within ${Math.round(timeoutMs / 1000)}s.`);
@@ -365,11 +397,29 @@ export async function chatCompletion(
 	}
 }
 
-/** Cheap round-trip used by the settings page "Test" button. */
+/**
+ * Cheap round-trip used by the settings page "Test" button.
+ *
+ * No output limit: a limit is exactly what makes a thinking model look broken,
+ * because it spends the whole budget before answering. We only care whether the
+ * endpoint accepts our key and answers at all.
+ */
 export async function pingAiModel(config: AiChatConfig): Promise<string> {
 	const result = await chatCompletion(config, [
 		{ role: 'system', content: 'Reply with exactly: OK' },
 		{ role: 'user', content: 'ping' }
-	], { maxTokens: 16, timeoutMs: 20000 });
-	return result.text.trim().slice(0, 60);
+	], { timeoutMs: 20000, tolerateTruncation: true });
+
+	const text = result.text.trim().slice(0, 60);
+	if (text) return text;
+
+	if (result.reasoning?.trim()) {
+		// Credentials and URL are fine — only the answer is missing, and
+		// translation cannot work with a model that never answers.
+		return 'Connected, but the model returned only its reasoning text. For translation, turn its "thinking" off or pick a model that answers directly.';
+	}
+
+	throw new AiApiError(result.truncated
+		? truncationHint(undefined, result.reasoning)
+		: 'The endpoint accepted the request but returned no text.');
 }
