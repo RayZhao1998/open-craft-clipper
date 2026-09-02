@@ -26,8 +26,8 @@ export async function exportHighlights(): Promise<void> {
 				try {
 					await navigator.share({
 						files: [new File([blob], fileName, { type: 'application/json' })],
-						title: 'Exported Obsidian Web Clipper Highlights',
-						text: 'Here are your exported highlights from Obsidian Web Clipper.'
+						title: 'Exported OpenCraftClipper Highlights',
+						text: 'Here are your exported highlights from OpenCraftClipper.'
 					});
 				} catch (error) {
 					console.error('Error sharing:', error);

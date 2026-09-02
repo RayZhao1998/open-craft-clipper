@@ -272,7 +272,7 @@
 		"message": "استخراج خواص"
 	},
 	"exportPropertiesDescription": {
-		"message": "ویژگی‌های Web Clipper را در یک فایل $strong_start$types.json$strong_end$ ذخیره کنید که می‌تواند به خزانه ابسیدین شما یا در دستگاه‌های دیگر به Web Clipper وارد شود.",
+		"message": "ویژگی‌های OpenCraftClipper را در یک فایل $strong_start$types.json$strong_end$ ذخیره کنید که می‌تواند به خزانه ابسیدین شما یا در دستگاه‌های دیگر به OpenCraftClipper وارد شود.",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "محتوای وب را در قالبی خصوصی و بادوام ذخیره کنید که بتوانید به صورت آفلاین به آن دسترسی داشته باشید. پسوند رسمی مرورگر برای ابسیدین."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "متن کپی نشد"
@@ -358,7 +358,7 @@
 		"message": "راهنما"
 	},
 	"helpDescription": {
-		"message": "نحوه استفاده از Web Clipper را بیاموزید و در رفع مشکلات کمک بگیرید."
+		"message": "نحوه استفاده از OpenCraftClipper را بیاموزید و در رفع مشکلات کمک بگیرید."
 	},
 	"highlightInline": {
 		"message": "محتوای صفحه را برجسته کنید"

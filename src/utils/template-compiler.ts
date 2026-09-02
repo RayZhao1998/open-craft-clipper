@@ -1,4 +1,4 @@
-// Template compiler for the Web Clipper template engine
+// Template compiler for the OpenCraftClipper template engine
 // This module provides the main entry point for template compilation,
 // integrating the AST-based renderer with the variable processors.
 

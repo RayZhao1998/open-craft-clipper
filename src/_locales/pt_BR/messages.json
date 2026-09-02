@@ -118,7 +118,7 @@
 		"message": "Fechar"
 	},
 	"commandOpenClipper": {
-		"message": "Abrir Obsidian Clipper"
+		"message": "Abrir OpenCraftClipper"
 	},
 	"commandQuickClip": {
 		"message": "Captura rápida"
@@ -272,7 +272,7 @@
 		"message": "Exportar propriedades"
 	},
 	"exportPropertiesDescription": {
-		"message": "Salve as propriedades do Web Clipper em um arquivo $strong_start$types.json$strong_end$ que pode ser importado para o cofre do Obsidian, ou para o Web Clipper em outros dispositivos.",
+		"message": "Salve as propriedades do OpenCraftClipper em um arquivo $strong_start$types.json$strong_end$ que pode ser importado para o cofre do Obsidian, ou para o OpenCraftClipper em outros dispositivos.",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "Salve o conteúdo da internet em um formato privado e durável, que pode ser acessado off-line. A extensão de navegador oficial do Obsidian."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Falha ao copiar o texto"
@@ -337,7 +337,7 @@
 		"message": "Comentários"
 	},
 	"feedbackDescription": {
-		"message": "Como podemos melhorar o Web Clipper? Por favor, visite nossa página de ajuda, onde você pode reportar bugs, sugerir recursos e obter ajuda com problemas comuns."
+		"message": "Como podemos melhorar o OpenCraftClipper? Por favor, visite nossa página de ajuda, onde você pode reportar bugs, sugerir recursos e obter ajuda com problemas comuns."
 	},
 	"feedbackTitle": {
 		"message": "Obrigado pelo seu feedback"
@@ -358,7 +358,7 @@
 		"message": "Ajuda"
 	},
 	"helpDescription": {
-		"message": "Aprenda a usar o Web Clipper e obtenha ajuda para solucionar problemas."
+		"message": "Aprenda a usar o OpenCraftClipper e obtenha ajuda para solucionar problemas."
 	},
 	"highlightInline": {
 		"message": "Realçar o conteúdo da página"
@@ -570,7 +570,7 @@
 		"message": "Abrir"
 	},
 	"openBehaviorDescription": {
-		"message": "Escolha como o Web Clipper abre por padrão."
+		"message": "Escolha como o OpenCraftClipper abre por padrão."
 	},
 	"openBehaviorTitle": {
 		"message": "Comportamento de abertura"
@@ -714,7 +714,7 @@
 		"message": "Provedores"
 	},
 	"rateExtensionDescription": {
-		"message": "Você está gostando do Web Clipper? Ajude-nos dando uma avaliação."
+		"message": "Você está gostando do OpenCraftClipper? Ajude-nos dando uma avaliação."
 	},
 	"read": {
 		"message": "Lidas"
@@ -966,7 +966,7 @@
 		"message": "Para alterar as atribuições de teclas, acesse $1, clique no ícone de engrenagem e selecione \"Gerenciar atalhos de extensões\"."
 	},
 	"shortcutInstructionsIntro": {
-		"message": "Atalhos de teclado lhe dão rápido acesso aos recursos do Web Clipper."
+		"message": "Atalhos de teclado lhe dão rápido acesso aos recursos do OpenCraftClipper."
 	},
 	"shortcutInstructionsSafari": {
 		"message": "Atalhos de teclado não são customizáveis no Safari."

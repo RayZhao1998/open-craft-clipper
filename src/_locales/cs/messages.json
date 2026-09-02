@@ -118,7 +118,7 @@
 		"message": "Zavřít"
 	},
 	"commandOpenClipper": {
-		"message": "Otevřít Obsidian Clipper"
+		"message": "Otevřít OpenCraftClipper"
 	},
 	"commandQuickClip": {
 		"message": "Rychlé zachycení"
@@ -272,7 +272,7 @@
 		"message": "Exportovat vlastnosti"
 	},
 	"exportPropertiesDescription": {
-		"message": "Uložte vlastnosti Web Clipper do souboru $strong_start$types.json$strong_end$, který lze importovat do vašeho trezoru Obsidian nebo do Web Clipper na jiných zařízeních.",
+		"message": "Uložte vlastnosti OpenCraftClipper do souboru $strong_start$types.json$strong_end$, který lze importovat do vašeho trezoru Obsidian nebo do OpenCraftClipper na jiných zařízeních.",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "Uložte obsah z webu v soukromém a trvalém formátu, ke kterému máte přístup offline. Oficiální prohlížečové rozšíření pro Obsidian."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Nepodařilo se zkopírovat text"
@@ -337,7 +337,7 @@
 		"message": "Zpětná vazba"
 	},
 	"feedbackDescription": {
-		"message": "Jak můžeme Web Clipper vylepšit? Navštivte naši stránku nápovědy, kde můžete nahlásit chyby, navrhnout funkce a získat pomoc s běžnými problémy."
+		"message": "Jak můžeme OpenCraftClipper vylepšit? Navštivte naši stránku nápovědy, kde můžete nahlásit chyby, navrhnout funkce a získat pomoc s běžnými problémy."
 	},
 	"feedbackTitle": {
 		"message": "Děkujeme za zpětnou vazbu"
@@ -358,7 +358,7 @@
 		"message": "Nápověda"
 	},
 	"helpDescription": {
-		"message": "Naučte se používat Web Clipper a získejte pomoc s řešením problémů"
+		"message": "Naučte se používat OpenCraftClipper a získejte pomoc s řešením problémů"
 	},
 	"highlightInline": {
 		"message": "Zvýraznit obsah stránky"
@@ -562,7 +562,7 @@
 		"message": "Otevřít"
 	},
 	"openBehaviorDescription": {
-		"message": "Vyberte, jak se Web Clipper otevírá jako výchozí."
+		"message": "Vyberte, jak se OpenCraftClipper otevírá jako výchozí."
 	},
 	"openBehaviorTitle": {
 		"message": "Chování při otevírání"
@@ -706,7 +706,7 @@
 		"message": "Poskytovatelé"
 	},
 	"rateExtensionDescription": {
-		"message": "Líbí se vám Web Clipper? Pomozte nám jeho ohodnocením."
+		"message": "Líbí se vám OpenCraftClipper? Pomozte nám jeho ohodnocením."
 	},
 	"read": {
 		"message": "Přečteno"

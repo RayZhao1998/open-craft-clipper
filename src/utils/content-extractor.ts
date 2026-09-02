@@ -118,8 +118,8 @@ export async function extractPageContent(tabId: number): Promise<ContentResponse
 		try {
 			return await sendExtractRequest(tabId);
 		} catch (retryError) {
-			console.error('[Obsidian Clipper] Extraction failed after retry:', retryError);
-			throw new Error('Web Clipper was not able to start. Please try reloading the page.');
+			console.error('[OpenCraftClipper] Extraction failed after retry:', retryError);
+			throw new Error('OpenCraftClipper was not able to start. Please try reloading the page.');
 		}
 	}
 }

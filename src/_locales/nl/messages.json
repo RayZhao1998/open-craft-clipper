@@ -118,7 +118,7 @@
 		"message": "Sluiten"
 	},
 	"commandOpenClipper": {
-		"message": "Open Obsidian Clipper"
+		"message": "Open OpenCraftClipper"
 	},
 	"commandQuickClip": {
 		"message": "Snel knippen"
@@ -272,7 +272,7 @@
 		"message": "Eigenschappen exporteren"
 	},
 	"exportPropertiesDescription": {
-		"message": "Sla Web Clipper eigenschappen op in een $strong_start$types.json$strong_end$ bestand dat kan worden geïmporteerd in je Obsidian kluis of in Web Clipper op andere apparaten.",
+		"message": "Sla OpenCraftClipper eigenschappen op in een $strong_start$types.json$strong_end$ bestand dat kan worden geïmporteerd in je Obsidian kluis of in OpenCraftClipper op andere apparaten.",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "Sla webinhoud op in een privé en duurzaam formaat dat je offline kunt bekijken. De officiële browserextensie voor Obsidian."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Tekst kopiëren mislukt"
@@ -337,7 +337,7 @@
 		"message": "Feedback"
 	},
 	"feedbackDescription": {
-		"message": "Hoe kunnen we Web Clipper verbeteren? Bezoek alstublieft onze hulppagina, waar u bugs kunt melden, functies kunt voorstellen en hulp kunt krijgen bij veelvoorkomende problemen."
+		"message": "Hoe kunnen we OpenCraftClipper verbeteren? Bezoek alstublieft onze hulppagina, waar u bugs kunt melden, functies kunt voorstellen en hulp kunt krijgen bij veelvoorkomende problemen."
 	},
 	"feedbackTitle": {
 		"message": "Bedankt voor uw feedback"
@@ -358,7 +358,7 @@
 		"message": "Help"
 	},
 	"helpDescription": {
-		"message": "Leer hoe je Web Clipper gebruikt en krijg hulp bij probleemoplossing."
+		"message": "Leer hoe je OpenCraftClipper gebruikt en krijg hulp bij probleemoplossing."
 	},
 	"highlightInline": {
 		"message": "Markeer de pagina-inhoud"
@@ -570,7 +570,7 @@
 		"message": "Openen"
 	},
 	"openBehaviorDescription": {
-		"message": "Kies hoe Web Clipper standaard wordt geopend."
+		"message": "Kies hoe OpenCraftClipper standaard wordt geopend."
 	},
 	"openBehaviorTitle": {
 		"message": "Open gedrag"
@@ -714,7 +714,7 @@
 		"message": "Providers"
 	},
 	"rateExtensionDescription": {
-		"message": "Geniet u van Web Clipper? Help ons door het een beoordeling te geven."
+		"message": "Geniet u van OpenCraftClipper? Help ons door het een beoordeling te geven."
 	},
 	"read": {
 		"message": "Gelezen"

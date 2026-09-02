@@ -118,7 +118,7 @@
 		"message": "Κλείσιμο"
 	},
 	"commandOpenClipper": {
-		"message": "Άνοιγμα Obsidian Clipper"
+		"message": "Άνοιγμα OpenCraftClipper"
 	},
 	"commandQuickClip": {
 		"message": "Γρήγορη αποκοπή"
@@ -272,7 +272,7 @@
 		"message": "Εξαγωγή ιδιοτήτων"
 	},
 	"exportPropertiesDescription": {
-		"message": "Αποθηκεύστε τις ιδιότητες του Web Clipper σε ένα αρχείο $strong_start$types.json$strong_end$ που μπορεί να εισαχθεί στο θησαυροφυλάκιο Obsidian σας ή στο Web Clipper σε άλλες συσκευές",
+		"message": "Αποθηκεύστε τις ιδιότητες του OpenCraftClipper σε ένα αρχείο $strong_start$types.json$strong_end$ που μπορεί να εισαχθεί στο θησαυροφυλάκιο Obsidian σας ή στο OpenCraftClipper σε άλλες συσκευές",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "Αποθηκεύστε περιεχόμενο από τον ιστό σε ιδιωτική και βιώσιμη μορφή στην οποία έχετε πρόσβαση εκτός σύνδεσης. Η επίσημη επέκταση περιηγητή για το Obsidian."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Αποτυχία αντιγραφής κειμένου"
@@ -337,7 +337,7 @@
 		"message": "Ανατροφοδότηση"
 	},
 	"feedbackDescription": {
-		"message": "Πώς μπορούμε να βελτιώσουμε το Web Clipper; Επισκεφθείτε τη σελίδα βοήθειάς μας όπου μπορείτε να αναφέρετε σφάλματα, να προτείνετε λειτουργίες και να λάβετε βοήθεια για κοινά προβλήματα."
+		"message": "Πώς μπορούμε να βελτιώσουμε το OpenCraftClipper; Επισκεφθείτε τη σελίδα βοήθειάς μας όπου μπορείτε να αναφέρετε σφάλματα, να προτείνετε λειτουργίες και να λάβετε βοήθεια για κοινά προβλήματα."
 	},
 	"feedbackTitle": {
 		"message": "Ευχαριστούμε για την ανατροφοδότηση"
@@ -358,7 +358,7 @@
 		"message": "Βοήθεια"
 	},
 	"helpDescription": {
-		"message": "Μάθετε πώς να χρησιμοποιείτε το Web Clipper και λάβετε βοήθεια για την αντιμετώπιση προβλημάτων"
+		"message": "Μάθετε πώς να χρησιμοποιείτε το OpenCraftClipper και λάβετε βοήθεια για την αντιμετώπιση προβλημάτων"
 	},
 	"highlightInline": {
 		"message": "Επισήμανση περιεχομένου σελίδας"
@@ -562,7 +562,7 @@
 		"message": "Άνοιγμα"
 	},
 	"openBehaviorDescription": {
-		"message": "Επιλέξτε πώς θα ανοίγει από προεπιλογή το Web Clipper."
+		"message": "Επιλέξτε πώς θα ανοίγει από προεπιλογή το OpenCraftClipper."
 	},
 	"openBehaviorTitle": {
 		"message": "Συμπεριφορά ανοίγματος"
@@ -706,7 +706,7 @@
 		"message": "Πάροχοι"
 	},
 	"rateExtensionDescription": {
-		"message": "Σας αρέσει το Web Clipper; Βοηθήστε μας δίνοντάς του μια αξιολόγηση."
+		"message": "Σας αρέσει το OpenCraftClipper; Βοηθήστε μας δίνοντάς του μια αξιολόγηση."
 	},
 	"read": {
 		"message": "Διαβασμένες"

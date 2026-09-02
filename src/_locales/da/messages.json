@@ -118,7 +118,7 @@
 		"message": "Luk"
 	},
 	"commandOpenClipper": {
-		"message": "Åbn Obsidian Clipper"
+		"message": "Åbn OpenCraftClipper"
 	},
 	"commandQuickClip": {
 		"message": "Hurtigklip"
@@ -272,7 +272,7 @@
 		"message": "Eksportér egenskaber"
 	},
 	"exportPropertiesDescription": {
-		"message": "Gem Web Clipper-egenskaber til en $strong_start$types.json$strong_end$-fil, som kan importeres i din Obsidian-boks eller Web Clipper på andre enheder",
+		"message": "Gem OpenCraftClipper-egenskaber til en $strong_start$types.json$strong_end$-fil, som kan importeres i din Obsidian-boks eller OpenCraftClipper på andre enheder",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "Gem webindhold i et privat og holdbart format, tilgængeligt offline. Den officielle browserudvidelse til Obsidian."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Kunne ikke kopiere tekst"
@@ -337,7 +337,7 @@
 		"message": "Feedback"
 	},
 	"feedbackDescription": {
-		"message": "Hvordan kan vi forbedre Web Clipper? Besøg vores hjælpeside for at rapportere fejl, foreslå funktioner og få hjælp med almindelige problemer."
+		"message": "Hvordan kan vi forbedre OpenCraftClipper? Besøg vores hjælpeside for at rapportere fejl, foreslå funktioner og få hjælp med almindelige problemer."
 	},
 	"feedbackTitle": {
 		"message": "Tak for din feedback"
@@ -358,7 +358,7 @@
 		"message": "Hjælp"
 	},
 	"helpDescription": {
-		"message": "Lær hvordan du bruger Web Clipper og få hjælp til fejlfinding"
+		"message": "Lær hvordan du bruger OpenCraftClipper og få hjælp til fejlfinding"
 	},
 	"highlightInline": {
 		"message": "Fremhæv indhold på siden"
@@ -562,7 +562,7 @@
 		"message": "Åbn"
 	},
 	"openBehaviorDescription": {
-		"message": "Vælg hvordan Web Clipper åbner som standard."
+		"message": "Vælg hvordan OpenCraftClipper åbner som standard."
 	},
 	"openBehaviorTitle": {
 		"message": "Åbn adfærd"
@@ -706,7 +706,7 @@
 		"message": "Udbydere"
 	},
 	"rateExtensionDescription": {
-		"message": "Kan du lide Web Clipper? Hjælp os ved at give en bedømmelse."
+		"message": "Kan du lide OpenCraftClipper? Hjælp os ved at give en bedømmelse."
 	},
 	"read": {
 		"message": "Læst"

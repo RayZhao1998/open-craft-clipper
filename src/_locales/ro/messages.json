@@ -118,7 +118,7 @@
 		"message": "Închide"
 	},
 	"commandOpenClipper": {
-		"message": "Deschide Obsidian Clipper"
+		"message": "Deschide OpenCraftClipper"
 	},
 	"commandQuickClip": {
 		"message": "Decupare rapidă"
@@ -272,7 +272,7 @@
 		"message": "Exportă proprietăți"
 	},
 	"exportPropertiesDescription": {
-		"message": "Salvează proprietățile Web Clipper într-un fișier $strong_start$types.json$strong_end$ care poate fi importat în seiful tău Obsidian sau în Web Clipper pe alte dispozitive",
+		"message": "Salvează proprietățile OpenCraftClipper într-un fișier $strong_start$types.json$strong_end$ care poate fi importat în seiful tău Obsidian sau în OpenCraftClipper pe alte dispozitive",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "Salvează conținut web într-un format privat și durabil care poate fi accesat offline. Extensia oficială de browser pentru Obsidian."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Nu s-a putut copia textul"
@@ -337,7 +337,7 @@
 		"message": "Feedback"
 	},
 	"feedbackDescription": {
-		"message": "Cum putem îmbunătăți Web Clipper? Vizitează pagina noastră de ajutor pentru a raporta erori, sugera funcționalități și primi ajutor pentru probleme comune."
+		"message": "Cum putem îmbunătăți OpenCraftClipper? Vizitează pagina noastră de ajutor pentru a raporta erori, sugera funcționalități și primi ajutor pentru probleme comune."
 	},
 	"feedbackTitle": {
 		"message": "Mulțumim pentru feedback"
@@ -358,7 +358,7 @@
 		"message": "Ajutor"
 	},
 	"helpDescription": {
-		"message": "Învață cum să folosești Web Clipper și primește ajutor pentru depanare"
+		"message": "Învață cum să folosești OpenCraftClipper și primește ajutor pentru depanare"
 	},
 	"highlightInline": {
 		"message": "Evidențiază conținut în pagină"
@@ -562,7 +562,7 @@
 		"message": "Deschide"
 	},
 	"openBehaviorDescription": {
-		"message": "Alegeți modul în care Web Clipper se deschide în mod implicit."
+		"message": "Alegeți modul în care OpenCraftClipper se deschide în mod implicit."
 	},
 	"openBehaviorTitle": {
 		"message": "Comportament la deschidere"
@@ -706,7 +706,7 @@
 		"message": "Furnizori"
 	},
 	"rateExtensionDescription": {
-		"message": "Îți place Web Clipper? Ajută-ne dându-ne o evaluare."
+		"message": "Îți place OpenCraftClipper? Ajută-ne dându-ne o evaluare."
 	},
 	"read": {
 		"message": "Citite"

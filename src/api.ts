@@ -1,4 +1,4 @@
-// Programmatic API for Obsidian Web Clipper.
+// Programmatic API for OpenCraftClipper.
 // Environment-agnostic — no Node.js or browser dependencies.
 // The caller provides a DocumentParser for their environment.
 

@@ -118,7 +118,7 @@
 		"message": "閉じる"
 	},
 	"commandOpenClipper": {
-		"message": "Obsidian Clipperを開く"
+		"message": "OpenCraftClipperを開く"
 	},
 	"commandQuickClip": {
 		"message": "クイッククリップ"
@@ -286,7 +286,7 @@
 		"message": "Webコンテンツをプライベートで永続的なオフラインアクセス可能な形式で保存します。Obsidianの公式ブラウザ拡張機能です。"
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "テキストのコピーに失敗しました"

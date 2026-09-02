@@ -118,7 +118,7 @@
 		"message": "Zavrieť"
 	},
 	"commandOpenClipper": {
-		"message": "Otvoriť Obsidian Clipper"
+		"message": "Otvoriť OpenCraftClipper"
 	},
 	"commandQuickClip": {
 		"message": "Rýchly výstrižok"
@@ -286,7 +286,7 @@
 		"message": "Ukladajte obsah z webu v súkromnom a trvácnom formáte, ku ktorému máte prístup aj offline. Oficiálne rozšírenie prehliadača pre Obsidian."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Nepodarilo sa skopírovať text"
@@ -337,7 +337,7 @@
 		"message": "Spätná väzba"
 	},
 	"feedbackDescription": {
-		"message": "Ako môžeme zlepšiť Web Clipper? Navštívte našu stránku pomoci, kde môžete nahlásiť chyby, navrhnúť funkcie a získať pomoc s bežnými problémami."
+		"message": "Ako môžeme zlepšiť OpenCraftClipper? Navštívte našu stránku pomoci, kde môžete nahlásiť chyby, navrhnúť funkcie a získať pomoc s bežnými problémami."
 	},
 	"feedbackTitle": {
 		"message": "Ďakujeme za vašu spätnú väzbu"
@@ -358,7 +358,7 @@
 		"message": "Pomoc"
 	},
 	"helpDescription": {
-		"message": "Zistite, ako používať Web Clipper, a získajte pomoc pri riešení problémov."
+		"message": "Zistite, ako používať OpenCraftClipper, a získajte pomoc pri riešení problémov."
 	},
 	"highlightInline": {
 		"message": "Zvýrazniť obsah stránky"
@@ -570,7 +570,7 @@
 		"message": "Otvoriť"
 	},
 	"openBehaviorDescription": {
-		"message": "Vyberte, ako sa má Web Clipper predvolene otvárať."
+		"message": "Vyberte, ako sa má OpenCraftClipper predvolene otvárať."
 	},
 	"openBehaviorTitle": {
 		"message": "Správanie pri otvorení"
@@ -714,7 +714,7 @@
 		"message": "Poskytovatelia"
 	},
 	"rateExtensionDescription": {
-		"message": "Páči sa vám Web Clipper? Pomôžte nám tým, že mu dáte hodnotenie."
+		"message": "Páči sa vám OpenCraftClipper? Pomôžte nám tým, že mu dáte hodnotenie."
 	},
 	"read": {
 		"message": "Prečítané"

@@ -118,7 +118,7 @@
 		"message": "Band karein"
 	},
 	"commandOpenClipper": {
-		"message": "Obsidian Clipper kholein"
+		"message": "OpenCraftClipper kholein"
 	},
 	"commandQuickClip": {
 		"message": "Quick clip"
@@ -272,7 +272,7 @@
 		"message": "Properties export karein"
 	},
 	"exportPropertiesDescription": {
-		"message": "Web Clipper properties ko $strong_start$types.json$strong_end$ file mein save karein jise aapke Obsidian vault mein, ya dusre devices par Web Clipper mein import kiya ja sakta hai.",
+		"message": "OpenCraftClipper properties ko $strong_start$types.json$strong_end$ file mein save karein jise aapke Obsidian vault mein, ya dusre devices par OpenCraftClipper mein import kiya ja sakta hai.",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "Web se content ko ek private aur durable format mein save karein jise aap offline access kar sakte hain. Obsidian ka official browser extension."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Text copy karne mein fail"
@@ -358,7 +358,7 @@
 		"message": "Help"
 	},
 	"helpDescription": {
-		"message": "Web Clipper ka upyog karna seekhein aur troubleshooting help prapt karein."
+		"message": "OpenCraftClipper ka upyog karna seekhein aur troubleshooting help prapt karein."
 	},
 	"highlightInline": {
 		"message": "Page content highlight karein"

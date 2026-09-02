@@ -118,7 +118,7 @@
 		"message": "סגור"
 	},
 	"commandOpenClipper": {
-		"message": "פתח את Obsidian Clipper"
+		"message": "פתח את OpenCraftClipper"
 	},
 	"commandQuickClip": {
 		"message": "גזירה מהירה"
@@ -272,7 +272,7 @@
 		"message": "ייצא מאפיינים"
 	},
 	"exportPropertiesDescription": {
-		"message": "שמור את מאפייני Web Clipper לקובץ $strong_start$types.json$strong_end$ שניתן לייבא לכספת Obsidian שלך או ל-Web Clipper במכשירים אחרים",
+		"message": "שמור את מאפייני OpenCraftClipper לקובץ $strong_start$types.json$strong_end$ שניתן לייבא לכספת Obsidian שלך או ל-OpenCraftClipper במכשירים אחרים",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "שמור תוכן מהאינטרנט בפורמט פרטי ובר-קיימא שניתן לגשת אליו במצב לא מקוון. הרחבת הדפדפן הרשמית של Obsidian."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "נכשל בהעתקת טקסט"
@@ -337,7 +337,7 @@
 		"message": "משוב"
 	},
 	"feedbackDescription": {
-		"message": "כיצד נוכל לשפר את Web Clipper? בקר/י בדף העזרה שלנו כדי לדווח על באגים, להציע תכונות ולקבל עזרה בבעיות נפוצות."
+		"message": "כיצד נוכל לשפר את OpenCraftClipper? בקר/י בדף העזרה שלנו כדי לדווח על באגים, להציע תכונות ולקבל עזרה בבעיות נפוצות."
 	},
 	"feedbackTitle": {
 		"message": "תודה על המשוב"
@@ -358,7 +358,7 @@
 		"message": "עזרה"
 	},
 	"helpDescription": {
-		"message": "למד/י כיצד להשתמש ב-Web Clipper וקבל/י עזרה בפתרון בעיות"
+		"message": "למד/י כיצד להשתמש ב-OpenCraftClipper וקבל/י עזרה בפתרון בעיות"
 	},
 	"highlightInline": {
 		"message": "סמן תוכן בדף"
@@ -706,7 +706,7 @@
 		"message": "ספקים"
 	},
 	"rateExtensionDescription": {
-		"message": "אוהב את Web Clipper? עזור לנו על ידי דירוג."
+		"message": "אוהב את OpenCraftClipper? עזור לנו על ידי דירוג."
 	},
 	"read": {
 		"message": "נקראו"

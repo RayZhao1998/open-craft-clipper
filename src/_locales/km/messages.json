@@ -118,7 +118,7 @@
 		"message": "បិទ"
 	},
 	"commandOpenClipper": {
-		"message": "បើក Obsidian Clipper"
+		"message": "បើក OpenCraftClipper"
 	},
 	"commandQuickClip": {
 		"message": "កាត់យករហ័ស"
@@ -272,7 +272,7 @@
 		"message": "នាំចេញលក្ខណៈសម្បត្តិ"
 	},
 	"exportPropertiesDescription": {
-		"message": "រក្សាទុកលក្ខណៈសម្បត្តិ Web Clipper ទៅឯកសារ $strong_start$types.json$strong_end$ ដែលអាចនាំចូលទៅក្នុង vault របស់ Obsidian របស់អ្នក ឬទៅក្នុង Web Clipper លើឧបករណ៍ផ្សេងៗ។",
+		"message": "រក្សាទុកលក្ខណៈសម្បត្តិ OpenCraftClipper ទៅឯកសារ $strong_start$types.json$strong_end$ ដែលអាចនាំចូលទៅក្នុង vault របស់ Obsidian របស់អ្នក ឬទៅក្នុង OpenCraftClipper លើឧបករណ៍ផ្សេងៗ។",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "រក្សាទុកមាតិកាពីបណ្ដាញក្នុងទម្រង់ឯកជន និងប្រើបានយូរ ដែលអ្នកអាចចូលប្រើក្រៅបណ្ដាញបាន។ ផ្នែកបន្ថែមកម្មវិធីរុករកផ្លូវការរបស់ Obsidian។"
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "បានបរាជ័យក្នុងការចម្លងអត្ថបទ"
@@ -337,7 +337,7 @@
 		"message": "មតិយោបល់"
 	},
 	"feedbackDescription": {
-		"message": "តើយើងអាចកែលម្អ Web Clipper ដោយរបៀបណា? សូមចូលទៅទំព័រជំនួយរបស់យើង ដែលអ្នកអាចរាយការណ៍កំហុស ស្នើមុខងារ និងទទួលជំនួយសម្រាប់បញ្ហាទូទៅ។"
+		"message": "តើយើងអាចកែលម្អ OpenCraftClipper ដោយរបៀបណា? សូមចូលទៅទំព័រជំនួយរបស់យើង ដែលអ្នកអាចរាយការណ៍កំហុស ស្នើមុខងារ និងទទួលជំនួយសម្រាប់បញ្ហាទូទៅ។"
 	},
 	"feedbackTitle": {
 		"message": "អរគុណសម្រាប់មតិយោបល់របស់អ្នក"
@@ -358,7 +358,7 @@
 		"message": "ជំនួយ"
 	},
 	"helpDescription": {
-		"message": "ស្វែងយល់ពីរបៀបប្រើ Web Clipper និងទទួលជំនួយដោះស្រាយបញ្ហា។"
+		"message": "ស្វែងយល់ពីរបៀបប្រើ OpenCraftClipper និងទទួលជំនួយដោះស្រាយបញ្ហា។"
 	},
 	"highlightInline": {
 		"message": "រំលេចមាតិកាទំព័រ"
@@ -570,7 +570,7 @@
 		"message": "បើក"
 	},
 	"openBehaviorDescription": {
-		"message": "ជ្រើសរើសរបៀបដែល Web Clipper បើកជាលំនាំដើម។"
+		"message": "ជ្រើសរើសរបៀបដែល OpenCraftClipper បើកជាលំនាំដើម។"
 	},
 	"openBehaviorTitle": {
 		"message": "ឥរិយាបថការបើក"
@@ -714,7 +714,7 @@
 		"message": "អ្នកផ្តល់សេវា"
 	},
 	"rateExtensionDescription": {
-		"message": "តើអ្នកកំពុងរីករាយជាមួយ Web Clipper មែនទេ? ជួយយើងដោយផ្តល់ការវាយតម្លៃ។"
+		"message": "តើអ្នកកំពុងរីករាយជាមួយ OpenCraftClipper មែនទេ? ជួយយើងដោយផ្តល់ការវាយតម្លៃ។"
 	},
 	"read": {
 		"message": "បានអាន"

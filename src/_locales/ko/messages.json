@@ -118,7 +118,7 @@
 		"message": "닫기"
 	},
 	"commandOpenClipper": {
-		"message": "Obsidian Clipper 열기"
+		"message": "OpenCraftClipper 열기"
 	},
 	"commandQuickClip": {
 		"message": "퀵 클립"
@@ -272,7 +272,7 @@
 		"message": "속성 내보내기"
 	},
 	"exportPropertiesDescription": {
-		"message": "Obsidian Vault 또는 다른 장치의 Web Clipper로 가져올 수 있는 $strong_start$types.json$strong_end$ 파일에 Web Clipper 속성을 저장합니다.",
+		"message": "Obsidian Vault 또는 다른 장치의 Web Clipper로 가져올 수 있는 $strong_start$types.json$strong_end$ 파일에 OpenCraftClipper 속성을 저장합니다.",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "웹 콘텐츠를 저장하여 오프라인에서도 접근할 수 있는 개인적이고 내구성 있는 형식으로 보관하세요. Obsidian의 공식 브라우저 확장 프로그램입니다."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "텍스트를 복사하지 못했습니다"
@@ -358,7 +358,7 @@
 		"message": "도움말"
 	},
 	"helpDescription": {
-		"message": "Web Clipper 사용 방법을 알아보고 문제 해결을 위한 도움을 받으세요."
+		"message": "OpenCraftClipper 사용 방법을 알아보고 문제 해결을 위한 도움을 받으세요."
 	},
 	"highlightInline": {
 		"message": "페이지 내용 인라인 하이라이트"

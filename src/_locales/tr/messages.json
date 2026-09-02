@@ -272,7 +272,7 @@
 		"message": "Özellikleri dışa aktar"
 	},
 	"exportPropertiesDescription": {
-		"message": "Web Kırpıcı özelliklerini, Obsidian kasanıza veya diğer cihazlardaki Web Kırpıcı'ya aktarılabilen bir $strong_start$types.json$strong_end$ dosyasına kaydedin.",
+		"message": "OpenCraftClipper özelliklerini, Obsidian kasanıza veya diğer cihazlardaki OpenCraftClipper'ya aktarılabilen bir $strong_start$types.json$strong_end$ dosyasına kaydedin.",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "Web içeriğini çevrimdışı erişebileceğiniz özel ve kalıcı bir formatta kaydedin. Obsidian'ın resmi tarayıcı uzantısı."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Kırpıcı"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Metin kopyalanamadı"
@@ -337,7 +337,7 @@
 		"message": "Geri bildirim"
 	},
 	"feedbackDescription": {
-		"message": "Web Clipper'ı nasıl geliştirebiliriz? Lütfen yardım sayfamızı ziyaret edin, burada hataları bildirebilir, özellikler önerabilir ve yaygın sorunlarla ilgili yardım alabilirsiniz."
+		"message": "OpenCraftClipper'ı nasıl geliştirebiliriz? Lütfen yardım sayfamızı ziyaret edin, burada hataları bildirebilir, özellikler önerabilir ve yaygın sorunlarla ilgili yardım alabilirsiniz."
 	},
 	"feedbackTitle": {
 		"message": "Geri bildiriminiz için teşekkür ederiz"
@@ -358,7 +358,7 @@
 		"message": "Yardım"
 	},
 	"helpDescription": {
-		"message": "Web Kırpıcı'yı nasıl kullanacağınızı öğrenin ve sorun giderme yardımı alın."
+		"message": "OpenCraftClipper'yı nasıl kullanacağınızı öğrenin ve sorun giderme yardımı alın."
 	},
 	"highlightInline": {
 		"message": "Sayfa içeriğini vurgula"
@@ -570,7 +570,7 @@
 		"message": "Aç"
 	},
 	"openBehaviorDescription": {
-		"message": "Web Clipper'ın varsayılan olarak nasıl açılacağını seçin."
+		"message": "OpenCraftClipper'ın varsayılan olarak nasıl açılacağını seçin."
 	},
 	"openBehaviorTitle": {
 		"message": "Açma davranışı"
@@ -714,7 +714,7 @@
 		"message": "Sağlayıcılar"
 	},
 	"rateExtensionDescription": {
-		"message": "Web Clipper'ı beğeniyor musunuz? Bize bir puan vererek yardımcı olun."
+		"message": "OpenCraftClipper'ı beğeniyor musunuz? Bize bir puan vererek yardımcı olun."
 	},
 	"read": {
 		"message": "Okundu"

@@ -234,7 +234,7 @@
 		"message": "关闭"
 	},
 	"commandOpenClipper": {
-		"message": "打开 Obsidian 剪藏器"
+		"message": "打开 OpenCraftClipper"
 	},
 	"commandQuickClip": {
 		"message": "快速剪藏"
@@ -495,7 +495,7 @@
 		"message": "导出属性"
 	},
 	"exportPropertiesDescription": {
-		"message": "将网页剪藏器的属性保存到 $strong_start$types.json$strong_end$ 文件，可以导入到 Obsidian 保管库或其他设备上的网页剪藏器。",
+		"message": "将OpenCraftClipper的属性保存到 $strong_start$types.json$strong_end$ 文件，可以导入到 Obsidian 保管库或其他设备上的OpenCraftClipper。",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -509,7 +509,7 @@
 		"message": "以私密且持久的格式保存网页内容，可离线访问。Obsidian 官方浏览器扩展。"
 	},
 	"extensionName": {
-		"message": "Obsidian 网页剪藏器"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "复制文本失败"
@@ -563,7 +563,7 @@
 		"message": "反馈"
 	},
 	"feedbackDescription": {
-		"message": "我们如何改进Web Clipper？请访问我们的帮助页面，您可以在那里报告错误，建议功能，并获得常见问题的帮助。"
+		"message": "我们如何改进OpenCraftClipper？请访问我们的帮助页面，您可以在那里报告错误，建议功能，并获得常见问题的帮助。"
 	},
 	"feedbackTitle": {
 		"message": "感谢您的反馈"
@@ -584,7 +584,7 @@
 		"message": "帮助"
 	},
 	"helpDescription": {
-		"message": "了解如何使用 Web Clipper 并获取故障排除帮助。"
+		"message": "了解如何使用 OpenCraftClipper 并获取故障排除帮助。"
 	},
 	"highlightInline": {
 		"message": "高亮页面内容"
@@ -796,7 +796,7 @@
 		"message": "打开"
 	},
 	"openBehaviorDescription": {
-		"message": "选择Web Clipper默认的打开方式。"
+		"message": "选择OpenCraftClipper默认的打开方式。"
 	},
 	"openBehaviorTitle": {
 		"message": "打开行为"
@@ -943,7 +943,7 @@
 		"message": "提供商"
 	},
 	"rateExtensionDescription": {
-		"message": "您喜欢使用Web Clipper吗？请帮助我们给它评分。"
+		"message": "您喜欢使用OpenCraftClipper吗？请帮助我们给它评分。"
 	},
 	"read": {
 		"message": "已阅读"

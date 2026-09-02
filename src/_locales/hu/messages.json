@@ -118,7 +118,7 @@
 		"message": "Bezárás"
 	},
 	"commandOpenClipper": {
-		"message": "Obsidian Clipper megnyitása"
+		"message": "OpenCraftClipper megnyitása"
 	},
 	"commandQuickClip": {
 		"message": "Gyors klip"
@@ -272,7 +272,7 @@
 		"message": "Tulajdonságok exportálása"
 	},
 	"exportPropertiesDescription": {
-		"message": "A Web Clipper tulajdonságainak mentése egy $strong_start$types.json$strong_end$ fájlba, amely importálható az Obsidian vaultodba, vagy a Web Clipperbe más eszközökön.",
+		"message": "A OpenCraftClipper tulajdonságainak mentése egy $strong_start$types.json$strong_end$ fájlba, amely importálható az Obsidian vaultodba, vagy a Web Clipperbe más eszközökön.",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "Ments tartalmat a webről privát és tartós formátumban, amelyet offline is elérhetsz. Az Obsidian hivatalos böngészőbővítménye."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Nem sikerült a szöveg másolása"
@@ -358,7 +358,7 @@
 		"message": "Súgó"
 	},
 	"helpDescription": {
-		"message": "Ismerd meg a Web Clipper használatát, és kapj segítséget a hibaelhárításhoz."
+		"message": "Ismerd meg a OpenCraftClipper használatát, és kapj segítséget a hibaelhárításhoz."
 	},
 	"highlightInline": {
 		"message": "Az oldal tartalmának kiemelése"
@@ -570,7 +570,7 @@
 		"message": "Megnyitás"
 	},
 	"openBehaviorDescription": {
-		"message": "Válaszd ki, hogyan nyíljon meg alapértelmezetten a Web Clipper."
+		"message": "Válaszd ki, hogyan nyíljon meg alapértelmezetten a OpenCraftClipper."
 	},
 	"openBehaviorTitle": {
 		"message": "Megnyitási viselkedés"
@@ -714,7 +714,7 @@
 		"message": "Szolgáltatók"
 	},
 	"rateExtensionDescription": {
-		"message": "Tetszik a Web Clipper? Segíts nekünk azzal, hogy értékeled."
+		"message": "Tetszik a OpenCraftClipper? Segíts nekünk azzal, hogy értékeled."
 	},
 	"read": {
 		"message": "Elolvasva"

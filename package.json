@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-clipper",
-	"version": "1.7.1",
-	"description": "Official web clipper for Obsidian.",
+	"name": "open-craft-clipper",
+	"version": "1.7.1-fork.1",
+	"description": "OpenCraftClipper — a fork of Obsidian Web Clipper with Craft save destinations and in-Reader AI translation.",
 	"bin": {
 		"obsidian-clipper": "./dist/cli.cjs"
 	},
@@ -71,5 +71,11 @@
 		"linkedom": "^0.18.0",
 		"lucide": "^0.359.0",
 		"lz-string": "^1.5.0"
-	}
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+ssh://git@github.com/RayZhao1998/open-craft-clipper.git"
+	},
+	"homepage": "https://github.com/RayZhao1998/open-craft-clipper",
+	"license": "MIT"
 }

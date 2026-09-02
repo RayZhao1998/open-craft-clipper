@@ -118,7 +118,7 @@
 		"message": "關閉"
 	},
 	"commandOpenClipper": {
-		"message": "開啟 Obsidian Clipper"
+		"message": "開啟 OpenCraftClipper"
 	},
 	"commandQuickClip": {
 		"message": "快速擷取"
@@ -272,7 +272,7 @@
 		"message": "匯出屬性"
 	},
 	"exportPropertiesDescription": {
-		"message": "將 Web Clipper 屬性儲存到 $strong_start$types.json$strong_end$ 檔案，可以匯入到您的 Obsidian 儲存庫，或匯入到其他裝置上的 Web Clipper。",
+		"message": "將 OpenCraftClipper 屬性儲存到 $strong_start$types.json$strong_end$ 檔案，可以匯入到您的 Obsidian 儲存庫，或匯入到其他裝置上的 OpenCraftClipper。",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "將網路內容以私密且穩定的格式儲存下來，供您離線存取使用。這是 Obsidian 官方推出的瀏覽器擴充套件。"
 	},
 	"extensionName": {
-		"message": "Obsidian 網頁擷取器"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "複製文字失敗"
@@ -337,7 +337,7 @@
 		"message": "反饋"
 	},
 	"feedbackDescription": {
-		"message": "我們如何改善Web Clipper？請訪問我們的幫助頁面，您可以在那裡報告錯誤，建議功能，並獲得常見問題的幫助。"
+		"message": "我們如何改善OpenCraftClipper？請訪問我們的幫助頁面，您可以在那裡報告錯誤，建議功能，並獲得常見問題的幫助。"
 	},
 	"feedbackTitle": {
 		"message": "感謝您的反饋"
@@ -570,7 +570,7 @@
 		"message": "開啟"
 	},
 	"openBehaviorDescription": {
-		"message": "選擇 Web Clipper 預設的開啟方式。"
+		"message": "選擇 OpenCraftClipper 預設的開啟方式。"
 	},
 	"openBehaviorTitle": {
 		"message": "開啟行為"
@@ -714,7 +714,7 @@
 		"message": "提供者"
 	},
 	"rateExtensionDescription": {
-		"message": "您喜歡Web Clipper嗎？請幫助我們給它評分。"
+		"message": "您喜歡OpenCraftClipper嗎？請幫助我們給它評分。"
 	},
 	"read": {
 		"message": "已閱讀"

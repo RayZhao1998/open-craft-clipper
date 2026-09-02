@@ -118,7 +118,7 @@
 		"message": "Isara"
 	},
 	"commandOpenClipper": {
-		"message": "Buksan ang Obsidian Clipper"
+		"message": "Buksan ang OpenCraftClipper"
 	},
 	"commandQuickClip": {
 		"message": "Quick clip"
@@ -272,7 +272,7 @@
 		"message": "I-export ang mga property"
 	},
 	"exportPropertiesDescription": {
-		"message": "I-save ang mga Web Clipper property sa $strong_start$types.json$strong_end$ file, na maaaring i-import sa iyong Obsidian vault o Web Clipper sa ibang device",
+		"message": "I-save ang mga OpenCraftClipper property sa $strong_start$types.json$strong_end$ file, na maaaring i-import sa iyong Obsidian vault o OpenCraftClipper sa ibang device",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "I-save ang web content sa pribado at pangmatagalang format, na maaaring ma-access offline. Ang opisyal na browser extension para sa Obsidian."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Hindi makopya ang text"
@@ -337,7 +337,7 @@
 		"message": "Feedback"
 	},
 	"feedbackDescription": {
-		"message": "Paano namin mapapabuti ang Web Clipper? Bisitahin ang aming help page para mag-report ng bugs, magmungkahi ng mga feature, at makakuha ng tulong sa mga karaniwang problema."
+		"message": "Paano namin mapapabuti ang OpenCraftClipper? Bisitahin ang aming help page para mag-report ng bugs, magmungkahi ng mga feature, at makakuha ng tulong sa mga karaniwang problema."
 	},
 	"feedbackTitle": {
 		"message": "Salamat sa iyong feedback"
@@ -358,7 +358,7 @@
 		"message": "Tulong"
 	},
 	"helpDescription": {
-		"message": "Alamin kung paano gamitin ang Web Clipper at makakuha ng tulong sa troubleshooting"
+		"message": "Alamin kung paano gamitin ang OpenCraftClipper at makakuha ng tulong sa troubleshooting"
 	},
 	"highlightInline": {
 		"message": "I-highlight ang content sa pahina"
@@ -562,7 +562,7 @@
 		"message": "Buksan"
 	},
 	"openBehaviorDescription": {
-		"message": "Pumili kung paano magbubukas ang Web Clipper bilang default."
+		"message": "Pumili kung paano magbubukas ang OpenCraftClipper bilang default."
 	},
 	"openBehaviorTitle": {
 		"message": "Pag-uugali ng pagbubukas"
@@ -706,7 +706,7 @@
 		"message": "Mga provider"
 	},
 	"rateExtensionDescription": {
-		"message": "Nagustuhan mo ba ang Web Clipper? Tulungan mo kami sa pamamagitan ng pagbibigay ng rating."
+		"message": "Nagustuhan mo ba ang OpenCraftClipper? Tulungan mo kami sa pamamagitan ng pagbibigay ng rating."
 	},
 	"read": {
 		"message": "Nabasa"

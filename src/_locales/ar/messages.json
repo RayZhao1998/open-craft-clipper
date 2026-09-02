@@ -286,7 +286,7 @@
 		"message": "احفظ المحتوى من الويب بتنسيق خاص ودائم يمكنك الوصول إليه دون اتصال. الإضافة الرسمية للمتصفح لأوبسيديان."
 	},
 	"extensionName": {
-		"message": "قاصّ أوبسيديان للويب"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "فشل نسخ النص"
@@ -337,7 +337,7 @@
 		"message": "الملاحظات"
 	},
 	"feedbackDescription": {
-		"message": "كيف يمكننا تحسين Web Clipper؟ يرجى زيارة صفحة المساعدة الخاصة بنا، حيث يمكنك الإبلاغ عن الأخطاء، اقتراح الميزات، والحصول على المساعدة في المشكلات الشائعة."
+		"message": "كيف يمكننا تحسين OpenCraftClipper؟ يرجى زيارة صفحة المساعدة الخاصة بنا، حيث يمكنك الإبلاغ عن الأخطاء، اقتراح الميزات، والحصول على المساعدة في المشكلات الشائعة."
 	},
 	"feedbackTitle": {
 		"message": "شكراً لملاحظاتك"
@@ -570,7 +570,7 @@
 		"message": "فتح"
 	},
 	"openBehaviorDescription": {
-		"message": "اختر كيف يفتح Web Clipper بشكل افتراضي."
+		"message": "اختر كيف يفتح OpenCraftClipper بشكل افتراضي."
 	},
 	"openBehaviorTitle": {
 		"message": "سلوك الفتح"
@@ -714,7 +714,7 @@
 		"message": "المزودون"
 	},
 	"rateExtensionDescription": {
-		"message": "هل تستمتع بـ Web Clipper؟ ساعدنا عن طريق تقييمه."
+		"message": "هل تستمتع بـ OpenCraftClipper؟ ساعدنا عن طريق تقييمه."
 	},
 	"read": {
 		"message": "مقروءة"

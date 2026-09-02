@@ -755,7 +755,7 @@
 					SafariServices,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "md.obsidian.Obsidian-Web-Clipper.Extension";
-				PRODUCT_NAME = "Obsidian Web Clipper Extension";
+				PRODUCT_NAME = "OpenCraftClipper Extension";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -785,7 +785,7 @@
 					SafariServices,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "md.obsidian.Obsidian-Web-Clipper.Extension";
-				PRODUCT_NAME = "Obsidian Web Clipper Extension";
+				PRODUCT_NAME = "OpenCraftClipper Extension";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -825,7 +825,7 @@
 					WebKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "md.obsidian.Obsidian-Web-Clipper";
-				PRODUCT_NAME = "Obsidian Web Clipper";
+				PRODUCT_NAME = "OpenCraftClipper";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -863,7 +863,7 @@
 					WebKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "md.obsidian.Obsidian-Web-Clipper";
-				PRODUCT_NAME = "Obsidian Web Clipper";
+				PRODUCT_NAME = "OpenCraftClipper";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -900,7 +900,7 @@
 					SafariServices,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "md.obsidian.Obsidian-Web-Clipper.Extension";
-				PRODUCT_NAME = "Obsidian Web Clipper Extension";
+				PRODUCT_NAME = "OpenCraftClipper Extension";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -936,7 +936,7 @@
 					SafariServices,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "md.obsidian.Obsidian-Web-Clipper.Extension";
-				PRODUCT_NAME = "Obsidian Web Clipper Extension";
+				PRODUCT_NAME = "OpenCraftClipper Extension";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -978,7 +978,7 @@
 					WebKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "md.obsidian.Obsidian-Web-Clipper";
-				PRODUCT_NAME = "Obsidian Web Clipper";
+				PRODUCT_NAME = "OpenCraftClipper";
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -1019,7 +1019,7 @@
 					WebKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "md.obsidian.Obsidian-Web-Clipper";
-				PRODUCT_NAME = "Obsidian Web Clipper";
+				PRODUCT_NAME = "OpenCraftClipper";
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

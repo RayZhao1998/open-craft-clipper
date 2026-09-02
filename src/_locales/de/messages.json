@@ -118,7 +118,7 @@
 		"message": "Schließen"
 	},
 	"commandOpenClipper": {
-		"message": "Obsidian Web-Clipper öffnen"
+		"message": "OpenCraftClipper öffnen"
 	},
 	"commandQuickClip": {
 		"message": "Schnelles Ausschneiden"
@@ -272,7 +272,7 @@
 		"message": "Eigenschaften exportieren"
 	},
 	"exportPropertiesDescription": {
-		"message": "Speichert Deine Web-Clipper Eigenschaften in einer $strong_start$types.json$strong_end$ Datei, die in Deinem Obsidian-Vault oder in Web-Clipper auf anderen Geräten importiert werden kann.",
+		"message": "Speichert Deine OpenCraftClipper Eigenschaften in einer $strong_start$types.json$strong_end$ Datei, die in Deinem Obsidian-Vault oder in OpenCraftClipper auf anderen Geräten importiert werden kann.",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "Speichet Deine Webinhalte in einem privaten und dauerhaften Format, auf das Du offline zugreifen kannst. Die offizielle Browser-Erweiterung für Obsidian."
 	},
 	"extensionName": {
-		"message": "Obsidian Web-Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Text konnte nicht kopiert werden"
@@ -337,7 +337,7 @@
 		"message": "Feedback"
 	},
 	"feedbackDescription": {
-		"message": "Wie können wir den Web Clipper verbessern? Bitte besuchen Sie unsere Hilfeseite, wo Sie Fehler melden, Funktionen vorschlagen und Hilfe bei häufigen Problemen erhalten können."
+		"message": "Wie können wir den OpenCraftClipper verbessern? Bitte besuchen Sie unsere Hilfeseite, wo Sie Fehler melden, Funktionen vorschlagen und Hilfe bei häufigen Problemen erhalten können."
 	},
 	"feedbackTitle": {
 		"message": "Vielen Dank für Ihr Feedback"
@@ -358,7 +358,7 @@
 		"message": "Hilfe"
 	},
 	"helpDescription": {
-		"message": "Lerne, wie Du den Web-Clipper verwendest und erhalte Hilfe bei der Fehlerbehebung."
+		"message": "Lerne, wie Du den OpenCraftClipper verwendest und erhalte Hilfe bei der Fehlerbehebung."
 	},
 	"highlightInline": {
 		"message": "Seiteninhalt markieren"
@@ -570,7 +570,7 @@
 		"message": "Öffnen"
 	},
 	"openBehaviorDescription": {
-		"message": "Wählen Sie, wie der Web Clipper standardmäßig geöffnet wird."
+		"message": "Wählen Sie, wie der OpenCraftClipper standardmäßig geöffnet wird."
 	},
 	"openBehaviorTitle": {
 		"message": "Öffnungsverhalten"
@@ -714,7 +714,7 @@
 		"message": "Anbieter"
 	},
 	"rateExtensionDescription": {
-		"message": "Gefällt Ihnen der Web Clipper? Helfen Sie uns, indem Sie ihm eine Bewertung geben."
+		"message": "Gefällt Ihnen der OpenCraftClipper? Helfen Sie uns, indem Sie ihm eine Bewertung geben."
 	},
 	"read": {
 		"message": "Gelesen"

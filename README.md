@@ -1,12 +1,20 @@
-Obsidian Web Clipper helps you highlight and capture the web in your favorite browser. Anything you save is stored as durable Markdown files that you can read offline, and preserve for the long term.
+# OpenCraftClipper
 
-- **[Download Web Clipper](https://obsidian.md/clipper)**
-- **[Documentation](https://help.obsidian.md/web-clipper)**
-- **[Troubleshooting](https://help.obsidian.md/web-clipper/troubleshoot)**
+**OpenCraftClipper** captures the web as clean Markdown — saved into **Craft**, into **Obsidian**, or to your **downloads** — and can translate any Reader article in place with your own AI endpoint.
+
+It is a fork of [Obsidian Web Clipper](https://github.com/obsidianmd/obsidian-clipper), renamed so it can be distributed on its own terms. It is **not affiliated with, sponsored, or endorsed by Obsidian**; the Obsidian name and logo remain their owner's trademarks, and the upstream code stays under its MIT license (see [License](#license)). Saving to Obsidian keeps working exactly as it did.
+
+Upstream's general description still applies: anything you save is stored as durable Markdown files you can read offline and preserve for the long term.
+
+- **[Releases — packaged builds for Chrome, Firefox, Safari](https://github.com/RayZhao1998/open-craft-clipper/releases)**
+- **[Documentation (upstream)](https://help.obsidian.md/web-clipper)** — templates, variables, filters, highlights and Interpreter are upstream's, and unchanged
+- **[Troubleshooting (upstream)](https://help.obsidian.md/web-clipper/troubleshoot)**
+
+Fork version `1.7.1-fork.1` is based on Obsidian Web Clipper `1.7.1`.
 
 ## This fork: Craft support
 
-`open-craft-clipper` is a personal fork that adds **Craft** as a save destination next to Obsidian, using the [Craft Space API](https://docs.craft.do/space-api). Templates, variables, filters, highlights and Interpreter are untouched — only the final save step changes.
+`OpenCraftClipper` adds **Craft** as a save destination next to Obsidian, using the [Craft Space API](https://docs.craft.do/space-api). Templates, variables, filters, highlights and Interpreter are untouched — only the final save step changes.
 
 - Usage and format details: [docs/Craft.md](docs/Craft.md)
 - Design, decisions and status: [docs/craft-integration-plan.md](docs/craft-integration-plan.md)
@@ -138,4 +146,12 @@ npm run test:watch
 
 ## License
 
-Obsidian Web Clipper source code is open source under the MIT License. All trademarks, icons, marketing copy, and other marketing assets are excluded from that license.
+OpenCraftClipper is distributed under the MIT License. The upstream copyright notice is retained unchanged, as that license requires:
+
+> Copyright (c) 2024 Obsidian
+
+Upstream's exclusion applies to this fork verbatim:
+
+> Obsidian Web Clipper source code is open source under the MIT License. All trademarks, icons, marketing copy, and other marketing assets are excluded from that license.
+
+So the **name and logo are not part of what you may reuse here**: `src/icons/` still contains upstream's artwork and must be replaced before publishing this build as its own product.

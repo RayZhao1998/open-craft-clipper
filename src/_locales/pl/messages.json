@@ -272,7 +272,7 @@
 		"message": "Eksportuj atrybuty"
 	},
 	"exportPropertiesDescription": {
-		"message": "Zapisz atrybuty Web Clipper w pliku $strong_start$types.json$strong_end$, który można zaimportować do sejfu w Obsidian lub do Web Clipper na innych urządzeniach.",
+		"message": "Zapisz atrybuty OpenCraftClipper w pliku $strong_start$types.json$strong_end$, który można zaimportować do sejfu w Obsidian lub do OpenCraftClipper na innych urządzeniach.",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "Zapisuj treści z Internetu w prywatnym i bezpiecznym formacie, do którego masz dostęp offline. Oficjalne rozszerzenie przeglądarki dla Obsidian."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Nie udało się skopiować tekstu"
@@ -337,7 +337,7 @@
 		"message": "Opinia"
 	},
 	"feedbackDescription": {
-		"message": "Jak możemy poprawić Web Clipper? Odwiedź naszą stronę pomocy, gdzie możesz zgłaszać błędy, proponować funkcje i uzyskać pomoc w rozwiązywaniu typowych problemów."
+		"message": "Jak możemy poprawić OpenCraftClipper? Odwiedź naszą stronę pomocy, gdzie możesz zgłaszać błędy, proponować funkcje i uzyskać pomoc w rozwiązywaniu typowych problemów."
 	},
 	"feedbackTitle": {
 		"message": "Dziękujemy za Twoją opinię"
@@ -358,7 +358,7 @@
 		"message": "Pomoc"
 	},
 	"helpDescription": {
-		"message": "Dowiedz się, jak korzystać z rozszerzenia Web Clipper i uzyskaj pomoc techniczną."
+		"message": "Dowiedz się, jak korzystać z rozszerzenia OpenCraftClipper i uzyskaj pomoc techniczną."
 	},
 	"highlightInline": {
 		"message": "Wyróżnij zawartość strony"
@@ -570,7 +570,7 @@
 		"message": "Otwórz"
 	},
 	"openBehaviorDescription": {
-		"message": "Wybierz, jak domyślnie otwiera się Web Clipper."
+		"message": "Wybierz, jak domyślnie otwiera się OpenCraftClipper."
 	},
 	"openBehaviorTitle": {
 		"message": "Zachowanie przy otwieraniu"
@@ -714,7 +714,7 @@
 		"message": "Dostawcy"
 	},
 	"rateExtensionDescription": {
-		"message": "Czy podoba Ci się Web Clipper? Pomóż nam, oceniając go."
+		"message": "Czy podoba Ci się OpenCraftClipper? Pomóż nam, oceniając go."
 	},
 	"read": {
 		"message": "Przeczytane"

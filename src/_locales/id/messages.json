@@ -118,7 +118,7 @@
 		"message": "Tutup"
 	},
 	"commandOpenClipper": {
-		"message": "Buka Obsidian Clipper"
+		"message": "Buka OpenCraftClipper"
 	},
 	"commandQuickClip": {
 		"message": "Klip cepat"
@@ -272,7 +272,7 @@
 		"message": "Ekspor properti"
 	},
 	"exportPropertiesDescription": {
-		"message": "Simpan properti Web Clipper ke file $strong_start$types.json$strong_end$ yang dapat diimpor ke dalam vault Obsidian, atau ke Web Clipper di perangkat lain.",
+		"message": "Simpan properti OpenCraftClipper ke file $strong_start$types.json$strong_end$ yang dapat diimpor ke dalam vault Obsidian, atau ke OpenCraftClipper di perangkat lain.",
 		"placeholders": {
 			"strong_end": {
 				"content": "</strong>"
@@ -286,7 +286,7 @@
 		"message": "Simpan konten dari web dalam format yang bersifat privat dan tahan lama dan dapat diakses secara luring. Ekstensi browser resmi untuk Obsidian."
 	},
 	"extensionName": {
-		"message": "Obsidian Web Clipper"
+		"message": "OpenCraftClipper"
 	},
 	"failedToCopyText": {
 		"message": "Gagal menyalin teks"
@@ -337,7 +337,7 @@
 		"message": "Umpan balik"
 	},
 	"feedbackDescription": {
-		"message": "Bagaimana kami bisa meningkatkan Web Clipper? Silakan kunjungi halaman bantuan kami, di mana Anda dapat melaporkan bug, menyarankan fitur, dan mendapatkan bantuan dengan masalah umum."
+		"message": "Bagaimana kami bisa meningkatkan OpenCraftClipper? Silakan kunjungi halaman bantuan kami, di mana Anda dapat melaporkan bug, menyarankan fitur, dan mendapatkan bantuan dengan masalah umum."
 	},
 	"feedbackTitle": {
 		"message": "Terima kasih atas umpan balik Anda"
@@ -358,7 +358,7 @@
 		"message": "Bantuan"
 	},
 	"helpDescription": {
-		"message": "Pelajari cara menggunakan Web Clipper dan dapatkan bantuan pemecahan masalah."
+		"message": "Pelajari cara menggunakan OpenCraftClipper dan dapatkan bantuan pemecahan masalah."
 	},
 	"highlightInline": {
 		"message": "Sorot konten laman web"
@@ -570,7 +570,7 @@
 		"message": "Buka"
 	},
 	"openBehaviorDescription": {
-		"message": "Pilih bagaimana Web Clipper dibuka secara default."
+		"message": "Pilih bagaimana OpenCraftClipper dibuka secara default."
 	},
 	"openBehaviorTitle": {
 		"message": "Perilaku buka"
@@ -714,7 +714,7 @@
 		"message": "Penyedia"
 	},
 	"rateExtensionDescription": {
-		"message": "Apakah Anda menikmati Web Clipper? Bantu kami dengan memberikan penilaian."
+		"message": "Apakah Anda menikmati OpenCraftClipper? Bantu kami dengan memberikan penilaian."
 	},
 	"read": {
 		"message": "Dibaca"

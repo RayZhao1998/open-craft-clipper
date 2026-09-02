@@ -162,7 +162,7 @@ export async function sendToLLM(promptContext: string, content: string, promptVa
 			headers = {
 				...headers,
 				'HTTP-Referer': 'https://obsidian.md/',
-				'X-Title': 'Obsidian Web Clipper',
+				'X-Title': 'OpenCraftClipper',
 				'Authorization': `Bearer ${provider.apiKey}`
 			};
 		} else if (provider.name.toLowerCase().includes('ollama')) {
@@ -193,7 +193,7 @@ export async function sendToLLM(promptContext: string, content: string, promptVa
 			headers = {
 				...headers,
 				'HTTP-Referer': 'https://obsidian.md/',
-				'X-Title': 'Obsidian Web Clipper',
+				'X-Title': 'OpenCraftClipper',
 				'Authorization': `Bearer ${provider.apiKey}`
 			};
 		}
