@@ -73,6 +73,30 @@ export interface CraftSettings {
 	wikilinks: 'plain' | 'link';
 }
 
+/**
+ * A single OpenAI-style endpoint the fork can call directly (Reader
+ * translation, and anything else that needs a bare completion). The Interpreter
+ * keeps its own provider/model list; this one stays deliberately tiny so any
+ * proxy, gateway or local server works by pasting a base URL + key.
+ */
+export interface AiSettings {
+	enabled: boolean;
+	/** OpenAI-compatible base URL: https://api.openai.com/v1 (…/chat/completions is appended). */
+	baseUrl: string;
+	apiKey: string;
+	model: string;
+	/** BCP-47-ish target language for immersive translation, e.g. "zh-CN". */
+	targetLang: string;
+	/** Keep the source paragraph above its translation, or swap it out. */
+	mode: 'bilingual' | 'replacement';
+	/** Extra translator instructions appended to the built-in prompt. */
+	prompt: string;
+	/** Also translate YouTube/Bilibili transcript lines. */
+	translateTranscript: boolean;
+	/** Start translating as soon as Reader opens, instead of waiting for the button. */
+	autoTranslate: boolean;
+}
+
 export interface ReaderSettings {
 	fontSize: number;
 	lineHeight: number;
@@ -110,6 +134,7 @@ export interface Settings {
 	propertyTypes: PropertyType[];
 	readerSettings: ReaderSettings;
 	craft: CraftSettings;
+	ai: AiSettings;
 	stats: {
 		addToObsidian: number;
 		addToCraft: number;

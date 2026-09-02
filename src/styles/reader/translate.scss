@@ -1,0 +1,144 @@
+// Immersive translation inside Reader.
+//
+// The translated block always sits right below (or inside, for table cells) its
+// source, so the pairing survives a reflow. The source keeps full contrast and
+// the translation is one step quieter — the opposite of what reads badly on a
+// long article.
+
+article {
+	.reader-translation {
+		color: var(--text-muted);
+		font-size: 0.95em;
+		line-height: 1.55;
+		margin-top: 0.1em;
+		margin-bottom: 0.9em;
+		padding-left: 0.85em;
+		border-left: 2px solid var(--background-modifier-border);
+		border-radius: 0;
+		overflow-wrap: break-word;
+
+		a {
+			color: var(--text-accent);
+		}
+
+		&.is-rtl {
+			padding-left: 0;
+			padding-right: 0.85em;
+			border-left: 0;
+			border-right: 2px solid var(--background-modifier-border);
+			text-align: start;
+		}
+	}
+
+	// A translated list item is its own <li>, so it inherits the list's rhythm.
+	li.reader-translation {
+		margin-top: 0.05em;
+		padding-left: 0.85em;
+		border-left: 2px solid var(--background-modifier-border);
+	}
+
+	// Headings get the translation inline-ish, without the rule.
+	h1, h2, h3, h4, h5, h6 {
+		+ .reader-translation {
+			margin-top: -0.25em;
+			margin-bottom: 0.7em;
+			border-left: 0;
+			padding-left: 0;
+			font-weight: 500;
+		}
+	}
+
+	// Transcript lines: line the translation up under the spoken text, not the
+	// timestamp column, and keep it tighter than article paragraphs.
+	.transcript .reader-translation-segment {
+		display: block;
+		margin: -0.35em 0 0.7em calc(var(--timestamp-width, 4.5em) + 1em);
+		padding-left: 0.5em;
+		border-left: 0;
+		font-size: 0.92em;
+	}
+
+	// Cells keep both languages even in "translation only" mode: hiding the cell
+	// would hide the translation too, since it lives inside it.
+	td, th {
+		> .reader-translation {
+			margin-top: 0.3em;
+			margin-bottom: 0;
+			border-left: 0;
+			padding-left: 0;
+			font-size: 0.9em;
+		}
+	}
+}
+
+// "Translation only" mode hides the source once — and only once — it has a
+// translation, so the page never blanks out mid-request.
+article.reader-translate-replace {
+	> [data-reader-translate-source="done"],
+	[data-reader-translate-source="done"] {
+		&:not(.transcript-segment):not(td):not(th):not(dt):not(dd) {
+			display: none;
+		}
+	}
+}
+
+// Nav button: hidden until AI is on, filled in when active, pulsing while a
+// request is in flight.
+.nav-btn-translate {
+	&.is-hidden {
+		display: none !important;
+	}
+
+	&.is-active {
+		color: var(--text-normal);
+		background: var(--background-primary-alt);
+	}
+
+	&.is-busy svg {
+		opacity: 1;
+		animation: reader-translate-pulse 1.2s ease-in-out infinite;
+	}
+}
+
+@keyframes reader-translate-pulse {
+	0%, 100% { opacity: 0.45; }
+	50% { opacity: 1; }
+}
+
+.reader-translate-toast {
+	position: fixed;
+	bottom: 24px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: var(--layer-popover, 1000);
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	max-width: min(80vw, 460px);
+	padding: 8px 14px;
+	border-radius: 8px;
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+	color: var(--text-normal);
+	font-family: var(--font-ui);
+	font-size: var(--font-ui-small);
+	line-height: 1.4;
+	transition: opacity 0.2s ease, transform 0.2s ease;
+
+	a {
+		color: var(--text-accent);
+		white-space: nowrap;
+		text-decoration: underline;
+	}
+
+	&.is-error {
+		border-color: var(--color-red);
+	}
+
+	&.is-hidden {
+		opacity: 0;
+		pointer-events: none;
+		transform: translateX(-50%) translateY(8px);
+	}
+}

@@ -15,7 +15,10 @@ import {
 	toCraftErrorMessage
 } from './utils/craft/api';
 import { CraftSaveResult } from './utils/craft/client';
-
+import { AiChatConfig, maskAiSecrets, pingAiModel } from './utils/ai/chat';
+import { getAiStatus, resolveAiConfig } from './utils/ai/config';
+import { translateTexts } from './utils/ai/translate';
+import type { TranslateOptions } from './utils/ai/translate';
 const YOUTUBE_EMBED_RULE_ID = 9001;
 const YOUTUBE_INNERTUBE_RULE_ID = 9002;
 
@@ -420,6 +423,77 @@ async function requireCraftApiUrl(): Promise<string> {
 
 function respondCraftError(sendResponse: (response?: any) => void, error: unknown): void {
 	sendResponse({ success: false, error: toCraftErrorMessage(error) });
+}
+
+// ---------------------------------------------------------------------------
+// AI chat (OpenAI-style endpoint)
+//
+// Reader's immersive translation calls aiTranslate with a small batch of
+// segments; the key is read here and only here, so it never appears in a page
+// bundle or in a content script. Responses are batched/packed further down by
+// translateTexts(), which is also where the cache lives.
+// ---------------------------------------------------------------------------
+
+const AI_MAX_SEGMENTS = 40;
+
+function respondAiError(sendResponse: (response?: any) => void, error: unknown): void {
+	const message = error instanceof Error ? error.message : String(error);
+	sendResponse({ error: maskAiSecrets(message) });
+}
+
+async function requireAiConfig(requireEnabled: boolean): Promise<AiChatConfig> {
+	const settings = await loadSettings();
+	if (requireEnabled && !settings.ai?.enabled) {
+		throw new Error('AI is turned off. Enable it in Settings → AI.');
+	}
+	const status = getAiStatus(settings);
+	if (!status.configured) {
+		throw new Error(status.reason || 'AI is not configured. Open Settings → AI.');
+	}
+	const config = resolveAiConfig(settings);
+	if (!config) {
+		throw new Error('AI is not configured. Open Settings → AI.');
+	}
+	return config;
+}
+
+interface AiTranslateRequest {
+	texts?: unknown;
+	targetLang?: string;
+	sourceLang?: string;
+	prompt?: string;
+}
+
+async function aiTranslateRequest(request: AiTranslateRequest): Promise<(string | null)[]> {
+	const config = await requireAiConfig(true);
+
+	if (!Array.isArray(request.texts) || !request.texts.length) {
+		throw new Error('No text was sent to translate.');
+	}
+	// Guard against a caller forgetting to batch: a whole article in one request
+	// is exactly what this pipeline is built to avoid.
+	const texts = (request.texts as unknown[])
+		.slice(0, AI_MAX_SEGMENTS)
+		.map(value => (typeof value === 'string' ? value : ''));
+
+	const options: TranslateOptions = {
+		targetLang: (request.targetLang || '').trim() || 'en',
+		sourceLang: (request.sourceLang || '').trim(),
+		prompt: typeof request.prompt === 'string' ? request.prompt : ''
+	};
+
+	const started = Date.now();
+	const translations = await translateTexts(texts, config, options);
+	debugLog('AI', `Translated ${texts.length} segments in ${Date.now() - started} ms`);
+	return translations;
+}
+
+async function aiTestRequest(request: { baseUrl?: string; apiKey?: string; model?: string }): Promise<string> {
+	const overrides = (request.baseUrl || '').trim() && (request.model || '').trim()
+		? { baseUrl: request.baseUrl!.trim(), apiKey: (request.apiKey || '').trim(), model: request.model!.trim() }
+		: null;
+	const config = overrides || await requireAiConfig(false);
+	return pingAiModel(config);
 }
 
 browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime.MessageSender, sendResponse: (response?: any) => void): true | undefined => {
@@ -862,6 +936,22 @@ browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime
 			return true;
 		}
 
+		// --- AI (OpenAI-style chat; Reader immersive translation) ---
+
+		if (typedRequest.action === "aiTranslate") {
+			aiTranslateRequest(typedRequest as any)
+				.then((translations) => sendResponse({ translations }))
+				.catch((error) => respondAiError(sendResponse, error));
+			return true;
+		}
+
+		if (typedRequest.action === "aiTest") {
+			aiTestRequest(typedRequest as any)
+				.then((reply) => sendResponse({ reply }))
+				.catch((error) => respondAiError(sendResponse, error));
+			return true;
+		}
+
 		// For other actions that use sendResponse
 		if (typedRequest.action === "extractContent" ||
 			typedRequest.action === "ensureContentScriptLoaded" ||
@@ -870,7 +960,9 @@ browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime
 			typedRequest.action === "openObsidianUrl" ||
 			typedRequest.action === "craftTestConnection" ||
 			typedRequest.action === "craftGetFolders" ||
-			typedRequest.action === "craftSave") {
+			typedRequest.action === "craftSave" ||
+			typedRequest.action === "aiTranslate" ||
+			typedRequest.action === "aiTest") {
 			return true;
 		}
 	}

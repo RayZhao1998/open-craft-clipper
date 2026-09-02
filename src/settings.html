@@ -21,6 +21,7 @@
 						<li data-section="reader"><div class="nav-item-icon"><i data-lucide="book-open"></i></div><span data-i18n="reader">Reader</span></li>
 						<li data-section="highlighter"><div class="nav-item-icon"><i data-lucide="highlighter"></i></div><span data-i18n="highlighter">Highlighter</span></li>
 						<li data-section="interpreter"><div class="nav-item-icon"><i data-lucide="quote"></i></div><span data-i18n="interpreter">Interpreter</span></li>
+						<li data-section="ai"><div class="nav-item-icon"><i data-lucide="languages"></i></div><span data-i18n="ai">AI</span></li>
 						<li data-section="craft"><div class="nav-item-icon"><i data-lucide="scissors-line-dashed"></i></div><span data-i18n="craft">Craft</span></li>
 						<li data-section="properties"><div class="nav-item-icon"><i data-lucide="archive"></i></div><span data-i18n="properties">Properties</span></li>
 						<li class="sidebar-heading" data-i18n="templatesHeading">Templates</li>
@@ -250,6 +251,134 @@
 										<div class="setting-item-control">
 											<button type="button" id="import-all-settings-btn" data-i18n="import">Import</button>
 										</div>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+
+					<div id="ai-section" class="settings-section">
+						<div class="settings-section-header">
+							<h2 data-i18n="ai">AI</h2>
+						</div>
+						<form id="ai-settings-form">
+							<div class="setting-group">
+								<div class="setting-items">
+									<div class="setting-item mod-horizontal mod-toggle">
+										<div class="setting-item-info">
+											<label for="ai-enabled-toggle" data-i18n="enableAi">Enable AI</label>
+											<div class="setting-item-description" data-i18n="enableAiDescription">
+												Turns on immersive translation in Reader using any OpenAI-compatible endpoint. Requests are made from the extension, never from the page you are reading.
+											</div>
+										</div>
+										<div class="setting-item-control">
+											<div class="checkbox-container">
+												<input type="checkbox" id="ai-enabled-toggle" />
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="setting-group" id="ai-endpoint-group">
+								<div class="setting-item setting-item-heading">
+									<h3 data-i18n="aiEndpointHeading">Model endpoint</h3>
+									<div class="warning-container">
+										<div class="warning-icon">
+											<i data-lucide="alert-triangle"></i>
+										</div>
+										<div class="warning-text" data-i18n="aiKeyWarning">
+											Your API key is stored in your browser and synced with your extension settings. Anyone with your synced settings can use it — keep an eye on the spending cap of the provider you point this at.
+										</div>
+									</div>
+								</div>
+								<div class="setting-items">
+									<div class="setting-item">
+										<label for="ai-base-url" data-i18n="aiBaseUrl">Base URL</label>
+										<div class="setting-item-description" data-i18n="aiBaseUrlDescription">
+											OpenAI-style endpoint. https://api.openai.com/v1, a proxy or gateway URL, or a local server such as http://127.0.0.1:11434 — /chat/completions is added for you.
+										</div>
+										<input type="text" id="ai-base-url" placeholder="https://api.openai.com/v1" autocomplete="off" spellcheck="false" />
+									</div>
+									<div class="setting-item">
+										<label for="ai-api-key" data-i18n="aiApiKey">API key</label>
+										<div class="setting-item-description" data-i18n="aiApiKeyDescription">
+											Sent as a bearer token. Leave empty for local servers that need no key.
+										</div>
+										<input type="password" id="ai-api-key" placeholder="sk-…" autocomplete="off" spellcheck="false" />
+									</div>
+									<div class="setting-item">
+										<label for="ai-model" data-i18n="aiModel">Model</label>
+										<div class="setting-item-description" data-i18n="aiModelDescription">
+											Any chat model your endpoint serves. Cheap and fast models translate better than frontier ones — translation is not where a big model pays off.
+										</div>
+										<input type="text" id="ai-model" placeholder="gpt-4o-mini" autocomplete="off" spellcheck="false" />
+									</div>
+									<div class="setting-item">
+										<div id="ai-test-row">
+											<button type="button" id="ai-test-btn" class="btn" data-i18n="aiTestConnection">Test connection</button>
+											<div id="ai-status" class="ai-connection-status" style="display: none;"></div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="setting-group" id="ai-translation-group">
+								<div class="setting-item setting-item-heading">
+									<h3 data-i18n="aiTranslationHeading">Immersive translation</h3>
+									<div class="setting-item-description" data-i18n="aiTranslationDescription">
+											In Reader, tap the translate button. Only the paragraphs around what you are reading — one screen above and below — are sent, and never while you are still scrolling, so a long article costs what you actually read.
+									</div>
+								</div>
+								<div class="setting-items">
+									<div class="setting-item">
+										<label for="ai-target-lang" data-i18n="aiTargetLang">Translate to</label>
+										<select id="ai-target-lang" class="dropdown"></select>
+										<input type="text" id="ai-target-lang-custom" class="is-hidden" placeholder="fr" autocomplete="off" spellcheck="false" />
+									</div>
+									<div class="setting-item">
+										<label for="ai-translate-mode" data-i18n="aiTranslateMode">Layout</label>
+										<div class="setting-item-description" data-i18n="aiTranslateModeDescription">
+											Alternating source and translation keeps links and citations usable; translation only hides the source after it has been replaced.
+										</div>
+										<select id="ai-translate-mode" class="dropdown">
+											<option value="bilingual" data-i18n="aiTranslateModeBilingual">Original + translation</option>
+											<option value="replacement" data-i18n="aiTranslateModeReplacement">Translation only</option>
+										</select>
+									</div>
+									<div class="setting-item mod-horizontal mod-toggle">
+										<div class="setting-item-info">
+											<label for="ai-translate-transcript" data-i18n="aiTranslateTranscript">Translate transcripts</label>
+										<div class="setting-item-description" data-i18n="aiTranslateTranscriptDescription">
+											YouTube and Bilibili captions and the video description. Transcript lines are always shown under the original so playback tracking keeps working.
+										</div>
+										</div>
+										<div class="setting-item-control">
+											<div class="checkbox-container">
+												<input type="checkbox" id="ai-translate-transcript" />
+											</div>
+										</div>
+									</div>
+									<div class="setting-item mod-horizontal mod-toggle">
+										<div class="setting-item-info">
+											<label for="ai-auto-translate" data-i18n="aiAutoTranslate">Translate automatically</label>
+										<div class="setting-item-description" data-i18n="aiAutoTranslateDescription">
+											Start translating as soon as Reader opens instead of waiting for the button. Same budget either way — nothing is sent until the page stops scrolling.
+										</div>
+										</div>
+										<div class="setting-item-control">
+											<div class="checkbox-container">
+												<input type="checkbox" id="ai-auto-translate" />
+											</div>
+										</div>
+									</div>
+									<div class="setting-item">
+										<label for="ai-translate-prompt" data-i18n="aiTranslatePrompt">Translation prompt</label>
+										<div class="setting-item-description" data-i18n="aiTranslatePromptDescription">
+											Style, glossary and tone rules, appended to the built-in instructions. {targetLang} and {sourceLang} are substituted. Leave empty for the default.
+										</div>
+										<textarea id="ai-translate-prompt" rows="6" spellcheck="false" placeholder="Translate tech writing the way a native developer would say it. Keep product names in English. Expand abbreviations on first use: {targetLang} readers may not know them."></textarea>
+									</div>
+									<div class="setting-item">
+										<button type="button" id="ai-reset-prompt-btn" class="btn btn-secondary" data-i18n="aiResetPrompt">Reset prompt</button>
 									</div>
 								</div>
 							</div>

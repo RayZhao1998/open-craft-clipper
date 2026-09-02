@@ -3,7 +3,7 @@ import { generalSettings } from '../utils/storage-utils';
 import { updatePromptContextVisibility } from './interpreter-settings';
 import { initializePropertyTypesManager } from './property-types-manager';
 
-export type SettingsSection = 'general' | 'properties' | 'highlighter' | 'interpreter' | 'reader' | 'craft' | 'templates';
+export type SettingsSection = 'general' | 'properties' | 'highlighter' | 'interpreter' | 'ai' | 'reader' | 'craft' | 'templates';
 
 export function showSettingsSection(section: SettingsSection, templateId?: string): void {
 	const sections = document.querySelectorAll('.settings-section');
@@ -76,9 +76,10 @@ export function initializeSidebar(): void {
 				|| section === 'properties'
 				|| section === 'highlighter'
 				|| section === 'interpreter'
+				|| section === 'ai'
 				|| section === 'reader'
 				|| section === 'craft') {
-				showSettingsSection(section as 'general' | 'properties' | 'highlighter' | 'interpreter' | 'reader' | 'craft');
+				showSettingsSection(section as 'general' | 'properties' | 'highlighter' | 'interpreter' | 'ai' | 'reader' | 'craft');
 			}
 			if (settingsContainer) {
 				settingsContainer.classList.remove('sidebar-open');

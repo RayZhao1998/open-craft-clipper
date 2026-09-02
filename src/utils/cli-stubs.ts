@@ -59,6 +59,17 @@ export const generalSettings: Settings = {
 		tags: '#clippings',
 		wikilinks: 'plain',
 	},
+	ai: {
+		enabled: false,
+		baseUrl: '',
+		apiKey: '',
+		model: '',
+		targetLang: 'zh-CN',
+		mode: 'bilingual',
+		prompt: '',
+		translateTranscript: true,
+		autoTranslate: false,
+	},
 	saveBehavior: 'addToObsidian',
 };
 

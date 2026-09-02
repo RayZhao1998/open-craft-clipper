@@ -44,6 +44,113 @@
 	"alwaysShowHighlightsDescription": {
 		"message": "Display your saved highlights when you load a page. Turn off to only display highlights when highlighter mode is activated."
 	},
+	"ai": {
+		"message": "AI"
+	},
+	"aiEndpointHeading": {
+		"message": "Model endpoint"
+	},
+	"aiApiKey": {
+		"message": "API key"
+	},
+	"aiApiKeyDescription": {
+		"message": "Sent as a bearer token. Leave empty for local servers that need no key."
+	},
+	"aiAutoTranslate": {
+		"message": "Translate automatically"
+	},
+	"aiAutoTranslateDescription": {
+		"message": "Start translating as soon as Reader opens instead of waiting for the button. The budget is the same either way — nothing is sent while the page is still scrolling."
+	},
+	"aiBaseUrl": {
+		"message": "Base URL"
+	},
+	"aiBaseUrlDescription": {
+		"message": "OpenAI-style endpoint: https://api.openai.com/v1, a proxy or gateway URL, or a local server such as http://127.0.0.1:11434 — /chat/completions is added for you."
+	},
+	"aiCustomLanguage": {
+		"message": "Custom code…"
+	},
+	"aiDisabled": {
+		"message": "AI is turned off in settings."
+	},
+	"aiKeyWarning": {
+		"message": "Your API key is stored in your browser and included in your synced extension settings. Anyone with access to those settings can use it — keep a spending cap on the provider you point this at."
+	},
+	"aiMissingApiKey": {
+		"message": "Add an AI API key in settings first."
+	},
+	"aiMissingBaseUrl": {
+		"message": "Add an AI base URL in settings first."
+	},
+	"aiMissingModel": {
+		"message": "Set an AI model in settings first."
+	},
+	"aiModel": {
+		"message": "Model"
+	},
+	"aiModelDescription": {
+		"message": "Any chat model your endpoint serves. A cheap, fast model translates better than a frontier one — translation is not where a big model pays off."
+	},
+	"aiOpenSettings": {
+		"message": "AI settings"
+	},
+	"aiPromptReset": {
+		"message": "Translation prompt reset to the built-in default."
+	},
+	"aiResetPrompt": {
+		"message": "Reset prompt"
+	},
+	"aiTargetLang": {
+		"message": "Translate to"
+	},
+	"aiTestConnection": {
+		"message": "Test connection"
+	},
+	"aiTestSuccess": {
+		"message": "Connected — the model answered: $1$",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"aiTestingConnection": {
+		"message": "Testing…"
+	},
+	"aiTranslateButton": {
+		"message": "Translate"
+	},
+	"aiTranslateMode": {
+		"message": "Layout"
+	},
+	"aiTranslateModeBilingual": {
+		"message": "Original + translation"
+	},
+	"aiTranslateModeDescription": {
+		"message": "Alternating source and translation keeps links and citations usable; translation only hides the source once it has been replaced."
+	},
+	"aiTranslateModeReplacement": {
+		"message": "Translation only"
+	},
+	"aiTranslatePrompt": {
+		"message": "Translation prompt"
+	},
+	"aiTranslatePromptDescription": {
+		"message": "Style, glossary and tone rules, appended to the built-in instructions. {targetLang} and {sourceLang} are substituted. Leave empty for the default."
+	},
+	"aiTranslateTranscript": {
+		"message": "Translate transcripts"
+	},
+	"aiTranslateTranscriptDescription": {
+		"message": "YouTube and Bilibili captions and the video description. Transcript lines are always shown under the original so playback tracking keeps working."
+	},
+	"aiTranslationDescription": {
+		"message": "In Reader, tap the translate button. Only the text around what you are reading — one screen above and below — is sent, and never while you are still scrolling, so a long article costs what you actually read."
+	},
+	"aiTranslationHeading": {
+		"message": "Immersive translation"
+	},
 	"apiKeyMissing": {
 		"message": "No API key"
 	},
@@ -321,6 +428,12 @@
 	},
 	"embedded": {
 		"message": "Embedded"
+	},
+	"enableAi": {
+		"message": "Enable AI"
+	},
+	"enableAiDescription": {
+		"message": "Turns on immersive translation in Reader using any OpenAI-compatible endpoint. Requests are made by the extension, never by the page you are reading."
 	},
 	"enableCraft": {
 		"message": "Save to Craft"

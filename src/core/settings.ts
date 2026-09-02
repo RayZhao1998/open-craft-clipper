@@ -13,6 +13,7 @@ import { updateTemplateList, showTemplateEditor, initializeAddPropertyButton, in
 import { initializeGeneralSettings } from '../managers/general-settings';
 import { initializeInterpreterSettings } from '../managers/interpreter-settings';
 import { initializeCraftSettings } from '../managers/craft-settings';
+import { initializeAiSettings } from '../managers/ai-settings';
 import { showSettingsSection, initializeSidebar } from '../managers/settings-section-ui';
 import { initializeReaderSettings } from '../managers/reader-settings';
 import { initializeAutoSave } from '../utils/auto-save';
@@ -41,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 	// Apply section from URL params immediately to avoid flash (DOM only, no side effects)
 	const { section: initialSection } = getUrlParameters();
-	const targetSection = (initialSection === 'general' || initialSection === 'interpreter' || initialSection === 'properties' || initialSection === 'highlighter' || initialSection === 'reader' || initialSection === 'craft') ? initialSection : 'general';
+	const targetSection = (initialSection === 'general' || initialSection === 'interpreter' || initialSection === 'ai' || initialSection === 'properties' || initialSection === 'highlighter' || initialSection === 'reader' || initialSection === 'craft') ? initialSection : 'general';
 	document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
 	document.querySelectorAll('#sidebar li[data-section]').forEach(i => i.classList.remove('active'));
 	document.getElementById(`${targetSection}-section`)?.classList.add('active');
@@ -67,6 +68,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 				await initializeCraftSettings();
 			} catch (error) {
 				console.error('Error initializing Craft settings, continuing with defaults:', error);
+			}
+			
+			// Same for AI: a broken endpoint must not take the settings page down
+			try {
+				await initializeAiSettings();
+			} catch (error) {
+				console.error('Error initializing AI settings, continuing with defaults:', error);
 			}
 			
 			// Load templates with error handling
@@ -215,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	async function handleUrlParameters(): Promise<void> {
 		const { section, templateId } = getUrlParameters();
 
-		if (section === 'general' || section === 'interpreter' || section === 'properties' || section === 'highlighter' || section === 'reader' || section === 'craft') {
+		if (section === 'general' || section === 'interpreter' || section === 'ai' || section === 'properties' || section === 'highlighter' || section === 'reader' || section === 'craft') {
 			showSettingsSection(section);
 		} else if (templateId) {
 			const template = findTemplateById(templateId);

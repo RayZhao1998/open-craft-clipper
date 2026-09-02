@@ -29,6 +29,113 @@
 	"advanced": {
 		"message": "高级"
 	},
+	"ai": {
+		"message": "AI"
+	},
+	"aiApiKey": {
+		"message": "API 密钥"
+	},
+	"aiApiKeyDescription": {
+		"message": "以 Bearer Token 发送。本地服务不需要密钥时可留空。"
+	},
+	"aiAutoTranslate": {
+		"message": "自动翻译"
+	},
+	"aiAutoTranslateDescription": {
+		"message": "打开阅读器即开始翻译，无需再手动点击按钮。两者的开销相同——页面滚动过程中不会发送任何请求。"
+	},
+	"aiBaseUrl": {
+		"message": "Base URL"
+	},
+	"aiBaseUrlDescription": {
+		"message": "OpenAI 风格端点：https://api.openai.com/v1、代理或网关地址，或本地服务（如 http://127.0.0.1:11434）——系统会自动补上 /chat/completions。"
+	},
+	"aiCustomLanguage": {
+		"message": "自定义语言代码…"
+	},
+	"aiDisabled": {
+		"message": "AI 未在设置中开启。"
+	},
+	"aiEndpointHeading": {
+		"message": "模型端点"
+	},
+	"aiKeyWarning": {
+		"message": "API 密钥保存在浏览器中，并会随扩展设置一起同步。能访问这些设置的人都能使用它——请为你接入的服务方设置消费上限。"
+	},
+	"aiMissingApiKey": {
+		"message": "请先在设置中填写 AI API 密钥。"
+	},
+	"aiMissingBaseUrl": {
+		"message": "请先在设置中填写 AI Base URL。"
+	},
+	"aiMissingModel": {
+		"message": "请先在设置中填写 AI 模型。"
+	},
+	"aiModel": {
+		"message": "模型"
+	},
+	"aiModelDescription": {
+		"message": "填写该端点支持的任意对话模型。翻译这类任务，便宜快速的模型比旗舰模型更合适。"
+	},
+	"aiOpenSettings": {
+		"message": "AI 设置"
+	},
+	"aiPromptReset": {
+		"message": "翻译提示词已恢复为内置默认。"
+	},
+	"aiResetPrompt": {
+		"message": "重置提示词"
+	},
+	"aiTargetLang": {
+		"message": "目标语言"
+	},
+	"aiTestConnection": {
+		"message": "测试连接"
+	},
+	"aiTestSuccess": {
+		"message": "已连接 — 模型回复：$1$",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"aiTestingConnection": {
+		"message": "测试中…"
+	},
+	"aiTranslateButton": {
+		"message": "翻译"
+	},
+	"aiTranslateMode": {
+		"message": "布局"
+	},
+	"aiTranslateModeBilingual": {
+		"message": "原文 + 译文"
+	},
+	"aiTranslateModeDescription": {
+		"message": "原文与译文交替展示可保留链接和引用；“仅译文”会在译文就位后隐藏原文。"
+	},
+	"aiTranslateModeReplacement": {
+		"message": "仅译文"
+	},
+	"aiTranslatePrompt": {
+		"message": "翻译提示词"
+	},
+	"aiTranslatePromptDescription": {
+		"message": "写在内置指令之后的风格、术语与语气规则。支持变量 {targetLang} 和 {sourceLang}。留空即使用默认。"
+	},
+	"aiTranslateTranscript": {
+		"message": "翻译逐字稿"
+	},
+	"aiTranslateTranscriptDescription": {
+		"message": "翻译 YouTube、B 站字幕以及视频简介。逐字稿译文始终显示在原文下方，以免破坏播放定位。"
+	},
+	"aiTranslationDescription": {
+		"message": "在阅读模式中点击翻译按钮。只会发送你正在阅读位置上下各一屏内的文本，而且滚动过程中不发送，因此长文只按实际阅读量计费。"
+	},
+	"aiTranslationHeading": {
+		"message": "沉浸式翻译"
+	},
 	"allHighlights": {
 		"message": "所有高亮"
 	},
@@ -321,6 +428,12 @@
 	},
 	"embedded": {
 		"message": "嵌入式"
+	},
+	"enableAi": {
+		"message": "启用 AI"
+	},
+	"enableAiDescription": {
+		"message": "在阅读模式中通过任意 OpenAI 兼容端点进行沉浸式翻译。请求由扩展发出，你正在阅读的页面拿不到密钥。"
 	},
 	"enableCraft": {
 		"message": "保存到 Craft"

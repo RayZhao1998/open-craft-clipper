@@ -40,6 +40,7 @@ const VIEWPORT = 'width=device-width, initial-scale=1, maximum-scale=1';
 
 import { ReaderSettings } from '../types/types';
 import { wireTranscript } from './reader-transcript';
+import { ReaderTranslation } from './reader-translate';
 
 interface ReaderContent {
 	content: string;
@@ -341,6 +342,8 @@ export class Reader {
 		triggerGroup.className = 'obsidian-reader-nav';
 		triggerGroup.appendChild(outlineBtn);
 		triggerGroup.appendChild(highlighterBtn);
+		// Immersive translation (hidden until AI is enabled in settings)
+		triggerGroup.appendChild(ReaderTranslation.createNavButton(doc));
 		triggerGroup.appendChild(clipButton);
 		triggerGroup.appendChild(trigger);
 		triggerGroup.appendChild(addToObsidianBtn);
@@ -1188,6 +1191,9 @@ export class Reader {
 
 		// Highlights
 		hl().removeExistingHighlights();
+
+		// Immersive translation
+		ReaderTranslation.detach(doc);
 	}
 
 	private static initializeFootnotes(doc: Document) {
@@ -2675,6 +2681,10 @@ export class Reader {
 		hl().invalidateHighlightCache();
 		await hl().loadHighlights();
 		hl().applyHighlights();
+
+		// Immersive translation: sets up the nav button and, if the user asked
+		// for it, starts a viewport-windowed translation pass.
+		void ReaderTranslation.attach(doc);
 	}
 
 	private static async getHighlightCountForDomain(domain: string): Promise<number> {

@@ -19,6 +19,19 @@ Stay rebaseable: all Craft logic lives in `src/utils/craft/*`, `src/utils/save-d
  git fetch upstream && git merge upstream/main   # then: npm run build && npm test
 ```
 
+## This fork: AI translation in Reader
+
+Reader mode can translate the page you are reading, bilingually, without sending the whole article to a model:
+
+- Configure any OpenAI-compatible endpoint (base URL + key + model) in **Settings → AI**, with a connection test.
+- Only the text within one viewport above and below the screen is queued; nothing is sent while you are scrolling; results are cached.
+- Works for YouTube too — the description keeps its lines, and caption lines are translated near the screen without breaking player seeking.
+- The translation prompt is editable (tone, glossary, domain context), with the output contract appended for you.
+
+Usage, cost controls and the prompt format: [docs/AI translation.md](docs/AI%20translation.md)
+
+All AI logic lives in `src/utils/ai/*` plus `src/utils/reader-translate.ts`; requests go through the background page so the key never reaches a content script. Everything else in the page — highlights, selection, the markdown that gets saved — is left alone.
+
 ## Get started
 
 Install the extension by downloading it from the official directory for your browser:

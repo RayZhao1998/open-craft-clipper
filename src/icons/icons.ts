@@ -33,6 +33,7 @@ import {
 	SquareCheckBig,
 	Tags,
 	Trash2,
+	Languages,
 	X
 } from 'lucide';
 
@@ -73,6 +74,7 @@ export const icons = {
 	SquareCheckBig,
 	Tags,
 	Trash2,
+	Languages,
 	X
 };
 

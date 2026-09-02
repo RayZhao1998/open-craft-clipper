@@ -1,8 +1,8 @@
 import browser from './browser-polyfill';
-import { Settings, ModelConfig, PropertyType, HistoryEntry, Provider, Rating, CraftSettings, SaveBehavior } from '../types/types';
+import { Settings, ModelConfig, PropertyType, HistoryEntry, Provider, Rating, CraftSettings, SaveBehavior, AiSettings } from '../types/types';
 import { debugLog } from './debug';
 
-export type { Settings, ModelConfig, PropertyType, HistoryEntry, Provider, Rating, CraftSettings, SaveBehavior };
+export type { Settings, ModelConfig, PropertyType, HistoryEntry, Provider, Rating, CraftSettings, SaveBehavior, AiSettings };
 
 export const defaultCraftSettings: CraftSettings = {
 	enabled: false,
@@ -12,6 +12,18 @@ export const defaultCraftSettings: CraftSettings = {
 	headerFormat: '',
 	tags: '#clippings',
 	wikilinks: 'plain'
+};
+
+export const defaultAiSettings: AiSettings = {
+	enabled: false,
+	baseUrl: '',
+	apiKey: '',
+	model: '',
+	targetLang: 'zh-CN',
+	mode: 'bilingual',
+	prompt: '',
+	translateTranscript: true,
+	autoTranslate: false
 };
 
 export let generalSettings: Settings = {
@@ -59,6 +71,7 @@ export let generalSettings: Settings = {
 	history: [],
 	ratings: [],
 	craft: { ...defaultCraftSettings },
+	ai: { ...defaultAiSettings },
 	saveBehavior: 'addToObsidian'
 };
 
@@ -87,6 +100,17 @@ interface StorageData {
 		headerFormat?: string;
 		tags?: string;
 		wikilinks?: 'plain' | 'link';
+	};
+	ai_settings?: {
+		enabled?: boolean;
+		baseUrl?: string;
+		apiKey?: string;
+		model?: string;
+		targetLang?: string;
+		mode?: 'bilingual' | 'replacement';
+		prompt?: string;
+		translateTranscript?: boolean;
+		autoTranslate?: boolean;
 	};
 	vaults?: string[];
 	highlighter_settings?: {
@@ -134,6 +158,25 @@ interface StorageData {
 }
 
 const CURRENT_MIGRATION_VERSION = 1;
+
+// Storage is user-editable (and synced), so every AI field is coerced: a stray
+// number in baseUrl or a non-string apiKey must never reach fetch().
+function sanitizeAiSettings(stored: StorageData['ai_settings'] | undefined, fallback: AiSettings): AiSettings {
+	const text = (value: unknown, or: string): string => (typeof value === 'string' ? value : or);
+	const flag = (value: unknown, or: boolean): boolean => (typeof value === 'boolean' ? value : or);
+
+	return {
+		enabled: flag(stored?.enabled, fallback.enabled),
+		baseUrl: text(stored?.baseUrl, fallback.baseUrl).trim(),
+		apiKey: text(stored?.apiKey, fallback.apiKey).trim(),
+		model: text(stored?.model, fallback.model).trim(),
+		targetLang: text(stored?.targetLang, fallback.targetLang).trim() || fallback.targetLang,
+		mode: stored?.mode === 'replacement' ? 'replacement' : (stored?.mode === 'bilingual' ? 'bilingual' : fallback.mode),
+		prompt: text(stored?.prompt, fallback.prompt),
+		translateTranscript: flag(stored?.translateTranscript, fallback.translateTranscript),
+		autoTranslate: flag(stored?.autoTranslate, fallback.autoTranslate)
+	};
+}
 
 export async function loadSettings(): Promise<Settings> {
 	const data = await browser.storage.sync.get(null) as StorageData;
@@ -185,6 +228,7 @@ export async function loadSettings(): Promise<Settings> {
 		history: [],
 		ratings: [],
 		craft: { ...defaultCraftSettings },
+		ai: { ...defaultAiSettings },
 	};
 
 	// Update migration version if needed
@@ -257,6 +301,7 @@ export async function loadSettings(): Promise<Settings> {
 				? 'link'
 				: (data.craft_settings?.wikilinks === 'plain' ? 'plain' : defaultCraftSettings.wikilinks)
 		},
+		ai: sanitizeAiSettings(data.ai_settings, defaultSettings.ai),
 		saveBehavior: data.general_settings?.saveBehavior ?? defaultSettings.saveBehavior
 	};
 
@@ -302,6 +347,17 @@ export async function saveSettings(settings?: Partial<Settings>): Promise<void> 
 			headerFormat: generalSettings.craft.headerFormat,
 			tags: generalSettings.craft.tags,
 			wikilinks: generalSettings.craft.wikilinks
+		},
+		ai_settings: {
+			enabled: generalSettings.ai.enabled,
+			baseUrl: generalSettings.ai.baseUrl,
+			apiKey: generalSettings.ai.apiKey,
+			model: generalSettings.ai.model,
+			targetLang: generalSettings.ai.targetLang,
+			mode: generalSettings.ai.mode,
+			prompt: generalSettings.ai.prompt,
+			translateTranscript: generalSettings.ai.translateTranscript,
+			autoTranslate: generalSettings.ai.autoTranslate
 		},
 		reader_settings: {
 			fontSize: generalSettings.readerSettings.fontSize,
