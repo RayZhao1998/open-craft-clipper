@@ -206,6 +206,9 @@ export function showTemplateEditor(template: Template | null): void {
 	const behaviorSelect = document.getElementById('template-behavior') as HTMLSelectElement;
 	if (behaviorSelect) behaviorSelect.value = editingTemplate.behavior || 'create';
 
+	const destinationSelect = document.getElementById('template-destination') as HTMLSelectElement;
+	if (destinationSelect) destinationSelect.value = editingTemplate.destination || '';
+
 	const noteNameFormat = document.getElementById('note-name-format') as HTMLInputElement;
 	if (noteNameFormat) {
 		noteNameFormat.value = editingTemplate.noteNameFormat || '{{title}}';
@@ -225,9 +228,14 @@ export function showTemplateEditor(template: Template | null): void {
 	}
 
 	updateBehaviorFields();
+	updateDestinationFields();
 
 	if (behaviorSelect) {
 		behaviorSelect.addEventListener('change', updateBehaviorFields);
+	}
+
+	if (destinationSelect) {
+		destinationSelect.addEventListener('change', updateDestinationFields);
 	}
 
 	refreshPropertyNameSuggestions();
@@ -312,6 +320,37 @@ function updateBehaviorFields(): void {
 				default:
 					noteNameFormat.placeholder = getMessage('noteNameFormat');
 			}
+		}
+	}
+
+	updateDestinationFields();
+}
+
+/**
+ * Craft has no vault, folder path or daily-note behavior, so hide the
+ * Obsidian-only fields when a template is pinned to Craft.
+ */
+function updateDestinationFields(): void {
+	const destinationSelect = document.getElementById('template-destination') as HTMLSelectElement;
+	const isCraft = destinationSelect?.value === 'craft';
+
+	const pathContainer = document.getElementById('path-name-container');
+	const vaultContainer = document.getElementById('template-vault-container');
+
+	if (vaultContainer) vaultContainer.style.display = isCraft ? 'none' : 'block';
+	if (pathContainer && isCraft) pathContainer.style.display = 'none';
+
+	// The Craft API only creates documents — no appending, no daily notes — so
+	// lock the behavior instead of silently ignoring it at save time.
+	const behaviorSelect = document.getElementById('template-behavior') as HTMLSelectElement;
+	if (behaviorSelect) {
+		behaviorSelect.disabled = isCraft;
+		behaviorSelect.title = isCraft ? getMessage('craftBehaviorLocked') : '';
+
+		if (isCraft && behaviorSelect.value !== 'create') {
+			behaviorSelect.value = 'create';
+			const noteNameFormatContainer = document.getElementById('note-name-format-container');
+			if (noteNameFormatContainer) noteNameFormatContainer.style.display = 'block';
 		}
 	}
 }
@@ -525,6 +564,13 @@ export function updateTemplateFromForm(): void {
 
 	const behaviorSelect = document.getElementById('template-behavior') as HTMLSelectElement;
 	if (behaviorSelect) template.behavior = behaviorSelect.value as Template['behavior'];
+
+	const destinationSelect = document.getElementById('template-destination') as HTMLSelectElement;
+	if (destinationSelect) {
+		template.destination = destinationSelect.value === 'obsidian' || destinationSelect.value === 'craft'
+			? destinationSelect.value as Template['destination']
+			: undefined;
+	}
 
 	const isDailyNote = template.behavior === 'append-daily' || template.behavior === 'prepend-daily';
 

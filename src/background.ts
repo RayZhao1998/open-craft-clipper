@@ -5,8 +5,16 @@ import { TextHighlightData } from './utils/highlighter';
 import { debounce } from './utils/debounce';
 import { Settings } from './types/types';
 import { debugLog } from './utils/debug';
-import { incrementStat } from './utils/storage-utils';
 import { hasStoredHighlights } from './utils/url-utils';
+import { incrementStat, loadSettings } from './utils/storage-utils';
+import {
+	getConnection,
+	getFolders,
+	createDocument,
+	appendMarkdown,
+	toCraftErrorMessage
+} from './utils/craft/api';
+import { CraftSaveResult } from './utils/craft/client';
 
 const YOUTUBE_EMBED_RULE_ID = 9001;
 const YOUTUBE_INNERTUBE_RULE_ID = 9002;
@@ -393,6 +401,26 @@ browser.runtime.onMessage.addListener((request: unknown) => {
 			return { ok: false, status: 0, text: '', error: 'CORS_PERMISSION_NEEDED' };
 		});
 });
+
+// ---------------------------------------------------------------------------
+// Craft Space API
+//
+// Calls run here rather than in the popup/settings page so the secret link is
+// used in exactly one place and page CSP/CORS can never interfere. Error text
+// is masked so the secret link never reaches a console or the UI verbatim.
+// ---------------------------------------------------------------------------
+
+async function requireCraftApiUrl(): Promise<string> {
+	const settings = await loadSettings();
+	if (!settings.craft?.apiUrl) {
+		throw new Error('Craft is not set up yet. Open settings and add your Craft Space API link.');
+	}
+	return settings.craft.apiUrl;
+}
+
+function respondCraftError(sendResponse: (response?: any) => void, error: unknown): void {
+	sendResponse({ success: false, error: toCraftErrorMessage(error) });
+}
 
 browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime.MessageSender, sendResponse: (response?: any) => void): true | undefined => {
 	if (typeof request === 'object' && request !== null) {
@@ -799,12 +827,50 @@ browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime
 			}
 		}
 
+		if (typedRequest.action === "craftTestConnection") {
+			const apiUrl = (typedRequest as any).apiUrl || '';
+			getConnection(apiUrl)
+				.then((connection) => sendResponse({ success: true, data: connection }))
+				.catch((error) => respondCraftError(sendResponse, error));
+			return true;
+		}
+
+		if (typedRequest.action === "craftGetFolders") {
+			requireCraftApiUrl()
+				.then(getFolders)
+				.then((folders) => sendResponse({ success: true, data: folders }))
+				.catch((error) => respondCraftError(sendResponse, error));
+			return true;
+		}
+
+		if (typedRequest.action === "craftSave") {
+			const { title, markdown, folderId } = typedRequest as any;
+			requireCraftApiUrl()
+				.then(async (apiUrl) => {
+					const created = await createDocument(apiUrl, (title || '').trim() || 'Untitled clip', folderId ?? null);
+					if (markdown) {
+						await appendMarkdown(apiUrl, created.id, markdown);
+					}
+					const result: CraftSaveResult = {
+						documentId: created.id,
+						clickableLink: created.clickableLink
+					};
+					return result;
+				})
+				.then((result) => sendResponse({ success: true, data: result }))
+				.catch((error) => respondCraftError(sendResponse, error));
+			return true;
+		}
+
 		// For other actions that use sendResponse
 		if (typedRequest.action === "extractContent" ||
 			typedRequest.action === "ensureContentScriptLoaded" ||
 			typedRequest.action === "getHighlighterMode" ||
 			typedRequest.action === "toggleHighlighterMode" ||
-			typedRequest.action === "openObsidianUrl") {
+			typedRequest.action === "openObsidianUrl" ||
+			typedRequest.action === "craftTestConnection" ||
+			typedRequest.action === "craftGetFolders" ||
+			typedRequest.action === "craftSave") {
 			return true;
 		}
 	}

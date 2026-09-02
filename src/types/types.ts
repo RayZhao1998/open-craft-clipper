@@ -9,6 +9,11 @@ export interface Template {
 	triggers?: string[];
 	vault?: string;
 	context?: string;
+	/**
+	 * Where this template saves. When unset, the global default
+	 * (Settings.saveBehavior) decides, so existing templates keep working.
+	 */
+	destination?: SaveDestination;
 }
 
 export interface Property {
@@ -48,7 +53,25 @@ export interface Rating {
 	date: string;
 }
 
-export type SaveBehavior = 'addToObsidian' | 'saveFile' | 'copyToClipboard';
+export type SaveDestination = 'obsidian' | 'craft';
+
+export type SaveBehavior = 'addToObsidian' | 'addToCraft' | 'saveFile' | 'copyToClipboard';
+
+export interface CraftSettings {
+	enabled: boolean;
+	/** Canonical Space API base URL, e.g. https://connect.craft.do/links/<id>/api/v1 */
+	apiUrl: string;
+	/** Destination folder id used when a template doesn't override it. */
+	defaultFolderId: string;
+	/** Render template properties as Craft callouts above the body, or drop them. */
+	propertiesAs: 'callouts' | 'strip';
+	/** Optional custom header, rendered with the template engine. Empty = built-in callouts. */
+	headerFormat: string;
+	/** Tag line inserted in the header, e.g. "#clippings". */
+	tags: string;
+	/** How [[wikilinks]] survive in Craft, which has no backlinks. */
+	wikilinks: 'plain' | 'link';
+}
 
 export interface ReaderSettings {
 	fontSize: number;
@@ -86,8 +109,10 @@ export interface Settings {
 	defaultPromptContext: string;
 	propertyTypes: PropertyType[];
 	readerSettings: ReaderSettings;
+	craft: CraftSettings;
 	stats: {
 		addToObsidian: number;
+		addToCraft: number;
 		saveFile: number;
 		copyToClipboard: number;
 		share: number;
@@ -95,7 +120,7 @@ export interface Settings {
 	};
 	history: HistoryEntry[];
 	ratings: Rating[];
-	saveBehavior: 'addToObsidian' | 'saveFile' | 'copyToClipboard';
+	saveBehavior: SaveBehavior;
 }
 
 export interface ModelConfig {
@@ -109,7 +134,7 @@ export interface ModelConfig {
 export interface HistoryEntry {
 	datetime: string;
 	url: string;
-	action: 'addToObsidian' | 'saveFile' | 'copyToClipboard' | 'share' | 'readerMode';
+	action: 'addToObsidian' | 'addToCraft' | 'saveFile' | 'copyToClipboard' | 'share' | 'readerMode';
 	title?: string;
 	vault?: string;
 	path?: string;

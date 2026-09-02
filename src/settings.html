@@ -21,6 +21,7 @@
 						<li data-section="reader"><div class="nav-item-icon"><i data-lucide="book-open"></i></div><span data-i18n="reader">Reader</span></li>
 						<li data-section="highlighter"><div class="nav-item-icon"><i data-lucide="highlighter"></i></div><span data-i18n="highlighter">Highlighter</span></li>
 						<li data-section="interpreter"><div class="nav-item-icon"><i data-lucide="quote"></i></div><span data-i18n="interpreter">Interpreter</span></li>
+						<li data-section="craft"><div class="nav-item-icon"><i data-lucide="scissors-line-dashed"></i></div><span data-i18n="craft">Craft</span></li>
 						<li data-section="properties"><div class="nav-item-icon"><i data-lucide="archive"></i></div><span data-i18n="properties">Properties</span></li>
 						<li class="sidebar-heading" data-i18n="templatesHeading">Templates</li>
 					</ul>
@@ -160,6 +161,7 @@
 										<div class="setting-item-control">
 											<select id="save-behavior-dropdown">
 												<option value="addToObsidian" selected data-i18n="addToObsidian">Add to Obsidian</option>
+												<option value="addToCraft" data-i18n="addToCraft">Add to Craft</option>
 												<option value="copyToClipboard" data-i18n="copyToClipboard">Copy to clipboard</option>
 												<option value="saveFile" data-i18n="saveFile">Save file</option>
 											</select>
@@ -248,6 +250,123 @@
 										<div class="setting-item-control">
 											<button type="button" id="import-all-settings-btn" data-i18n="import">Import</button>
 										</div>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+
+					<div id="craft-section" class="settings-section">
+						<div class="settings-section-header">
+							<h2 data-i18n="craft">Craft</h2>
+						</div>
+						<form id="craft-settings-form">
+							<div class="setting-group">
+								<div class="setting-items">
+									<div class="setting-item mod-horizontal mod-toggle">
+										<div class="setting-item-info">
+											<label for="craft-enabled-toggle" data-i18n="enableCraft">Save to Craft</label>
+											<div class="setting-item-description" data-i18n="enableCraftDescription">
+												Clip pages into a Craft space using the <a href="https://docs.craft.do/space-api" target="_blank">Craft Space API</a>. Templates, variables and highlights work the same — only the destination changes.
+											</div>
+										</div>
+										<div class="setting-item-control">
+											<div class="checkbox-container">
+												<input type="checkbox" id="craft-enabled-toggle" />
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="setting-group" id="craft-connection-group">
+								<div class="setting-item setting-item-heading">
+									<h3 data-i18n="craftConnectionHeading">Connection</h3>
+									<div class="warning-container">
+										<div class="warning-icon">
+											<i data-lucide="alert-triangle"></i>
+										</div>
+										<div class="warning-text" data-i18n="craftApiLinkWarning">
+											Your Space API link is the only credential for your space — anyone who has it can read and write documents in it. Keep it out of screenshots and shared settings files.
+										</div>
+									</div>
+								</div>
+								<div class="setting-items">
+									<div class="setting-item">
+										<label for="craft-api-url" data-i18n="craftApiLink">Craft Space API link</label>
+										<div class="setting-item-description" data-i18n="craftApiLinkDescription">
+											Paste the link from Craft (Space settings → Space API), or just the link id. Format: https://connect.craft.do/links/…/api/v1
+										</div>
+										<div id="craft-api-url-row">
+											<input type="text" id="craft-api-url" placeholder="https://connect.craft.do/links/…/api/v1" autocomplete="off" spellcheck="false" />
+											<button type="button" id="craft-test-connection-btn" class="btn" data-i18n="craftTestConnection">Test connection</button>
+										</div>
+										<div id="craft-connection-status" class="craft-connection-status" style="display: none;"></div>
+									</div>
+									<div class="setting-item mod-horizontal">
+										<div class="setting-item-info">
+											<label for="craft-default-folder" data-i18n="craftDefaultFolder">Default folder</label>
+											<div class="setting-item-description" data-i18n="craftDefaultFolderDescription">
+												Where new documents are created. You can change the folder per clip.
+											</div>
+										</div>
+										<div class="setting-item-control">
+											<select id="craft-default-folder" class="dropdown">
+												<option value="unsorted" data-i18n="craftFolderUnsorted">Unsorted</option>
+											</select>
+											<button type="button" id="craft-refresh-folders-btn" class="clickable-icon" data-i18n-title="craftRefreshFolders">
+												<i data-lucide="refresh-cw"></i>
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="setting-group" id="craft-format-group">
+								<div class="setting-item setting-item-heading"><h3 data-i18n="craftFormatHeading">Document format</h3></div>
+								<div class="setting-items">
+									<div class="setting-item mod-horizontal">
+										<div class="setting-item-info">
+											<label for="craft-properties-as" data-i18n="craftPropertiesAsTitle">Properties</label>
+											<div class="setting-item-description" data-i18n="craftPropertiesAsDescription">
+												Craft has no YAML frontmatter. Render template properties as callouts at the top of the document, or drop them.
+											</div>
+										</div>
+										<div class="setting-item-control">
+											<select id="craft-properties-as" class="dropdown">
+												<option value="callouts" data-i18n="craftPropertiesAsCallouts">Callouts</option>
+												<option value="strip" data-i18n="craftPropertiesAsStrip">Drop them</option>
+											</select>
+										</div>
+									</div>
+									<div class="setting-item mod-horizontal">
+										<div class="setting-item-info">
+											<label for="craft-wikilinks" data-i18n="craftWikilinksTitle">Wiki links</label>
+											<div class="setting-item-description" data-i18n="craftWikilinksDescription">
+												Craft has no backlinks, so [[wiki links]] have nothing to point at.
+											</div>
+										</div>
+										<div class="setting-item-control">
+											<select id="craft-wikilinks" class="dropdown">
+												<option value="plain" data-i18n="craftWikilinksPlain">Plain text</option>
+												<option value="link" data-i18n="craftWikilinksLink">Link to Obsidian</option>
+											</select>
+										</div>
+									</div>
+									<div class="setting-item">
+										<label for="craft-tags" data-i18n="craftTagsTitle">Header tags</label>
+										<div class="setting-item-description" data-i18n="craftTagsDescription">
+												Inserted in the document header. Supports template variables, e.g. {{tags}}.
+										</div>
+										<input type="text" id="craft-tags" placeholder="#clippings" spellcheck="false" />
+									</div>
+									<div class="setting-item">
+										<label for="craft-header-format" data-i18n="craftHeaderTitle">Custom header</label>
+										<div class="setting-item-description" data-i18n="craftHeaderDescription">
+											Optional. Replaces the built-in header callouts. Uses the same template syntax as note content; leave empty for the default header.
+										</div>
+										<textarea id="craft-header-format" rows="6" spellcheck="false" placeholder="&lt;callout&gt;[{{title}}]({{url}})&lt;/callout&gt;
+&lt;callout&gt;&lt;caption&gt;Saved {{date}}&lt;/caption&gt;&lt;/callout&gt;
+
+***"></textarea>
 									</div>
 								</div>
 							</div>
@@ -705,6 +824,15 @@
 									<div class="setting-item setting-item-heading"><h3 data-i18n="templateGroupLocation">Location</h3></div>
 									<div class="setting-items">
 										<div class="setting-item">
+											<label for="template-destination" data-i18n="templateDestination">Save to</label>
+											<div class="setting-item-description" data-i18n="templateDestinationDescription">Send clips created with this template to Craft instead of Obsidian. Automatic follows the default save behavior.</div>
+											<select id="template-destination">
+												<option value="" data-i18n="destinationAutomatic">Automatic</option>
+												<option value="obsidian" data-i18n="addToObsidian">Add to Obsidian</option>
+												<option value="craft" data-i18n="addToCraft">Add to Craft</option>
+											</select>
+										</div>
+										<div class="setting-item">
 											<label for="template-behavior" data-i18n="behavior">Behavior</label>
 											<select id="template-behavior">
 												<option value="create" data-i18n="createNewNote">Create new note</option>
@@ -725,7 +853,7 @@
 											<div class="setting-item-description" data-i18n="noteLocationDescription">The folder or path of the note.</div>
 											<input type="text" id="template-path-name" placeholder="Clippings" />
 										</div>
-										<div class="setting-item">
+										<div class="setting-item" id="template-vault-container">
 											<label for="template-vault" data-i18n="vault">Vault</label>
 											<div class="setting-item-description" data-i18n="vaultDescription">Select the default vault for this template. Go to general settings to add or remove vaults.</div>
 											<select id="template-vault">

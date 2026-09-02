@@ -16,6 +16,7 @@
 	],
 	"host_permissions": [
 		"<all_urls>",
+		"https://connect.craft.do/*",
 		"http://*/*",
 		"https://*/*"
 	],

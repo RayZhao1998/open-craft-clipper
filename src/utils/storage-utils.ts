@@ -1,8 +1,18 @@
 import browser from './browser-polyfill';
-import { Settings, ModelConfig, PropertyType, HistoryEntry, Provider, Rating } from '../types/types';
+import { Settings, ModelConfig, PropertyType, HistoryEntry, Provider, Rating, CraftSettings, SaveBehavior } from '../types/types';
 import { debugLog } from './debug';
 
-export type { Settings, ModelConfig, PropertyType, HistoryEntry, Provider, Rating };
+export type { Settings, ModelConfig, PropertyType, HistoryEntry, Provider, Rating, CraftSettings, SaveBehavior };
+
+export const defaultCraftSettings: CraftSettings = {
+	enabled: false,
+	apiUrl: '',
+	defaultFolderId: 'unsorted',
+	propertiesAs: 'callouts',
+	headerFormat: '',
+	tags: '#clippings',
+	wikilinks: 'plain'
+};
 
 export let generalSettings: Settings = {
 	vaults: [],
@@ -40,6 +50,7 @@ export let generalSettings: Settings = {
 	},
 	stats: {
 		addToObsidian: 0,
+		addToCraft: 0,
 		saveFile: 0,
 		copyToClipboard: 0,
 		share: 0,
@@ -47,6 +58,7 @@ export let generalSettings: Settings = {
 	},
 	history: [],
 	ratings: [],
+	craft: { ...defaultCraftSettings },
 	saveBehavior: 'addToObsidian'
 };
 
@@ -65,7 +77,16 @@ interface StorageData {
 		legacyMode?: boolean;
 		silentOpen?: boolean;
 		openBehavior?: boolean | 'popup' | 'embedded';
-		saveBehavior?: 'addToObsidian' | 'copyToClipboard' | 'saveFile';
+		saveBehavior?: SaveBehavior;
+	};
+	craft_settings?: {
+		enabled?: boolean;
+		apiUrl?: string;
+		defaultFolderId?: string;
+		propertiesAs?: 'callouts' | 'strip';
+		headerFormat?: string;
+		tags?: string;
+		wikilinks?: 'plain' | 'link';
 	};
 	vaults?: string[];
 	highlighter_settings?: {
@@ -101,6 +122,7 @@ interface StorageData {
 	property_types?: PropertyType[];
 	stats?: {
 		addToObsidian: number;
+		addToCraft?: number;
 		saveFile: number;
 		copyToClipboard: number;
 		share: number;
@@ -154,6 +176,7 @@ export async function loadSettings(): Promise<Settings> {
 		},
 		stats: {
 			addToObsidian: 0,
+			addToCraft: 0,
 			saveFile: 0,
 			copyToClipboard: 0,
 			share: 0,
@@ -161,6 +184,7 @@ export async function loadSettings(): Promise<Settings> {
 		},
 		history: [],
 		ratings: [],
+		craft: { ...defaultCraftSettings },
 	};
 
 	// Update migration version if needed
@@ -218,6 +242,21 @@ export async function loadSettings(): Promise<Settings> {
 		stats: { ...defaultSettings.stats, ...data.stats },
 		history: data.history || defaultSettings.history,
 		ratings: data.ratings || defaultSettings.ratings,
+		craft: {
+			enabled: data.craft_settings?.enabled ?? defaultCraftSettings.enabled,
+			apiUrl: typeof data.craft_settings?.apiUrl === 'string' ? data.craft_settings.apiUrl : defaultCraftSettings.apiUrl,
+			defaultFolderId: typeof data.craft_settings?.defaultFolderId === 'string' && data.craft_settings.defaultFolderId
+				? data.craft_settings.defaultFolderId
+				: defaultCraftSettings.defaultFolderId,
+			propertiesAs: data.craft_settings?.propertiesAs === 'strip'
+				? 'strip'
+				: (data.craft_settings?.propertiesAs === 'callouts' ? 'callouts' : defaultCraftSettings.propertiesAs),
+			headerFormat: typeof data.craft_settings?.headerFormat === 'string' ? data.craft_settings.headerFormat : defaultCraftSettings.headerFormat,
+			tags: typeof data.craft_settings?.tags === 'string' ? data.craft_settings.tags : defaultCraftSettings.tags,
+			wikilinks: data.craft_settings?.wikilinks === 'link'
+				? 'link'
+				: (data.craft_settings?.wikilinks === 'plain' ? 'plain' : defaultCraftSettings.wikilinks)
+		},
 		saveBehavior: data.general_settings?.saveBehavior ?? defaultSettings.saveBehavior
 	};
 
@@ -255,6 +294,15 @@ export async function saveSettings(settings?: Partial<Settings>): Promise<void> 
 			defaultPromptContext: generalSettings.defaultPromptContext
 		},
 		property_types: generalSettings.propertyTypes,
+		craft_settings: {
+			enabled: generalSettings.craft.enabled,
+			apiUrl: generalSettings.craft.apiUrl,
+			defaultFolderId: generalSettings.craft.defaultFolderId,
+			propertiesAs: generalSettings.craft.propertiesAs,
+			headerFormat: generalSettings.craft.headerFormat,
+			tags: generalSettings.craft.tags,
+			wikilinks: generalSettings.craft.wikilinks
+		},
 		reader_settings: {
 			fontSize: generalSettings.readerSettings.fontSize,
 			lineHeight: generalSettings.readerSettings.lineHeight,

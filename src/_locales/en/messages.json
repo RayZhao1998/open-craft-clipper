@@ -17,6 +17,9 @@
 	"addProviderTitle": {
 		"message": "Add provider"
 	},
+	"addToCraft": {
+		"message": "Add to Craft"
+	},
 	"addToObsidian": {
 		"message": "Add to Obsidian"
 	},
@@ -144,6 +147,98 @@
 	"copyToClipboard": {
 		"message": "Copy to clipboard"
 	},
+	"craft": {
+		"message": "Craft"
+	},
+	"craftApiLink": {
+		"message": "Craft Space API link"
+	},
+	"craftApiLinkCleared": {
+		"message": "Craft API link removed."
+	},
+	"craftApiLinkDescription": {
+		"message": "Paste the link from Craft (Space settings → Space API), or just the link id. Format: https://connect.craft.do/links/…/api/v1"
+	},
+	"craftApiLinkWarning": {
+		"message": "Your Space API link is the only credential for your space — anyone who has it can read and write documents in it. Keep it out of screenshots and shared settings files."
+	},
+	"craftBehaviorLocked": {
+		"message": "Craft documents are always created new — appending and daily notes are Obsidian-only."
+	},
+	"craftConnected": {
+		"message": "Connected to $1",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"craftConnectionHeading": {
+		"message": "Connection"
+	},
+	"craftDefaultFolder": {
+		"message": "Default folder"
+	},
+	"craftDefaultFolderDescription": {
+		"message": "Where new documents are created. You can change the folder per clip."
+	},
+	"craftFolderUnsorted": {
+		"message": "Unsorted"
+	},
+	"craftFormatHeading": {
+		"message": "Document format"
+	},
+	"craftHeaderDescription": {
+		"message": "Optional. Replaces the built-in header callouts. Uses the same template syntax as note content; leave empty for the default header."
+	},
+	"craftHeaderTitle": {
+		"message": "Custom header"
+	},
+	"craftNotConfigured": {
+		"message": "Add your Craft Space API link in settings first."
+	},
+	"craftPropertiesAsCallouts": {
+		"message": "Callouts"
+	},
+	"craftPropertiesAsDescription": {
+		"message": "Craft has no YAML frontmatter. Render template properties as callouts at the top of the document, or drop them."
+	},
+	"craftPropertiesAsStrip": {
+		"message": "Drop them"
+	},
+	"craftPropertiesAsTitle": {
+		"message": "Properties"
+	},
+	"craftRefreshFolders": {
+		"message": "Reload folders"
+	},
+	"craftTagsDescription": {
+		"message": "Inserted in the document header. Supports template variables, e.g. {{tags}}."
+	},
+	"craftTagsTitle": {
+		"message": "Header tags"
+	},
+	"craftTestConnection": {
+		"message": "Test connection"
+	},
+	"craftTestingConnection": {
+		"message": "Testing…"
+	},
+	"craftUnnamedSpace": {
+		"message": "your space"
+	},
+	"craftWikilinksDescription": {
+		"message": "Craft has no backlinks, so [[wiki links]] have nothing to point at."
+	},
+	"craftWikilinksLink": {
+		"message": "Link to Obsidian"
+	},
+	"craftWikilinksPlain": {
+		"message": "Plain text"
+	},
+	"craftWikilinksTitle": {
+		"message": "Wiki links"
+	},
 	"createNewNote": {
 		"message": "Create new note"
 	},
@@ -179,6 +274,9 @@
 	},
 	"deleteProviderConfirm": {
 		"message": "Are you sure you want to delete this provider?"
+	},
+	"destinationAutomatic": {
+		"message": "Automatic"
 	},
 	"disableHighlighter": {
 		"message": "Turn off highlighter"
@@ -223,6 +321,12 @@
 	},
 	"embedded": {
 		"message": "Embedded"
+	},
+	"enableCraft": {
+		"message": "Save to Craft"
+	},
+	"enableCraftDescription": {
+		"message": "Clip pages into a Craft space using the <a href=\"https://docs.craft.do/space-api\" target=\"_blank\">Craft Space API</a>. Templates, variables and highlights work the same — only the destination changes."
 	},
 	"enableHighlighterDescription": {
 		"message": "Highlight content on web pages that you can save to Obsidian."
@@ -332,6 +436,9 @@
 	},
 	"failedToSaveProvider": {
 		"message": "Failed to save provider. Please try again."
+	},
+	"failedToSaveToCraft": {
+		"message": "Failed to save to Craft."
 	},
 	"feedback": {
 		"message": "Feedback"
@@ -580,6 +687,9 @@
 	},
 	"openHighlights": {
 		"message": "Open highlights"
+	},
+	"openInCraft": {
+		"message": "Open in Craft"
 	},
 	"openReader": {
 		"message": "Open Reader"
@@ -920,11 +1030,14 @@
 	"saveBehaviorLabel": {
 		"message": "Save behavior"
 	},
+	"saveFile": {
+		"message": "Save file..."
+	},
 	"saved": {
 		"message": "Saved"
 	},
-	"saveFile": {
-		"message": "Save file..."
+	"savedToCraft": {
+		"message": "Saved to Craft"
 	},
 	"searchHighlightsPlaceholder": {
 		"message": "Search highlights…"
@@ -1018,6 +1131,12 @@
 	},
 	"templateCopyError": {
 		"message": "Failed to copy template JSON to clipboard"
+	},
+	"templateDestination": {
+		"message": "Save to"
+	},
+	"templateDestinationDescription": {
+		"message": "Send clips created with this template to Craft instead of Obsidian. Automatic follows the default save behavior."
 	},
 	"templateErrorCount": {
 		"message": "There is an error in your template."

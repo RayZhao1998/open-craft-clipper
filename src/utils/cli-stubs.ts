@@ -42,6 +42,7 @@ export const generalSettings: Settings = {
 	},
 	stats: {
 		addToObsidian: 0,
+		addToCraft: 0,
 		saveFile: 0,
 		copyToClipboard: 0,
 		share: 0,
@@ -49,6 +50,15 @@ export const generalSettings: Settings = {
 	},
 	history: [],
 	ratings: [],
+	craft: {
+		enabled: false,
+		apiUrl: '',
+		defaultFolderId: 'unsorted',
+		propertiesAs: 'callouts',
+		headerFormat: '',
+		tags: '#clippings',
+		wikilinks: 'plain',
+	},
 	saveBehavior: 'addToObsidian',
 };
 

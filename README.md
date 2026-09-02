@@ -4,6 +4,21 @@ Obsidian Web Clipper helps you highlight and capture the web in your favorite br
 - **[Documentation](https://help.obsidian.md/web-clipper)**
 - **[Troubleshooting](https://help.obsidian.md/web-clipper/troubleshoot)**
 
+## This fork: Craft support
+
+`open-craft-clipper` is a personal fork that adds **Craft** as a save destination next to Obsidian, using the [Craft Space API](https://docs.craft.do/space-api). Templates, variables, filters, highlights and Interpreter are untouched — only the final save step changes.
+
+- Usage and format details: [docs/Craft.md](docs/Craft.md)
+- Design, decisions and status: [docs/craft-integration-plan.md](docs/craft-integration-plan.md)
+
+Stay rebaseable: all Craft logic lives in `src/utils/craft/*`, `src/utils/save-destination.ts` and `src/managers/craft-settings.ts`; edits to upstream files are kept to small, guarded hunks.
+
+```bash
+# track upstream
+ git remote add upstream https://github.com/obsidianmd/obsidian-clipper.git
+ git fetch upstream && git merge upstream/main   # then: npm run build && npm test
+```
+
 ## Get started
 
 Install the extension by downloading it from the official directory for your browser:

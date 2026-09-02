@@ -23,6 +23,18 @@ import { sanitizeFileName } from '../utils/string-utils';
 import { saveFile } from '../utils/file-utils';
 import { translatePage, getMessage, setupLanguageAndDirection } from '../utils/i18n';
 import { formatPropertyValue } from '../utils/shared';
+import { resolveSaveDestination, isCraftConfigured, SaveDestination } from '../utils/save-destination';
+import { saveToCraft } from '../utils/craft/note-creator';
+import {
+	loadCraftFolders,
+	buildCraftFolderOptions,
+	coerceCraftFolderId,
+	getCraftFolderLabel,
+	getLastCraftFolderId,
+	setLastCraftFolderId,
+	CraftFolderOption,
+	UNSORTED_FOLDER_ID
+} from '../utils/craft/folders';
 
 interface ReaderModeResponse {
 	success: boolean;
@@ -35,6 +47,8 @@ let templates: Template[] = [];
 let currentVariables: { [key: string]: string } = {};
 let currentTabId: number | undefined;
 let lastSelectedVault: string | null = null;
+let craftFolderOptions: CraftFolderOption[] = [];
+let lastCraftFolderId: string | null = null;
 
 const isSidePanel = window.location.pathname.includes('side-panel.html');
 const urlParams = new URLSearchParams(window.location.search);
@@ -851,6 +865,10 @@ function buildTemplateFieldsSkeleton(template: Template | null) {
 		}
 	}
 
+	// Destination row (vault/path vs. Craft folder) and main button label
+	updateCraftDestinationUI(resolveSaveDestination(template, loadedSettings));
+	determineMainAction();
+
 	const noteContentField = document.getElementById('note-content-field') as HTMLTextAreaElement;
 	if (noteContentField) {
 		noteContentField.setAttribute('data-template-value', template.noteContentFormat || '');
@@ -1286,26 +1304,52 @@ function determineMainAction() {
 	// Clear existing secondary actions
 	secondaryActions.textContent = '';
 
+	const destination = resolveSaveDestination(currentTemplate, loadedSettings);
+	const craftAvailable = destination === 'craft' || isCraftConfigured(loadedSettings);
+
+	// Offer the two note-app destinations, the active one listed first.
+	const addAppActions = (preferred: SaveDestination) => {
+		const actions: SaveDestination[] = preferred === 'craft' ? ['craft', 'obsidian'] : ['obsidian', 'craft'];
+		for (const action of actions) {
+			if (action === 'craft' && !craftAvailable) continue;
+			addSecondaryAction(
+				secondaryActions,
+				action === 'craft' ? 'addToCraft' : 'addToObsidian',
+				action === 'craft' ? () => handleClipCraft() : () => handleClipObsidian()
+			);
+		}
+	};
+
+	const setAppMainAction = (preferred: SaveDestination) => {
+		if (preferred === 'craft') {
+			mainButton.textContent = getMessage('addToCraft');
+			mainButton.onclick = () => handleClipCraft();
+			addSecondaryAction(secondaryActions, 'addToObsidian', () => handleClipObsidian());
+		} else {
+			mainButton.textContent = getMessage('addToObsidian');
+			mainButton.onclick = () => handleClipObsidian();
+			if (craftAvailable) {
+				addSecondaryAction(secondaryActions, 'addToCraft', () => handleClipCraft());
+			}
+		}
+	};
+
 	// Set up actions based on saved behavior
 	switch (loadedSettings.saveBehavior) {
 		case 'copyToClipboard':
 			mainButton.textContent = getMessage('copyToClipboard');
 			mainButton.onclick = () => copyContent();
-			// Add direct actions to secondary
-			addSecondaryAction(secondaryActions, 'addToObsidian', () => handleClipObsidian());
+			addAppActions(destination);
 			addSecondaryAction(secondaryActions, 'saveFile', handleSaveToDownloads);
 			break;
 		case 'saveFile':
 			mainButton.textContent = getMessage('saveFile');
 			mainButton.onclick = () => handleSaveToDownloads();
-			// Add direct actions to secondary
-			addSecondaryAction(secondaryActions, 'addToObsidian', () => handleClipObsidian());
+			addAppActions(destination);
 			addSecondaryAction(secondaryActions, 'copyToClipboard', copyContent);
 			break;
-		default: // 'addToObsidian'
-			mainButton.textContent = getMessage('addToObsidian');
-			mainButton.onclick = () => handleClipObsidian();
-			// Add direct actions to secondary
+		default: // 'addToObsidian' and 'addToCraft'
+			setAppMainAction(destination);
 			addSecondaryAction(secondaryActions, 'copyToClipboard', copyContent);
 			addSecondaryAction(secondaryActions, 'saveFile', handleSaveToDownloads);
 	}
@@ -1326,15 +1370,7 @@ async function handleClipObsidian(): Promise<void> {
 	}
 
 	try {
-		// Handle interpreter if needed
-		if (generalSettings.interpreterEnabled && interpretBtn && collectPromptVariables(currentTemplate).length > 0) {
-			if (interpretBtn.classList.contains('processing')) {
-				await waitForInterpreter(interpretBtn);
-			} else if (!interpretBtn.classList.contains('done')) {
-				interpretBtn.click();
-				await waitForInterpreter(interpretBtn);
-			}
-		}
+		await runInterpreterIfNeeded(interpretBtn);
 
 		// Gather content
 		const properties = getPropertiesFromDOM();
@@ -1363,6 +1399,187 @@ async function handleClipObsidian(): Promise<void> {
 		showError('failedToSaveFile');
 		throw error;
 	}
+}
+
+// Run the interpreter if the template has prompt variables and the user has
+// not run it yet. Shared by the Obsidian and Craft clip handlers.
+async function runInterpreterIfNeeded(interpretBtn: HTMLButtonElement | null): Promise<void> {
+	if (!currentTemplate) return;
+	if (generalSettings.interpreterEnabled && interpretBtn && collectPromptVariables(currentTemplate).length > 0) {
+		if (interpretBtn.classList.contains('processing')) {
+			await waitForInterpreter(interpretBtn);
+		} else if (!interpretBtn.classList.contains('done')) {
+			interpretBtn.click();
+			await waitForInterpreter(interpretBtn);
+		}
+	}
+}
+
+async function handleClipCraft(): Promise<void> {
+	if (!currentTemplate) return;
+
+	const noteContentField = document.getElementById('note-content-field') as HTMLTextAreaElement;
+	const noteNameField = document.getElementById('note-name-field') as HTMLTextAreaElement;
+	const interpretBtn = document.getElementById('interpret-btn') as HTMLButtonElement;
+
+	if (!noteContentField) {
+		showError('Some required fields are missing. Please try reloading the extension.');
+		return;
+	}
+
+	if (!loadedSettings.craft.apiUrl) {
+		showError('craftNotConfigured');
+		return;
+	}
+
+	const clipButton = document.getElementById('clip-btn');
+	const originalButtonText = clipButton?.textContent || '';
+
+	try {
+		await runInterpreterIfNeeded(interpretBtn);
+
+		const properties = getPropertiesFromDOM();
+		const title = noteNameField?.value?.trim() || document.title || 'Untitled clip';
+		const header = await renderCraftHeader();
+		const folderId = getSelectedCraftFolderId();
+		const tabInfo = await getCurrentTabInfo();
+
+		const result = await saveToCraft({
+			title,
+			body: noteContentField.value,
+			properties,
+			folderId,
+			craft: loadedSettings.craft,
+			header,
+			sourceUrl: tabInfo.url,
+			vault: getCraftVaultHint()
+		});
+
+		const folderLabel = getCraftFolderLabel(folderId, craftFolderOptions, getMessage('craftFolderUnsorted'));
+		await incrementStat('addToCraft', '', folderLabel, tabInfo.url, tabInfo.title);
+		await setLastCraftFolderId(folderId);
+
+		if (clipButton) {
+			clipButton.textContent = getMessage('savedToCraft');
+		}
+
+		// Mirror the Obsidian "open the note after saving" behavior, which
+		// silentOpen suppresses.
+		if (!generalSettings.silentOpen && result.clickableLink) {
+			window.open(result.clickableLink, '_blank');
+		}
+
+		if (!isSidePanel) {
+			setTimeout(() => window.close(), 500);
+		}
+	} catch (error) {
+		console.error('Error in handleClipCraft:', error);
+		showError('failedToSaveToCraft');
+		if (clipButton && originalButtonText) {
+			clipButton.textContent = originalButtonText;
+		}
+		throw error;
+	}
+}
+
+/** Render the custom Craft header with the page variables; '' = built-in. */
+async function renderCraftHeader(): Promise<string> {
+	const format = loadedSettings.craft.headerFormat?.trim();
+	if (!format || !currentTabId) return '';
+
+	const currentUrl = (await getTabInfo(currentTabId)).url || '';
+	return memoizedCompileTemplate(currentTabId, format, currentVariables, currentUrl);
+}
+
+function getSelectedCraftFolderId(): string {
+	const select = document.getElementById('craft-folder-select') as HTMLSelectElement | null;
+	return select?.value || UNSORTED_FOLDER_ID;
+}
+
+/** Best-effort vault for obsidian:// links generated out of [[wiki links]]. */
+function getCraftVaultHint(): string {
+	const vaultDropdown = document.getElementById('vault-select') as HTMLSelectElement | null;
+	return currentTemplate?.vault
+		|| vaultDropdown?.value
+		|| lastSelectedVault
+		|| loadedSettings?.vaults?.[0]
+		|| '';
+}
+
+/**
+ * Show the Craft folder picker instead of the vault/path row when the current
+ * clip resolves to the Craft destination, and keep the main button in sync
+ * with the template's destination.
+ */
+function updateCraftDestinationUI(destination: SaveDestination): void {
+	const folderContainer = document.getElementById('craft-folder-container');
+	const vaultContainer = document.getElementById('vault-container');
+	const pathField = document.getElementById('path-name-field') as HTMLInputElement | null;
+	const isCraft = destination === 'craft';
+
+	if (folderContainer) {
+		folderContainer.style.display = isCraft ? 'block' : 'none';
+	}
+
+	if (isCraft) {
+		if (vaultContainer) vaultContainer.style.display = 'none';
+		if (pathField) pathField.style.display = 'none';
+		void ensureCraftFolderOptions();
+	} else if (currentTemplate) {
+		const isDailyNote = currentTemplate.behavior === 'append-daily' || currentTemplate.behavior === 'prepend-daily';
+		if (pathField && !isDailyNote) pathField.style.display = '';
+		if (vaultContainer && loadedSettings?.vaults?.length) vaultContainer.style.display = 'block';
+	}
+}
+
+async function ensureCraftFolderOptions(): Promise<void> {
+	const select = document.getElementById('craft-folder-select') as HTMLSelectElement | null;
+	if (!select) return;
+
+	if (!select.dataset.bound) {
+		select.dataset.bound = 'true';
+		select.addEventListener('change', () => {
+			lastCraftFolderId = select.value;
+			void setLastCraftFolderId(select.value);
+		});
+	}
+
+	const unsortedLabel = getMessage('craftFolderUnsorted');
+
+	if (!craftFolderOptions.length) {
+		// Show something usable immediately, then upgrade once the tree arrives.
+		craftFolderOptions = [{ id: UNSORTED_FOLDER_ID, label: unsortedLabel }];
+		renderCraftFolderOptions(select, unsortedLabel);
+
+		try {
+			lastCraftFolderId = await getLastCraftFolderId();
+			const folders = await loadCraftFolders(false);
+			craftFolderOptions = buildCraftFolderOptions(folders, unsortedLabel);
+		} catch (error) {
+			console.error('Failed to load Craft folders:', error);
+		}
+	}
+
+	renderCraftFolderOptions(select, unsortedLabel);
+}
+
+function renderCraftFolderOptions(select: HTMLSelectElement, unsortedLabel: string): void {
+	const previous = select.value;
+	select.textContent = '';
+
+	for (const option of craftFolderOptions) {
+		const element = document.createElement('option');
+		element.value = option.id;
+		element.textContent = option.label;
+		select.appendChild(element);
+	}
+
+	const desired = craftFolderOptions.some(option => option.id === previous)
+		? previous
+		: coerceCraftFolderId(lastCraftFolderId || loadedSettings?.craft?.defaultFolderId, craftFolderOptions);
+
+	select.value = coerceCraftFolderId(desired, craftFolderOptions);
+	select.title = getCraftFolderLabel(select.value, craftFolderOptions, unsortedLabel);
 }
 
 function addSecondaryAction(container: Element, actionType: string, handler: () => void) {
@@ -1397,6 +1614,7 @@ function getActionIcon(actionType: string): string {
 		case 'copyToClipboard': return 'copy';
 		case 'saveFile': return 'file-down';
 		case 'addToObsidian': return 'pen-line';
+		case 'addToCraft': return 'scissors-line-dashed';
 		default: return 'plus';
 	}
 }

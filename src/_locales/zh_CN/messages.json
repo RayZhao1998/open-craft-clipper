@@ -17,6 +17,9 @@
 	"addProviderTitle": {
 		"message": "添加提供商"
 	},
+	"addToCraft": {
+		"message": "添加到 Craft"
+	},
 	"addToObsidian": {
 		"message": "添加到 Obsidian"
 	},
@@ -144,6 +147,98 @@
 	"copyToClipboard": {
 		"message": "复制到剪贴板"
 	},
+	"craft": {
+		"message": "Craft"
+	},
+	"craftApiLink": {
+		"message": "Craft Space API 链接"
+	},
+	"craftApiLinkCleared": {
+		"message": "已清除 Craft API 链接。"
+	},
+	"craftApiLinkDescription": {
+		"message": "粘贴 Craft 中获取的链接（Space 设置 → Space API），或只粘贴链接 id。格式：https://connect.craft.do/links/…/api/v1"
+	},
+	"craftApiLinkWarning": {
+		"message": "Space API 链接是你空间的唯一凭证——拿到它的人可以读写其中的所有文档。请勿截图或分享包含它的设置文件。"
+	},
+	"craftBehaviorLocked": {
+		"message": "Craft 只支持新建文档——追加与日记功能仅限 Obsidian。"
+	},
+	"craftConnected": {
+		"message": "已连接到 $1",
+		"placeholders": {
+			"1": {
+				"content": "$1"
+			}
+		}
+	},
+	"craftConnectionHeading": {
+		"message": "连接"
+	},
+	"craftDefaultFolder": {
+		"message": "默认文件夹"
+	},
+	"craftDefaultFolderDescription": {
+		"message": "新建文档的保存位置，可在保存时临时切换。"
+	},
+	"craftFolderUnsorted": {
+		"message": "未分类"
+	},
+	"craftFormatHeading": {
+		"message": "文档格式"
+	},
+	"craftHeaderDescription": {
+		"message": "可选，替换内置的头部 callout。使用与笔记内容相同的模板语法，留空则使用默认头部。"
+	},
+	"craftHeaderTitle": {
+		"message": "自定义头部"
+	},
+	"craftNotConfigured": {
+		"message": "请先在设置中填写 Craft Space API 链接。"
+	},
+	"craftPropertiesAsCallouts": {
+		"message": "转为 callout"
+	},
+	"craftPropertiesAsDescription": {
+		"message": "Craft 不支持 YAML frontmatter。可将模板属性渲染为文档顶部的 callout，或直接丢弃。"
+	},
+	"craftPropertiesAsStrip": {
+		"message": "直接丢弃"
+	},
+	"craftPropertiesAsTitle": {
+		"message": "属性"
+	},
+	"craftRefreshFolders": {
+		"message": "重新加载文件夹"
+	},
+	"craftTagsDescription": {
+		"message": "插入文档头部的标签，支持模板变量，例如 {{tags}}。"
+	},
+	"craftTagsTitle": {
+		"message": "头部标签"
+	},
+	"craftTestConnection": {
+		"message": "测试连接"
+	},
+	"craftTestingConnection": {
+		"message": "测试中…"
+	},
+	"craftUnnamedSpace": {
+		"message": "你的空间"
+	},
+	"craftWikilinksDescription": {
+		"message": "Craft 没有反向链接，[[wiki 链接]] 没有可指向的目标。"
+	},
+	"craftWikilinksLink": {
+		"message": "链接到 Obsidian"
+	},
+	"craftWikilinksPlain": {
+		"message": "纯文本"
+	},
+	"craftWikilinksTitle": {
+		"message": "Wiki 链接"
+	},
 	"createNewNote": {
 		"message": "创建新笔记"
 	},
@@ -179,6 +274,9 @@
 	},
 	"deleteProviderConfirm": {
 		"message": "您确定要删除此提供商吗？"
+	},
+	"destinationAutomatic": {
+		"message": "自动"
 	},
 	"disableHighlighter": {
 		"message": "禁用高亮"
@@ -223,6 +321,12 @@
 	},
 	"embedded": {
 		"message": "嵌入式"
+	},
+	"enableCraft": {
+		"message": "保存到 Craft"
+	},
+	"enableCraftDescription": {
+		"message": "使用 <a href=\"https://docs.craft.do/space-api\" target=\"_blank\">Craft Space API</a> 将网页剪辑到 Craft 空间。模板、变量和高亮用法不变，仅保存目标不同。"
 	},
 	"enableHighlighterDescription": {
 		"message": "在网页上高亮内容并保存到 Obsidian。"
@@ -332,6 +436,9 @@
 	},
 	"failedToSaveProvider": {
 		"message": "无法保存提供商。请再试一次。"
+	},
+	"failedToSaveToCraft": {
+		"message": "保存到 Craft 失败。"
 	},
 	"feedback": {
 		"message": "反馈"
@@ -580,6 +687,9 @@
 	},
 	"openHighlights": {
 		"message": "打开高亮"
+	},
+	"openInCraft": {
+		"message": "在 Craft 中打开"
 	},
 	"openReader": {
 		"message": "打开阅读器"
@@ -920,11 +1030,14 @@
 	"saveBehaviorLabel": {
 		"message": "保存行为"
 	},
+	"saveFile": {
+		"message": "保存文件..."
+	},
 	"saved": {
 		"message": "已保存"
 	},
-	"saveFile": {
-		"message": "保存文件..."
+	"savedToCraft": {
+		"message": "已保存到 Craft"
 	},
 	"searchHighlightsPlaceholder": {
 		"message": "搜索高亮…"
@@ -1018,6 +1131,12 @@
 	},
 	"templateCopyError": {
 		"message": "无法将模板 JSON 复制到剪贴板"
+	},
+	"templateDestination": {
+		"message": "保存到"
+	},
+	"templateDestinationDescription": {
+		"message": "使用此模板剪辑的内容保存到 Craft 而非 Obsidian。选择“自动”则遵循默认保存行为。"
 	},
 	"templateErrorCount": {
 		"message": "你的模板中有一个错误。"

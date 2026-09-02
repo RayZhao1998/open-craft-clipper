@@ -9,6 +9,7 @@ import { createDefaultTemplate, getTemplates, saveTemplateSettings } from '../ma
 import { updateTemplateList, showTemplateEditor } from '../managers/template-ui';
 import { exportAllSettings, importAllSettings } from '../utils/import-export';
 import { Settings, Template } from '../types/types';
+import { SaveBehavior } from '../utils/storage-utils';
 import { exportHighlights, importHighlights } from './highlights-manager';
 import { getMessage, setupLanguageAndDirection } from '../utils/i18n';
 import { debounce } from '../utils/debounce';
@@ -365,9 +366,15 @@ function initializeSaveBehaviorDropdown(): void {
     const dropdown = document.getElementById('save-behavior-dropdown') as HTMLSelectElement;
     if (!dropdown) return;
 
+    // Only offer Craft once it is enabled and configured below.
+    const craftOption = dropdown.querySelector('option[value="addToCraft"]') as HTMLOptionElement | null;
+    if (craftOption) {
+        craftOption.hidden = !generalSettings.craft.enabled;
+    }
+
     dropdown.value = generalSettings.saveBehavior;
     dropdown.addEventListener('change', () => {
-        const newValue = dropdown.value as 'addToObsidian' | 'copyToClipboard' | 'saveFile';
+        const newValue = dropdown.value as SaveBehavior;
         saveSettings({ saveBehavior: newValue });
     });
 }

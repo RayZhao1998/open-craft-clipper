@@ -166,6 +166,16 @@
 			min-width: 100px;
 			cursor: default;
 		}
+		#craft-folder-container {
+			flex-grow: 1;
+			min-width: 0;
+		}
+		#craft-folder-select {
+			font-weight: var(--clipper-select-font-weight);
+			min-width: 100px;
+			max-width: 100%;
+			cursor: default;
+		}
 	}
 }
 
