@@ -104,7 +104,10 @@ let toastTimer: number | null = null;
 // --- Text extraction -----------------------------------------------------
 
 function isTranscriptBlock(el: HTMLElement): boolean {
-	return el.classList.contains('transcript-segment') || Boolean(el.closest('.transcript'));
+	// Only the spoken lines inside a caption row. Chapter headings live in the
+	// same .transcript container but are ordinary blocks, and the caption styling
+	// (indent under the timestamp) must not be applied to them.
+	return Boolean(el.closest('.transcript-segment'));
 }
 
 /** Inner text with <br> preserved as newlines; chrome and code are left out. */
@@ -283,27 +286,49 @@ function createTranslationNode(text: string, targetLang: string, block: Translat
 	return node;
 }
 
+function insertTranslationNode(block: TranslatableBlock, node: HTMLElement): void {
+	if (block.el.matches(CONTAINED_SELECTOR)) {
+		// Inside the cell: a sibling of a cell would break the row.
+		block.el.appendChild(node);
+	} else {
+		// Right after its source — including caption lines, whose translation
+		// stays inside the segment row that the player measures.
+		block.el.insertAdjacentElement('afterend', node);
+	}
+}
+
+/** A shimmering stand-in while the translation of this block is in flight. */
+function markLoading(block: TranslatableBlock): void {
+	if (!docRef || block.node) return;
+
+	const node = createTranslationNode('', settings?.targetLang || '', block);
+	node.classList.add('is-loading');
+	node.setAttribute('aria-hidden', 'true');
+	block.node = node;
+	insertTranslationNode(block, node);
+}
+
+function discardPlaceholder(block: TranslatableBlock): void {
+	block.node?.remove();
+	block.node = undefined;
+}
+
 function attachTranslation(block: TranslatableBlock, text: string): void {
 	if (!docRef) return;
 
+	block.el.setAttribute('data-reader-translate-source', 'done');
+
 	if (block.node) {
+		// The placeholder is already in the right place; it becomes the answer.
+		block.node.classList.remove('is-loading');
+		block.node.removeAttribute('aria-hidden');
 		block.node.textContent = text;
 		return;
 	}
 
 	const node = createTranslationNode(text, settings?.targetLang || '', block);
 	block.node = node;
-	block.el.setAttribute('data-reader-translate-source', 'done');
-
-	if (block.el.matches(CONTAINED_SELECTOR)) {
-		block.el.appendChild(node);
-	} else if (block.el.tagName === 'SPAN') {
-		// A caption line: inside its segment row, after the original text. Never
-		// beside the segment itself — the player measures those rows.
-		block.el.insertAdjacentElement('afterend', node);
-	} else {
-		block.el.insertAdjacentElement('afterend', node);
-	}
+	insertTranslationNode(block, node);
 }
 
 function removeTranslations(doc: Document): void {
@@ -313,6 +338,8 @@ function removeTranslations(doc: Document): void {
 			el.setAttribute('data-reader-translate-source', 'pending');
 		}
 	});
+	// Every node we were holding is detached now, placeholders included.
+	for (const block of discovered) block.node = undefined;
 }
 
 function setBusy(busy: boolean): void {
@@ -392,13 +419,18 @@ function pump(): void {
 
 async function runBatch(batch: Batch): Promise<void> {
 	const blocks = batch.blocks;
-	const release = () => blocks.forEach(block => { if (block.state === 'queued') block.state = 'new'; });
+	const release = () => blocks.forEach(block => {
+		if (block.state === 'queued') block.state = 'new';
+		discardPlaceholder(block);
+	});
 	if (!settings || !docRef || !active) {
 		release();
 		return;
 	}
 
 	const { targetLang, prompt } = settings;
+	// Show where the request is working, not just that something is happening.
+	blocks.forEach(markLoading);
 
 	try {
 		const translations = await requestTranslations(batch.texts, { targetLang, prompt });
@@ -426,9 +458,11 @@ async function runBatch(batch: Batch): Promise<void> {
 				);
 			} else if (block.attempts >= MAX_ATTEMPTS) {
 				block.state = 'skipped';
+				discardPlaceholder(block);
 				block.el.setAttribute('data-reader-translate-source', 'skipped');
 			} else {
 				block.state = 'new';
+				discardPlaceholder(block);
 			}
 		});
 	} catch (error: unknown) {
@@ -438,6 +472,7 @@ async function runBatch(batch: Batch): Promise<void> {
 
 		blocks.forEach(block => {
 			block.state = block.attempts >= MAX_ATTEMPTS ? 'error' : 'new';
+			discardPlaceholder(block);
 		});
 
 		// Stop rather than keep hammering a broken (or unbilled) endpoint.

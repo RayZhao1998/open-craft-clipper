@@ -29,7 +29,7 @@ Under **Immersive translation** you can choose the target language (**Translate 
 
 ## Translate an article
 
-Open an article in Reader (the **Read** tab in the extension popup, or the Reader button on a page) and press **Translate** in the Reader toolbar. Translations appear under each paragraph as you scroll.
+Open an article in Reader (the **Read** tab in the extension popup, or the Reader button on a page) and press **Translate** in the Reader toolbar. Translations appear under each paragraph as you scroll; a paragraph whose translation is on its way shows a faint placeholder line in its place.
 
 - **Original + translation** (default) keeps the original and adds the translation below it.
 - **Translation only** hides the original once a paragraph has been translated, so the page never blanks out mid-request. Table cells and definition terms stay bilingual, because their translation lives inside them.
@@ -60,6 +60,26 @@ Captions are the most expensive part of a video, so they are optional: **Transla
 | After consecutive failures | 3 — translating stops and the error is shown |
 | Code, quotes, numbers | never sent |
 | Text already in the target language | never sent |
+
+## Extra request parameters
+
+If the model needs a parameter that has no field of its own, put it in **Settings → AI → Extra request parameters** as a JSON object. It is merged into every request body:
+
+```json
+{"thinking_token_budget": 0}
+```
+
+Common recipes for models that "think" before answering:
+
+| Endpoint | Parameter |
+| --- | --- |
+| Qwen on Aliyun-style compatible endpoints | `{"thinking_token_budget": 0}` or `{"enable_thinking": false}` |
+| Qwen served by vLLM / SGLang | `{"chat_template_kwargs": {"enable_thinking": false}}` |
+| Gemini | `{"generationConfig": {"thinkingConfig": {"thinkingBudget": 0}}}` |
+| Ollama | `{"think": false}` |
+| OpenAI reasoning models | `{"reasoning_effort": "low"}` (there is no off switch) |
+
+The object can add parameters; it cannot replace `model`, `messages`, `stream` or the prompt we built. If a gateway rejects an unknown parameter with HTTP 400, the request is retried once without it, so a wrong field costs one failed call rather than breaking translation. Nothing here is optional in a cost sense: a thinking model that spends 2,000 tokens reasoning before answering a 40-token paragraph is billed for all of it — turning thinking off is the single largest saving available on these models.
 
 ## Custom translation prompt
 

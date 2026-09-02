@@ -48,12 +48,20 @@ article {
 		}
 	}
 
-	// Transcript lines: line the translation up under the spoken text, not the
-	// timestamp column, and keep it tighter than article paragraphs.
-	.transcript .reader-translation-segment {
+	// Caption rows are laid out as flex (timestamp | spoken text). The
+	// translation must not become a third column — that squeezes the original
+	// into a narrow strip — so the row is allowed to wrap and the translation
+	// takes a full line of its own, aligned under the sentence it translates.
+	.transcript-segment {
+		flex-wrap: wrap;
+		row-gap: 0;
+	}
+
+	.transcript-segment > .reader-translation {
+		flex: 0 0 100%;
 		display: block;
-		margin: -0.35em 0 0.7em calc(var(--timestamp-width, 4.5em) + 1em);
-		padding-left: 0.5em;
+		margin: -0.05em 0 0.55em calc(var(--timestamp-width, 5em) + 1.5em);
+		padding-left: 0;
 		border-left: 0;
 		font-size: 0.92em;
 	}
@@ -69,10 +77,61 @@ article {
 			font-size: 0.9em;
 		}
 	}
+
+	// In flight: a quiet two-line shimmer under the paragraph being translated,
+	// so the reader can see which part the request is about.
+	.reader-translation.is-loading {
+		border-left: 0;
+		padding-left: 0;
+		margin: 0.1em 0 0.85em;
+
+		&::before,
+		&::after {
+			content: '';
+			display: block;
+			height: 0.78em;
+			border-radius: 3px;
+			background: linear-gradient(
+				90deg,
+				var(--background-modifier-hover) 25%,
+				var(--background-modifier-border) 45%,
+				var(--background-modifier-hover) 65%
+			);
+			background-size: 300% 100%;
+			animation: reader-translate-shimmer 1.5s ease-in-out infinite;
+		}
+
+		&::after {
+			width: 45%;
+			margin-top: 0.35em;
+			animation-delay: 0.12s;
+		}
+	}
+
+	.transcript-segment > .reader-translation.is-loading {
+		margin: 0.15em 0 0.55em calc(var(--timestamp-width, 5em) + 1.5em);
+
+		&::before { height: 0.7em; }
+		&::after { height: 0.7em; margin-top: 0.25em; width: 35%; }
+	}
+}
+
+@keyframes reader-translate-shimmer {
+	0% { background-position: 120% 0; }
+	100% { background-position: -60% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	article .reader-translation.is-loading::before,
+	article .reader-translation.is-loading::after {
+		animation: none;
+		background: var(--background-modifier-hover);
+	}
 }
 
 // "Translation only" mode hides the source once — and only once — it has a
-// translation, so the page never blanks out mid-request.
+// translation, so the page never blanks out mid-request. A placeholder does not
+// count: hiding the source before its answer arrives would blank the page.
 article.reader-translate-replace {
 	> [data-reader-translate-source="done"],
 	[data-reader-translate-source="done"] {

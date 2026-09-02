@@ -16,7 +16,7 @@ const { aiSettings, translateCalls, control } = vi.hoisted(() => ({
 		autoTranslate: true
 	},
 	translateCalls: [] as string[][],
-	control: { fail: false }
+	control: { fail: false, gate: null as Promise<void> | null }
 }));
 
 vi.mock('./storage-utils', () => ({
@@ -31,6 +31,7 @@ vi.mock('./i18n', () => ({
 vi.mock('./ai/messenger', () => ({
 	requestTranslations: vi.fn(async (texts: string[]) => {
 		translateCalls.push(texts);
+		if (control.gate) await control.gate;
 		if (control.fail) throw new Error('429 rate limited');
 		return texts.map(text => `译文:${text}`);
 	}),
@@ -95,6 +96,7 @@ beforeEach(() => {
 	FakeIntersectionObserver.instances = [];
 	translateCalls.length = 0;
 	control.fail = false;
+	control.gate = null;
 	Object.defineProperty(window, 'innerHeight', { value: 400, configurable: true });
 	Object.defineProperty(window, 'scrollY', { value: 0, writable: true, configurable: true });
 });
@@ -340,6 +342,30 @@ describe('ReaderTranslation', () => {
 		expect(description.nextElementSibling?.className).toContain('reader-translation');
 
 		aiSettings.translateTranscript = true;
+	});
+
+	test('shows a placeholder in the text while the request is in flight', async () => {
+		let releaseGate = () => {};
+		control.gate = new Promise<void>(resolve => { releaseGate = resolve; });
+
+		const article = buildArticle(2);
+		Array.from(article.querySelectorAll('p')).forEach((p, i) => placeAt(p as HTMLElement, i * 100));
+
+		await ReaderTranslation.attach(document);
+		await vi.advanceTimersByTimeAsync(250);
+
+		const placeholders = article.querySelectorAll('.reader-translation.is-loading');
+		expect(placeholders.length).toBe(2);
+		expect(placeholders[0].getAttribute('aria-hidden')).toBe('true');
+		// The source is still there, unmarked: nothing is claimed until it arrives.
+		expect(article.querySelector('p')?.getAttribute('data-reader-translate-source')).toBe('pending');
+
+		releaseGate();
+		await settle();
+
+		expect(article.querySelectorAll('.reader-translation.is-loading').length).toBe(0);
+		expect(article.querySelectorAll('.reader-translation').length).toBe(2);
+		expect(article.querySelector('.reader-translation')?.textContent).toContain('译文:');
 	});
 
 	test('detach() cleans up for the next article', async () => {
