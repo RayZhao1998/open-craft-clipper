@@ -5,7 +5,7 @@
 import { generalSettings, saveSettings } from '../utils/storage-utils';
 import type { AiSettings } from '../types/types';
 import { LANGUAGE_OPTIONS } from '../utils/ai/translate';
-import { maskAiSecrets, normalizeAiBaseUrl } from '../utils/ai/chat';
+import { maskAiSecrets, normalizeAiBaseUrl, parseAiExtraParams } from '../utils/ai/chat';
 import { isLocalEndpoint } from '../utils/ai/config';
 import { requestAiTest } from '../utils/ai/messenger';
 import { getMessage } from '../utils/i18n';
@@ -83,17 +83,38 @@ function initializeEndpointFields(): void {
 			hideStatus();
 		});
 	}
+
+	const extraParams = document.getElementById('ai-extra-params') as HTMLTextAreaElement;
+	if (extraParams) {
+		extraParams.value = generalSettings.ai.extraParams || '';
+		extraParams.addEventListener('change', () => {
+			const value = extraParams.value.trim();
+			extraParams.value = value;
+			try {
+				parseAiExtraParams(value);
+			} catch (error) {
+				// Keep the text: the user is mid-edit, and the status line says what
+				// is wrong with it.
+				showStatus('error', error instanceof Error ? error.message : String(error));
+				return;
+			}
+			setAiSetting('extraParams', value);
+			hideStatus();
+		});
+	}
 }
 
-function readDraftEndpoint(): { baseUrl: string; apiKey: string; model: string } {
+function readDraftEndpoint(): { baseUrl: string; apiKey: string; model: string; extraParams: string } {
 	const baseUrl = document.getElementById('ai-base-url') as HTMLInputElement | null;
 	const apiKey = document.getElementById('ai-api-key') as HTMLInputElement | null;
 	const model = document.getElementById('ai-model') as HTMLInputElement | null;
+	const extraParams = document.getElementById('ai-extra-params') as HTMLTextAreaElement | null;
 
 	return {
 		baseUrl: (baseUrl?.value || generalSettings.ai.baseUrl).trim(),
 		apiKey: (apiKey?.value || generalSettings.ai.apiKey).trim(),
-		model: (model?.value || generalSettings.ai.model).trim()
+		model: (model?.value || generalSettings.ai.model).trim(),
+		extraParams: (extraParams?.value ?? generalSettings.ai.extraParams).trim()
 	};
 }
 
@@ -119,6 +140,14 @@ async function testConnection(): Promise<void> {
 		showStatus('error', getMessage('aiMissingApiKey') || 'Set an API key first.');
 		return;
 	}
+	// Malformed extras would fail at the endpoint with a message that does not
+	// point back at the field, so check them here where we can name the field.
+	try {
+		parseAiExtraParams(draft.extraParams);
+	} catch (error) {
+		showStatus('error', error instanceof Error ? error.message : String(error));
+		return;
+	}
 
 	const originalLabel = btn?.textContent || '';
 	if (btn) {
@@ -128,10 +157,21 @@ async function testConnection(): Promise<void> {
 	showStatus('info', getMessage('aiTestingConnection') || 'Testing…');
 
 	try {
-		const reply = await requestAiTest({ baseUrl, apiKey: draft.apiKey, model: draft.model });
+		const reply = await requestAiTest({
+			baseUrl,
+			apiKey: draft.apiKey,
+			model: draft.model,
+			extraParams: draft.extraParams
+		});
 		await saveSettings({
 			...generalSettings,
-			ai: { ...generalSettings.ai, baseUrl, apiKey: draft.apiKey, model: draft.model }
+			ai: {
+				...generalSettings.ai,
+				baseUrl,
+				apiKey: draft.apiKey,
+				model: draft.model,
+				extraParams: draft.extraParams
+			}
 		});
 		showStatus('success', getMessage('aiTestSuccess', maskAiSecrets(reply, draft.apiKey)));
 	} catch (error: unknown) {

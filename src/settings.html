@@ -314,6 +314,13 @@
 										<input type="text" id="ai-model" placeholder="gpt-4o-mini" autocomplete="off" spellcheck="false" />
 									</div>
 									<div class="setting-item">
+										<label for="ai-extra-params" data-i18n="aiExtraParams">Extra request parameters</label>
+										<div class="setting-item-description" data-i18n="aiExtraParamsDescription">
+											Advanced. Optional JSON merged into every request, for parameters an endpoint needs that we have no field for: {"thinking_token_budget": 0} or {"chat_template_kwargs": {"enable_thinking": false}} stops a "thinking" model from spending the whole answer. It cannot change the model, the messages or streaming, and a gateway that rejects the parameter is retried without it.
+										</div>
+										<textarea id="ai-extra-params" rows="3" spellcheck="false" placeholder='{"thinking_token_budget": 0}'></textarea>
+									</div>
+									<div class="setting-item">
 										<div id="ai-test-row">
 											<button type="button" id="ai-test-btn" class="btn" data-i18n="aiTestConnection">Test connection</button>
 											<div id="ai-status" class="ai-connection-status" style="display: none;"></div>

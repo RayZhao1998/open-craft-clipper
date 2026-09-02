@@ -59,6 +59,12 @@
 	"aiEndpointHeading": {
 		"message": "模型端点"
 	},
+	"aiExtraParams": {
+		"message": "额外请求参数（高级）"
+	},
+	"aiExtraParamsDescription": {
+		"message": "可选。这里的 JSON 会被合并进请求体，用来补我们没有输入框的参数 —— 例如 {\"thinking_token_budget\": 0}，或 {\"chat_template_kwargs\": {\"enable_thinking\": false}} 用来关闭模型的思考过程。它不能覆盖 model、messages 和 stream。若网关拒绝该参数，会自动去掉它重试一次。"
+	},
 	"aiKeyWarning": {
 		"message": "API 密钥保存在浏览器中，并会随扩展设置一起同步。能访问这些设置的人都能使用它——请为你接入的服务方设置消费上限。"
 	},

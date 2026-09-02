@@ -1,7 +1,7 @@
 // Resolving "can we call an LLM right now?" from settings, in one place, so the
 // background, the settings page and Reader never disagree.
 
-import { AiChatConfig } from './chat';
+import { AiChatConfig, parseAiExtraParams } from './chat';
 import type { Settings } from '../../types/types';
 
 export interface AiStatus {
@@ -18,7 +18,7 @@ export function resolveAiConfig(settings: Settings | undefined): AiChatConfig | 
 	const model = (ai.model || '').trim();
 	if (!baseUrl || !model) return null;
 	// Ollama and friends run without a key; everything else is checked by the API.
-	return { baseUrl, apiKey: (ai.apiKey || '').trim(), model };
+	return { baseUrl, apiKey: (ai.apiKey || '').trim(), model, extraParams: (ai.extraParams || '').trim() };
 }
 
 export function getAiStatus(settings: Settings | undefined): AiStatus {
@@ -33,6 +33,13 @@ export function getAiStatus(settings: Settings | undefined): AiStatus {
 	}
 	if (!(settings.ai.apiKey || '').trim() && !isLocalEndpoint(settings.ai.baseUrl)) {
 		return { configured: false, missing: 'apiKey', reason: 'No AI API key is set.' };
+	}
+	// Catch a malformed extras field here, so Reader reports it at once instead of
+	// after a request that could never have worked.
+	try {
+		parseAiExtraParams(settings.ai.extraParams);
+	} catch (error: unknown) {
+		return { configured: false, reason: error instanceof Error ? error.message : String(error) };
 	}
 	return { configured: true };
 }

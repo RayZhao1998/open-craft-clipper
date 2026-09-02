@@ -1,10 +1,12 @@
 import { describe, test, expect, vi, afterEach } from 'vitest';
 import {
+	applyExtraParams,
 	buildChatRequest,
 	chatCompletion,
 	estimateTokens,
 	maskAiSecrets,
 	normalizeAiBaseUrl,
+	parseAiExtraParams,
 	parseChatResponse,
 	pingAiModel,
 	resolveEndpoint
@@ -160,6 +162,49 @@ describe('estimateTokens', () => {
 	});
 });
 
+describe('parseAiExtraParams', () => {
+	test('nothing typed adds nothing', () => {
+		expect(parseAiExtraParams('')).toEqual({});
+		expect(parseAiExtraParams(undefined)).toEqual({});
+	});
+
+	test('accepts an object and refuses anything else', () => {
+		expect(parseAiExtraParams('{"thinking_token_budget": 0}')).toEqual({ thinking_token_budget: 0 });
+		expect(() => parseAiExtraParams('thinking_token_budget=0')).toThrow(/not valid JSON/);
+		expect(() => parseAiExtraParams('[1,2]')).toThrow(/must be a JSON object/);
+	});
+
+	test('cannot override the prompt or the response shape', () => {
+		expect(() => parseAiExtraParams('{"messages":[]}')).toThrow(/cannot override "messages"/);
+		expect(() => parseAiExtraParams('{"stream":true}')).toThrow(/cannot override "stream"/);
+	});
+});
+
+describe('applyExtraParams', () => {
+	const messages = [{ role: 'user' as const, content: 'hi' }];
+
+	test('adds parameters without touching the prompt', () => {
+		const request = buildChatRequest('https://api.openai.com/v1', 'sk-1', 'gpt', messages);
+		const merged = applyExtraParams(request, '{"thinking_token_budget":0,"chat_template_kwargs":{"enable_thinking":false}}');
+
+		expect(merged.body.thinking_token_budget).toBe(0);
+		expect(merged.body.chat_template_kwargs).toEqual({ enable_thinking: false });
+		expect(merged.body.messages).toEqual(request.body.messages);
+		// The original request object is left alone.
+		expect(request.body.thinking_token_budget).toBeUndefined();
+	});
+
+	test('a shared object is merged, not replaced', () => {
+		const request = buildChatRequest('https://generativelanguage.googleapis.com', 'g-key', 'gemini', messages, 500);
+		const merged = applyExtraParams(request, '{"generationConfig":{"thinkingConfig":{"thinkingBudget":0}}}');
+
+		expect(merged.body.generationConfig).toEqual({
+			maxOutputTokens: 500,
+			thinkingConfig: { thinkingBudget: 0 }
+		});
+	});
+});
+
 describe('chatCompletion', () => {
 	const config = { baseUrl: 'https://api.openai.com/v1', apiKey: 'sk-secret123456', model: 'mini' };
 	const messages = [{ role: 'user' as const, content: 'hi' }];
@@ -210,6 +255,30 @@ describe('chatCompletion', () => {
 
 		await expect(chatCompletion(config, messages)).rejects.toThrow(/not JSON/);
 		await expect(chatCompletion(config, messages)).rejects.not.toThrow(/sk-secret123456/);
+	});
+
+	test('retries without the extra parameters when the gateway rejects them', async () => {
+		const fetchMock = vi.fn()
+			.mockImplementationOnce(async () => new Response('{"error":"Unexpected parameter: thinking_token_budget"}', { status: 400 }))
+			.mockImplementationOnce(async () => jsonResponse({ choices: [{ message: { content: 'OK' }, finish_reason: 'stop' }] }));
+		vi.stubGlobal('fetch', fetchMock);
+
+		const result = await chatCompletion({ ...config, extraParams: '{"thinking_token_budget":0}' }, messages);
+
+		expect(result.text).toBe('OK');
+		const first = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
+		const second = JSON.parse((fetchMock.mock.calls[1][1] as RequestInit).body as string);
+		expect(first.thinking_token_budget).toBe(0);
+		expect(second.thinking_token_budget).toBeUndefined();
+	});
+
+	test('refuses to send broken extras', async () => {
+		const fetchMock = vi.fn();
+		vi.stubGlobal('fetch', fetchMock);
+
+		await expect(chatCompletion({ ...config, extraParams: '{"thinking_token_budget"' }, messages))
+			.rejects.toThrow(/not valid JSON/);
+		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
 	test('keeps a cut-off answer when the caller can use partial output', async () => {

@@ -85,6 +85,12 @@ export interface AiSettings {
 	baseUrl: string;
 	apiKey: string;
 	model: string;
+	/**
+	 * Extra JSON merged into every chat request body, for parameters an endpoint
+	 * needs that we do not model — e.g. `{"thinking_token_budget": 0}` or
+	 * `{"chat_template_kwargs": {"enable_thinking": false}}`.
+	 */
+	extraParams: string;
 	/** BCP-47-ish target language for immersive translation, e.g. "zh-CN". */
 	targetLang: string;
 	/** Keep the source paragraph above its translation, or swap it out. */

@@ -64,6 +64,7 @@ export const generalSettings: Settings = {
 		baseUrl: '',
 		apiKey: '',
 		model: '',
+		extraParams: '',
 		targetLang: 'zh-CN',
 		mode: 'bilingual',
 		prompt: '',

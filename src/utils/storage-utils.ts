@@ -19,6 +19,7 @@ export const defaultAiSettings: AiSettings = {
 	baseUrl: '',
 	apiKey: '',
 	model: '',
+	extraParams: '',
 	targetLang: 'zh-CN',
 	mode: 'bilingual',
 	prompt: '',
@@ -106,6 +107,7 @@ interface StorageData {
 		baseUrl?: string;
 		apiKey?: string;
 		model?: string;
+		extraParams?: string;
 		targetLang?: string;
 		mode?: 'bilingual' | 'replacement';
 		prompt?: string;
@@ -170,6 +172,7 @@ function sanitizeAiSettings(stored: StorageData['ai_settings'] | undefined, fall
 		baseUrl: text(stored?.baseUrl, fallback.baseUrl).trim(),
 		apiKey: text(stored?.apiKey, fallback.apiKey).trim(),
 		model: text(stored?.model, fallback.model).trim(),
+		extraParams: text(stored?.extraParams, fallback.extraParams).trim().slice(0, 4000),
 		targetLang: text(stored?.targetLang, fallback.targetLang).trim() || fallback.targetLang,
 		mode: stored?.mode === 'replacement' ? 'replacement' : (stored?.mode === 'bilingual' ? 'bilingual' : fallback.mode),
 		prompt: text(stored?.prompt, fallback.prompt),
@@ -353,6 +356,7 @@ export async function saveSettings(settings?: Partial<Settings>): Promise<void> 
 			baseUrl: generalSettings.ai.baseUrl,
 			apiKey: generalSettings.ai.apiKey,
 			model: generalSettings.ai.model,
+			extraParams: generalSettings.ai.extraParams,
 			targetLang: generalSettings.ai.targetLang,
 			mode: generalSettings.ai.mode,
 			prompt: generalSettings.ai.prompt,

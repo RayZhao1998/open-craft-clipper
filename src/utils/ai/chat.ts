@@ -9,6 +9,8 @@ export interface AiChatConfig {
 	baseUrl: string;
 	apiKey: string;
 	model: string;
+	/** Raw JSON merged into the request body; see parseAiExtraParams. */
+	extraParams?: string;
 }
 
 export interface ChatMessage {
@@ -123,7 +125,7 @@ export function estimateTokens(text: string): number {
 	return Math.ceil(cjk * 1.1 + other / 4);
 }
 
-interface BuiltRequest {
+export interface BuiltRequest {
 	url: string;
 	body: Record<string, unknown>;
 	headers: Record<string, string>;
@@ -319,9 +321,67 @@ function describeHttpError(status: number, body: string, endpoint: string): stri
 	return `HTTP ${status}${detail ? ': ' + detail : ''}`;
 }
 
+/** Keys the extras may not touch: the prompt we built, and the response shape. */
+const FORBIDDEN_EXTRA_KEYS = ['model', 'messages', 'contents', 'prompt', 'input', 'stream'];
+
 /**
- * POST a chat completion and return the assistant text. Retries once without
- * `max_tokens` for gateways that renamed or dropped the parameter.
+ * Endpoints take parameters we cannot know about — `thinking_token_budget`,
+ * `enable_thinking`, `chat_template_kwargs`, vendor-specific routing keys — so
+ * the escape hatch is raw JSON from the settings page. It may add parameters, it
+ * may not replace the prompt we just built or switch on a response shape we
+ * cannot parse.
+ */
+export function parseAiExtraParams(raw?: string): Record<string, unknown> {
+	const text = (raw || '').trim();
+	if (!text) return {};
+
+	const example = 'For example: {"thinking_token_budget": 0}';
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(text);
+	} catch {
+		throw new Error(`Extra request parameters are not valid JSON. ${example}`);
+	}
+
+	if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+		throw new Error(`Extra request parameters must be a JSON object. ${example}`);
+	}
+
+	for (const key of Object.keys(parsed as Record<string, unknown>)) {
+		if (FORBIDDEN_EXTRA_KEYS.includes(key)) {
+			throw new Error(`Extra request parameters cannot override "${key}".`);
+		}
+	}
+
+	return parsed as Record<string, unknown>;
+}
+
+/**
+ * Merge the extras into a request body. Two plain objects under the same key are
+ * merged rather than replaced, so `{"generationConfig": {"thinkingConfig": …}}`
+ * does not wipe out something we set there ourselves.
+ */
+export function applyExtraParams(request: BuiltRequest, extraParams?: string): BuiltRequest {
+	const extras = parseAiExtraParams(extraParams);
+	if (!Object.keys(extras).length) return request;
+
+	const body = { ...request.body };
+	for (const [key, value] of Object.entries(extras)) {
+		const current = body[key];
+		const mergeable = current && typeof current === 'object' && !Array.isArray(current)
+			&& value && typeof value === 'object' && !Array.isArray(value);
+		body[key] = mergeable
+			? { ...(current as Record<string, unknown>), ...(value as Record<string, unknown>) }
+			: value;
+	}
+
+	return { ...request, body };
+}
+
+/**
+ * POST a chat completion and return the assistant text. Retries once without the
+ * optional parameters (`max_tokens`, the user's extras) for gateways that reject
+ * unknown or renamed ones.
  */
 export async function chatCompletion(
 	config: AiChatConfig,
@@ -337,7 +397,12 @@ export async function chatCompletion(
 	const { kind } = resolveEndpoint(config.baseUrl, config.model);
 
 	try {
-		let request = buildChatRequest(config.baseUrl, config.apiKey, config.model, messages, options.maxTokens);
+		// Invalid extras are a configuration mistake; say so in the same channel
+		// as every other AI error.
+		let request = applyExtraParams(
+			buildChatRequest(config.baseUrl, config.apiKey, config.model, messages, options.maxTokens),
+			config.extraParams
+		);
 		let response = await fetch(request.url, {
 			method: 'POST',
 			headers: request.headers,
@@ -345,9 +410,12 @@ export async function chatCompletion(
 			signal: controller.signal
 		});
 
-		if (!response.ok && options.maxTokens !== undefined) {
+		const sentOptionalParameters = options.maxTokens !== undefined || Boolean((config.extraParams || '').trim());
+		if (!response.ok && sentOptionalParameters) {
 			const errorBody = await response.clone().text().catch(() => '');
-			if (response.status === 400 && /max_tokens|max_completion_tokens|unsupported parameter/i.test(errorBody)) {
+			const complainsAboutAParameter = /max_tokens|max_completion_tokens|unsupported|unexpected|unknown|unrecognized|extra fields?|invalid parameter/i.test(errorBody);
+			if (response.status === 400 && complainsAboutAParameter) {
+				// Drop everything optional and ask once more.
 				request = buildChatRequest(config.baseUrl, config.apiKey, config.model, messages, undefined);
 				response = await fetch(request.url, {
 					method: 'POST',

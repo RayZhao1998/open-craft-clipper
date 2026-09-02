@@ -29,6 +29,12 @@
 	"advanced": {
 		"message": "Advanced"
 	},
+	"aiExtraParams": {
+		"message": "Extra request parameters"
+	},
+	"aiExtraParamsDescription": {
+		"message": "Advanced. Optional JSON merged into every request, for parameters an endpoint needs that we have no field for: {\"thinking_token_budget\": 0} or {\"chat_template_kwargs\": {\"enable_thinking\": false}} stops a \"thinking\" model from spending the whole answer. It cannot change the model, the messages or streaming, and a gateway that rejects the parameter is retried without it."
+	},
 	"allHighlights": {
 		"message": "All highlights"
 	},

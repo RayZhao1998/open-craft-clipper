@@ -10,6 +10,7 @@ export interface AiTestPayload {
 	baseUrl: string;
 	apiKey: string;
 	model: string;
+	extraParams?: string;
 }
 
 export interface AiTranslateResponse {
@@ -49,7 +50,8 @@ export async function requestAiTest(payload: AiTestPayload): Promise<string> {
 		action: 'aiTest',
 		baseUrl: payload.baseUrl,
 		apiKey: payload.apiKey,
-		model: payload.model
+		model: payload.model,
+		extraParams: payload.extraParams || ''
 	}) as { reply?: string; error?: string } | undefined;
 
 	if (!response) throw new Error('The background did not answer.');

@@ -488,9 +488,16 @@ async function aiTranslateRequest(request: AiTranslateRequest): Promise<(string 
 	return translations;
 }
 
-async function aiTestRequest(request: { baseUrl?: string; apiKey?: string; model?: string }): Promise<string> {
+async function aiTestRequest(request: { baseUrl?: string; apiKey?: string; model?: string; extraParams?: string }): Promise<string> {
 	const overrides = (request.baseUrl || '').trim() && (request.model || '').trim()
-		? { baseUrl: request.baseUrl!.trim(), apiKey: (request.apiKey || '').trim(), model: request.model!.trim() }
+		? {
+			baseUrl: request.baseUrl!.trim(),
+			apiKey: (request.apiKey || '').trim(),
+			model: request.model!.trim(),
+			// What the form holds, not necessarily what was saved: a bad JSON there
+			// should be reported by the test, not silently ignored.
+			extraParams: (request.extraParams || '').trim()
+		}
 		: null;
 	const config = overrides || await requireAiConfig(false);
 	return pingAiModel(config);
