@@ -160,11 +160,19 @@ function ruleMatches(rule: AutoReaderRule, url: URL, href: string): boolean {
 	}
 
 	if (rule.pathPrefix) {
-		// Path boundaries count: `example.com/blog` covers `/blog` and `/blog/x`,
-		// but not `/bloggers`. The query is included so `…/item?id=42` is usable.
 		const pathname = url.pathname.startsWith('/') ? url.pathname : '/' + url.pathname;
-		const target = pathname + url.search;
-		if (target !== rule.pathPrefix && !target.startsWith(rule.pathPrefix + '/')) return false;
+
+		// A rule that carries a query (`example.com/watch?v=abc`) is compared against
+		// path+query and stays a plain prefix: parameters are delimited by & already.
+		if (rule.pathPrefix.includes('?')) {
+			return (pathname + url.search).startsWith(rule.pathPrefix);
+		}
+
+		// The boundary is about the path, and the query may follow it freely. Doing it
+		// the other way round — comparing the prefix against path+query — makes every
+		// query URL unreachable, and `youtube.com/watch` then misses the one address
+		// the rule was written for: /watch?v=…
+		return pathname === rule.pathPrefix || pathname.startsWith(rule.pathPrefix + '/');
 	}
 
 	return true;

@@ -73,6 +73,22 @@ describe('shouldAutoReader', () => {
 		expect(shouldAutoReader(exact, 'https://example.com/blog/2024')).toBe(true);
 	});
 
+	test('a path rule reaches URLs whose parameters come after the path', () => {
+		// Video pages put the id in the query, so `youtube.com/watch` has to cover
+		// /watch?v=… . Matching the prefix against path+query misses that address —
+		// the one the rule was written for.
+		const rules = config('youtube.com/watch');
+		expect(shouldAutoReader(rules, 'https://www.youtube.com/watch?v=FGC4ofTcg2k')).toBe(true);
+		expect(shouldAutoReader(rules, 'https://m.youtube.com/watch?v=FGC4&list=PL1&t=42s')).toBe(true);
+		expect(shouldAutoReader(rules, 'https://www.youtube.com/watch_popup?v=FGC4')).toBe(false);
+		expect(shouldAutoReader(rules, 'https://www.youtube.com/feed/subscriptions')).toBe(false);
+		expect(shouldAutoReader(rules, 'https://notyoutube.com/watch')).toBe(false);
+
+		const blog = config('example.com/blog');
+		expect(shouldAutoReader(blog, 'https://example.com/blog?utm_source=x')).toBe(true);
+		expect(shouldAutoReader(blog, 'https://example.com/bloggers?utm_source=x')).toBe(false);
+	});
+
 	test('a rule may carry a query and a bare slash is host-only', () => {
 		expect(shouldAutoReader(config('news.example.com/item?id=42'), 'https://news.example.com/item?id=42')).toBe(true);
 		expect(shouldAutoReader(config('news.example.com/item?id=42'), 'https://news.example.com/item?id=43')).toBe(false);

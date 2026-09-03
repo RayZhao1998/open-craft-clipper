@@ -21,6 +21,7 @@ Nothing is fetched or rewritten until the toggle is on and at least one rule exi
 | --- | --- |
 | `example.com` | that host **and its subdomains**, any path |
 | `example.com/blog` | `/blog` and everything under it — but **not** `/bloggers`, paths end at a `/` boundary |
+| `youtube.com/watch` | `/watch` **whatever its parameters**: `…/watch?v=…`, `…/watch?v=…&t=42s` — while `/watch_popup` stays outside |
 | `x.com/*/status/*` | `*` is one path segment, `**` spans any depth: `x.com/**/status/*` also covers `/i/web/status/…` |
 | `https://example.com/long-reads/` | addresses starting exactly like that, no subdomain shortcut |
 | `localhost:3000` | that host **and** port — a rule without a port ignores the port |
@@ -33,6 +34,8 @@ A few things worth knowing:
 - Exceptions win wherever they sit in the list, so the order of your rules does not matter. An exception on its own never opens Reader.
 - A domain rule matches the host and its subdomains only — `example.com` does not match `notexample.com`.
 - `*` stays inside one path segment, so `x.com/*/status/*` covers every account's status page and none of the timelines, bookmarks or search results on the same host.
+- Parameters do not get in the way: a path rule is compared against the path, so `youtube.com/watch` covers `…/watch?v=…` — the shape every video page uses. A rule that carries a query of its own (`example.com/item?id=42`) is compared against path **and** query, and stays a prefix.
+- A video host is rarely worth opening whole. `youtube.com/watch` plus `youtu.be` covers watch pages (desktop, `m.`, `music.`) and short links, and leaves the homepage, the subscriptions feed and `/shorts/` alone; add `youtube.com/shorts` or `youtube.com/live` if you want those too.
 - Blank lines and lines starting with `#` are ignored, and a broken rule is skipped rather than disabling the rest.
 - Leading `www.` is not required, and `www.` in front of a domain rule makes no difference. `*.example.com` is allowed and means the same as `example.com`.
 
@@ -42,6 +45,11 @@ theverge.com/reviews
 x.com/*/status/*
 -x.com/*/status/*/video
 /^https:\/\/\w+\.medium\.com\/.+$/
+
+# Videos, into the transcript rather than the feed
+youtube.com/watch
+youtube.com/shorts
+youtu.be
 ```
 
 ## Getting it out of the way
