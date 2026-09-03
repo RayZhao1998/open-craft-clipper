@@ -20,6 +20,8 @@ export interface AutoReaderRule {
 	host?: string;
 	/** Path a host rule is limited to, e.g. `/blog`. Empty means any path. */
 	pathPrefix?: string;
+	/** Compiled from a path containing `*` (one segment) or `**` (any depth). */
+	pathRegex?: RegExp;
 	/** `http(s)://…` form: plain prefix of the whole URL. */
 	urlPrefix?: string;
 }
@@ -62,12 +64,17 @@ function parsePattern(entry: unknown): AutoReaderRule | null {
 	if (!text) return null;
 
 	if (text.length > 2 && text.startsWith('/') && text.endsWith('/')) {
-		try {
-			return { raw, negate, regex: new RegExp(text.slice(1, -1), 'i') };
-		} catch {
-			console.warn('[Auto Reader] ignoring invalid regex pattern:', raw);
-			return null;
-		}
+		const regex = tryRegex(text.slice(1, -1));
+		if (!regex) console.warn('[Auto Reader] ignoring invalid regex pattern:', raw);
+		return regex ? { raw, negate, regex } : null;
+	}
+
+	// A pattern starting with ^ is a regex against the whole address, accepted
+	// without delimiters so the slashes inside a URL stay unescaped.
+	if (text.startsWith('^')) {
+		const regex = tryRegex(text);
+		if (!regex) console.warn('[Auto Reader] ignoring invalid regex pattern:', raw);
+		return regex ? { raw, negate, regex } : null;
 	}
 
 	// Already a full address — match it as a prefix of the URL.
@@ -78,17 +85,51 @@ function parsePattern(entry: unknown): AutoReaderRule | null {
 	const slash = text.indexOf('/');
 	const host = (slash === -1 ? text : text.slice(0, slash))
 		.toLowerCase()
-		.replace(/^www\./, '')
+		.replace(/^\*?\.?www\./, '')
+		.replace(/^\*\./, '')
 		.replace(/\.$/, '');
-	if (!host || /\s/.test(host)) return null;
+	if (!host || /\s/.test(host) || host.includes('*')) return null;
 
+	const path = slash === -1 ? '' : text.slice(slash);
+
+	// `*` stands for one path segment, `**` for any depth, so the shape people
+	// reach for first — x.com/*/status/* — is what they get.
+	if (path.includes('*')) {
+		const pathRegex = buildPathRegex(path);
+		if (!pathRegex) {
+			console.warn('[Auto Reader] ignoring invalid wildcard pattern:', raw);
+			return null;
+		}
+		return { raw, negate, host, pathRegex };
+	}
 	// A path is stored without its trailing slash, so `example.com/blog` and
 	// `example.com/blog/` mean the same thing, and `example.com/` is host-only.
-	let pathPrefix = slash === -1 ? '' : text.slice(slash);
+	let pathPrefix = path;
 	if (pathPrefix === '/') pathPrefix = '';
 	else if (pathPrefix.length > 1 && pathPrefix.endsWith('/')) pathPrefix = pathPrefix.slice(0, -1);
 
 	return { raw, negate, host, pathPrefix };
+}
+
+function tryRegex(source: string): RegExp | null {
+	try {
+		return new RegExp(source, 'i');
+	} catch {
+		return null;
+	}
+}
+
+function escapeForRegex(text: string): string {
+	return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function buildPathRegex(path: string): RegExp | null {
+	// Split on ** first so ** wins over the * inside it.
+	const source = path
+		.split('**')
+		.map(segment => segment.split('*').map(escapeForRegex).join('[^/]*'))
+		.join('.*');
+	return tryRegex('^' + source);
 }
 
 function parseHttpUrl(url: unknown): URL | null {
@@ -112,6 +153,11 @@ function ruleMatches(rule: AutoReaderRule, url: URL, href: string): boolean {
 	const hostAndPort = url.host.toLowerCase();
 	const matches = (candidate: string) => candidate === rule.host || candidate.endsWith('.' + rule.host);
 	if (!matches(host) && !matches(hostAndPort)) return false;
+
+	if (rule.pathRegex) {
+		const wildcardTarget = (url.pathname.startsWith('/') ? url.pathname : '/' + url.pathname) + url.search;
+		return rule.pathRegex.test(wildcardTarget);
+	}
 
 	if (rule.pathPrefix) {
 		// Path boundaries count: `example.com/blog` covers `/blog` and `/blog/x`,

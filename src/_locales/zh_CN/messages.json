@@ -982,10 +982,10 @@
 		"message": "站点与链接"
 	},
 	"readerAutoReaderSitesDescription": {
-		"message": "每行一条规则。写域名会连同子域名一起匹配；加上路径可限定到该路径。写完整网址则按前缀匹配，/正则/ 匹配整个网址，行首的 - 表示从其余规则中排除。在某个标签页里手动关闭阅读器后，该标签页不会再自动打开。"
+		"message": "每行一条规则。写域名会连同子域名一起匹配；加路径可限定范围，其中 * 代表一层路径、** 代表任意层级。写完整网址则按前缀匹配，^… 或 /…/ 是对整个网址的正则，行首的 - 表示从其余规则中排除。在某个标签页里手动关闭阅读器后，该标签页不会再自动打开。"
 	},
 	"readerAutoReaderSitesPlaceholder": {
-		"message": "example.com\nnews.example.com/blog\n-news.example.com/comments\nhttps://example.com/long-reads/"
+		"message": "example.com\nnews.example.com/blog\nexample.com/*/status/*\n-example.com/comments"
 	},
 	"readerAutoScroll": {
 		"message": "自动滚动"

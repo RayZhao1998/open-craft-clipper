@@ -105,6 +105,33 @@ describe('shouldAutoReader', () => {
 		expect(shouldAutoReader(config('example.com'), 'http://example.com:8080/post')).toBe(true);
 	});
 
+	test('a * covers one path segment and ** any depth', () => {
+		const status = config('x.com/*/status/*');
+		expect(shouldAutoReader(status, 'https://x.com/philipkiely/status/2094916428076106029')).toBe(true);
+		expect(shouldAutoReader(status, 'https://x.com/philipkiely/status/2094916428076106029?s=20&t=a')).toBe(true);
+		expect(shouldAutoReader(status, 'https://www.x.com/philipkiely/status/2094916428076106029/photo/1')).toBe(true);
+
+		// The timeline, bookmarks and the web-status route are not status pages
+		// in this shape; ** is what spans separators.
+		expect(shouldAutoReader(status, 'https://x.com/home')).toBe(false);
+		expect(shouldAutoReader(status, 'https://x.com/i/bookmarks')).toBe(false);
+		expect(shouldAutoReader(status, 'https://x.com/i/web/status/2094916428076106029')).toBe(false);
+		expect(shouldAutoReader(config('x.com/**/status/*'), 'https://x.com/i/web/status/2094916428076106029')).toBe(true);
+	});
+
+	test('a ^ pattern is a regex on the whole address, slashes unescaped', () => {
+		const rules = config('^https://(www\\.)?x\\.com/[^/]+/status/\\d+$');
+		expect(shouldAutoReader(rules, 'https://x.com/philipkiely/status/2094916428076106029')).toBe(true);
+		expect(shouldAutoReader(rules, 'https://x.com/philipkiely/status/abc')).toBe(false);
+		expect(shouldAutoReader(rules, 'https://x.com/philipkiely/status/123?s=20')).toBe(false);
+	});
+
+	test('wildcards and exceptions combine', () => {
+		const rules = config('x.com/**/status/*', '-x.com/*/status/*/video');
+		expect(shouldAutoReader(rules, 'https://x.com/a/status/1')).toBe(true);
+		expect(shouldAutoReader(rules, 'https://x.com/a/status/1/video')).toBe(false);
+	});
+
 	test('exclusions win whatever their position in the list', () => {
 		const after = config('example.com', '-example.com/comments');
 		const before = config('-example.com/comments', 'example.com');

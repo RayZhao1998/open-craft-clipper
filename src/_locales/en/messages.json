@@ -982,10 +982,10 @@
 		"message": "Sites and links"
 	},
 	"readerAutoReaderSitesDescription": {
-		"message": "One rule per line. A domain also covers its subdomains; add a path to limit it to that path. A full address matches its start, /regex/ matches the whole address, and - at the start carves an exception out of the rest. Turning Reader off in a tab stops it from reopening there."
+		"message": "One rule per line. A domain also covers its subdomains; add a path to limit it, where * is one path segment and ** any depth. A full address matches its start, ^… or /…/ is a regular expression on the whole address, and - at the start carves an exception out of the rest. Turning Reader off in a tab stops it from reopening there."
 	},
 	"readerAutoReaderSitesPlaceholder": {
-		"message": "example.com\nnews.example.com/blog\n-news.example.com/comments\nhttps://example.com/long-reads/"
+		"message": "example.com\nnews.example.com/blog\nexample.com/*/status/*\n-example.com/comments"
 	},
 	"readerAutoScroll": {
 		"message": "Auto-scroll"
