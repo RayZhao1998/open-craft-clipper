@@ -61,6 +61,16 @@ Captions are the most expensive part of a video, so they are optional: **Transla
 | Code, quotes, numbers | never sent |
 | Text already in the target language | never sent |
 
+## Usage
+
+**Settings → AI → Usage** answers what the endpoint has actually been asked to do: requests, input and output tokens, the average per request, and what the cache meant you did not pay for.
+
+- The log is one line per request, kept **on this device for 180 days**. It is never synced and never leaves the machine; **Keep usage on this device** turns it off and deletes what is there.
+- Cache hits are not counted as requests. They are shown separately as *Saved by cache* — the tokens re-reading a page would have cost.
+- Some gateways strip the `usage` field out of a response. Those requests are still counted, with the token counts measured from the text instead, and the panel says how many of them are estimates. Numbers from an endpoint that reports usage are exact.
+- **Price per million tokens** (input and output) is optional and in your provider's currency. Fill it in and a *Reference cost* appears; leave it empty and no cost is shown. It is arithmetic on your own numbers, not an invoice — compare it with your provider's bill, not the other way round.
+- Requests are recorded when they answer. An error, a timeout or a cancelled page records nothing, and the connection test counts as one request.
+
 ## Extra request parameters
 
 If the model needs a parameter that has no field of its own, put it in **Settings → AI → Extra request parameters** as a JSON object. It is merged into every request body:

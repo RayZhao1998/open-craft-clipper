@@ -236,6 +236,44 @@ describe('chatCompletion', () => {
 		await expect(chatCompletion(config, messages)).rejects.toThrow(/\/chat\/completions/);
 	});
 
+	test('reports what an answer cost, as the endpoint reported it', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({
+			choices: [{ message: { content: '{"t":["x"]}' }, finish_reason: 'stop' }],
+			usage: { prompt_tokens: 1200, completion_tokens: 34 }
+		})));
+
+		const onUsage = vi.fn();
+		await chatCompletion(config, messages, { onUsage });
+
+		expect(onUsage).toHaveBeenCalledTimes(1);
+		expect(onUsage.mock.calls[0][0]).toMatchObject({
+			promptTokens: 1200, completionTokens: 34, estimated: false
+		});
+		expect(onUsage.mock.calls[0][0].durationMs).toBeGreaterThanOrEqual(0);
+	});
+
+	test('estimates when the endpoint sends no usage, and says so', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({
+			choices: [{ message: { content: 'translated output text here' }, finish_reason: 'stop' }]
+		})));
+
+		const onUsage = vi.fn();
+		await chatCompletion(config, [{ role: 'user', content: 'translate this sentence about something long' }], { onUsage });
+
+		const usage = onUsage.mock.calls[0][0] as Record<string, unknown>;
+		expect(usage.estimated).toBe(true);
+		expect(usage.promptTokens).toBeGreaterThan(0);
+		expect(usage.completionTokens).toBeGreaterThan(0);
+	});
+
+	test('a request that never answered reports no usage', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('nope', { status: 500 })));
+
+		const onUsage = vi.fn();
+		await expect(chatCompletion(config, messages, { onUsage })).rejects.toThrow();
+		expect(onUsage).not.toHaveBeenCalled();
+	});
+
 	test('retries once without max_tokens when a gateway rejects the parameter', async () => {
 		const fetchMock = vi.fn()
 			.mockResolvedValueOnce(new Response('{"error":"Unsupported parameter: max_tokens"}', { status: 400 }))

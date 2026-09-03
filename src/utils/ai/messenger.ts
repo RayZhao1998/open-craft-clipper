@@ -5,6 +5,7 @@
 
 import browser from '../browser-polyfill';
 import type { TranslateOptions } from './translate';
+import type { AiUsageSummary } from './usage';
 
 export interface AiTestPayload {
 	baseUrl: string;
@@ -57,4 +58,31 @@ export async function requestAiTest(payload: AiTestPayload): Promise<string> {
 	if (!response) throw new Error('The background did not answer.');
 	if (response.error) throw new Error(response.error);
 	return response.reply || 'OK';
+}
+
+export interface AiUsagePanelData {
+	summary: AiUsageSummary;
+	/** Whether tracking is on right now — the panel says so when it is off. */
+	recorded: boolean;
+	/** Entries kept on this device, whatever the window. */
+	entries: number;
+}
+
+/**
+ * One window of the usage log. The folding happens in the background, where the
+ * prices and the log live, so the page never ships the whole list around.
+ *
+ * @param windowDays 1 for today, 7/30 for a window, 0 for everything kept.
+ */
+export async function requestAiUsage(windowDays: number): Promise<AiUsagePanelData> {
+	const response = await browser.runtime.sendMessage({ action: 'aiUsage', window: windowDays }) as
+		(AiUsagePanelData & { error?: string }) | undefined;
+
+	if (!response || response.error) throw new Error(response?.error || 'The background did not answer.');
+	return { summary: response.summary, recorded: response.recorded, entries: response.entries };
+}
+
+export async function requestAiUsageClear(): Promise<void> {
+	const response = await browser.runtime.sendMessage({ action: 'aiUsageClear' }) as { error?: string } | undefined;
+	if (response?.error) throw new Error(response.error);
 }

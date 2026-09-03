@@ -700,3 +700,93 @@ label {
 #ai-target-lang-custom {
 	margin-top: 0.5rem;
 }
+
+/* AI usage panel (Settings → AI): stat cards, daily bars, per-model table */
+#ai-usage-summary {
+	.ai-usage-empty {
+		font-size: var(--font-ui-smaller);
+		color: var(--text-muted);
+	}
+
+	&:not(.is-empty) .ai-usage-empty {
+		display: none;
+	}
+}
+
+.ai-usage-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+	gap: 0.5rem;
+	margin-bottom: 1rem;
+}
+
+.ai-usage-stat {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 0.6rem 0.75rem;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 0.5rem;
+	background: var(--background-secondary);
+
+	.ai-usage-stat-value {
+		font-weight: 600;
+		overflow-wrap: anywhere;
+	}
+
+	.ai-usage-stat-label {
+		font-size: var(--font-ui-smaller);
+		color: var(--text-muted);
+	}
+}
+
+.ai-usage-bar-row {
+	display: flex;
+	align-items: flex-end;
+	gap: 3px;
+	height: 3rem;
+	margin-bottom: 0.35rem;
+}
+
+.ai-usage-bar {
+	flex: 1 1 auto;
+	min-width: 3px;
+	border-radius: 2px 2px 0 0;
+	background: var(--interactive-accent);
+	opacity: 0.85;
+
+	&.is-empty {
+		background: var(--background-modifier-border);
+		opacity: 0.7;
+	}
+}
+
+.ai-usage-note {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+	margin-bottom: 0.75rem;
+}
+
+.ai-usage-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--font-ui-smaller);
+
+	th,
+	td {
+		text-align: left;
+		padding: 0.3rem 0.5rem 0.3rem 0;
+		border-bottom: 1px solid var(--background-modifier-border);
+		overflow-wrap: anywhere;
+	}
+
+	th {
+		font-weight: 500;
+		color: var(--text-muted);
+	}
+
+	th:nth-child(n+2),
+	td:nth-child(n+2) {
+		text-align: right;
+	}
+}

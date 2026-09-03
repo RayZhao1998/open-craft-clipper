@@ -29,6 +29,22 @@ export interface ChatOptions {
 	 * tolerant parser recovers, instead of losing the whole batch.
 	 */
 	tolerateTruncation?: boolean;
+	/**
+	 * What this request cost, reported once it answered. The numbers come from the
+	 * endpoint when it sends a `usage`, and are estimated otherwise, so a gateway
+	 * that swallows usage still leaves a number whose shape can be trusted.
+	 */
+	onUsage?: (usage: AiRequestUsage) => void;
+}
+
+/** Token counts for one request, from the wire or from estimateTokens(). */
+export interface AiRequestUsage {
+	promptTokens: number;
+	completionTokens: number;
+	/** The endpoint reported no usage, so the two numbers above are our estimate. */
+	estimated: boolean;
+	/** Time until the answer was usable, parameter-drop retry included. */
+	durationMs: number;
 }
 
 export interface ChatResult {
@@ -379,6 +395,27 @@ export function applyExtraParams(request: BuiltRequest, extraParams?: string): B
 }
 
 /**
+ * Rough prompt size for the records, used only when the endpoint reports no
+ * usage. The JSON of the messages is a little larger than their text, which is
+ * the right direction to be wrong in when the number is shown as an estimate.
+ */
+function estimateRequestTokens(body: Record<string, unknown>): number {
+	const messages = body.messages ?? body.contents ?? body.input ?? body.prompt ?? '';
+	const system = body.system ?? body.systemInstruction ?? '';
+	return estimateTokens(asText(messages)) + estimateTokens(asText(system));
+}
+
+/** Never let a bookkeeping helper break the request it is describing. */
+function asText(value: unknown): string {
+	if (typeof value === 'string') return value;
+	try {
+		return JSON.stringify(value) || '';
+	} catch {
+		return '';
+	}
+}
+
+/**
  * POST a chat completion and return the assistant text. Retries once without the
  * optional parameters (`max_tokens`, the user's extras) for gateways that reject
  * unknown or renamed ones.
@@ -388,6 +425,7 @@ export async function chatCompletion(
 	messages: ChatMessage[],
 	options: ChatOptions = {}
 ): Promise<ChatResult> {
+	const startedAt = Date.now();
 	const timeoutMs = options.timeoutMs ?? DEFAULT_CHAT_TIMEOUT_MS;
 	const controller = new AbortController();
 	const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -451,6 +489,20 @@ export async function chatCompletion(
 			);
 		}
 
+		// Only a request that answered is billed, and only one that answered is
+		// recorded: an error, a timeout or an abort says nothing about cost.
+		if (options.onUsage) {
+			const reported = parsed.promptTokens !== undefined || parsed.completionTokens !== undefined;
+			options.onUsage({
+				promptTokens: reported ? (parsed.promptTokens || 0) : estimateRequestTokens(request.body),
+				completionTokens: reported
+					? (parsed.completionTokens || 0)
+					: estimateTokens(parsed.text) + estimateTokens(parsed.reasoning || ''),
+				estimated: !reported,
+				durationMs: Date.now() - startedAt
+			});
+		}
+
 		return { ...parsed, truncated };
 	} catch (error: unknown) {
 		if (error instanceof DOMException && error.name === 'AbortError') {
@@ -472,11 +524,11 @@ export async function chatCompletion(
  * because it spends the whole budget before answering. We only care whether the
  * endpoint accepts our key and answers at all.
  */
-export async function pingAiModel(config: AiChatConfig): Promise<string> {
+export async function pingAiModel(config: AiChatConfig, options: Pick<ChatOptions, 'onUsage'> = {}): Promise<string> {
 	const result = await chatCompletion(config, [
 		{ role: 'system', content: 'Reply with exactly: OK' },
 		{ role: 'user', content: 'ping' }
-	], { timeoutMs: 20000, tolerateTruncation: true });
+	], { timeoutMs: 20000, tolerateTruncation: true, onUsage: options.onUsage });
 
 	const text = result.text.trim().slice(0, 60);
 	if (text) return text;

@@ -72,6 +72,9 @@ export const generalSettings: Settings = {
 		prompt: '',
 		translateTranscript: true,
 		autoTranslate: false,
+		recordUsage: true,
+		priceInput: '',
+		priceOutput: '',
 	},
 	saveBehavior: 'addToObsidian',
 };

@@ -23,10 +23,18 @@ import {
 	isAutoReaderSuppressed,
 	clearAutoReaderSuppression
 } from './utils/auto-reader';
-import { AiChatConfig, maskAiSecrets, pingAiModel } from './utils/ai/chat';
+import { AiChatConfig, AiRequestUsage, maskAiSecrets, normalizeAiBaseUrl, pingAiModel } from './utils/ai/chat';
 import { getAiStatus, resolveAiConfig } from './utils/ai/config';
 import { translateTexts } from './utils/ai/translate';
 import type { TranslateOptions } from './utils/ai/translate';
+import {
+	clearAiUsage,
+	parseAiPricing,
+	recordAiUsage,
+	summarizeAiUsage,
+	getAiUsage
+} from './utils/ai/usage';
+import type { AiUsagePurpose } from './utils/ai/usage';
 const YOUTUBE_EMBED_RULE_ID = 9001;
 const YOUTUBE_INNERTUBE_RULE_ID = 9002;
 
@@ -468,6 +476,37 @@ async function requireAiConfig(requireEnabled: boolean): Promise<AiChatConfig> {
 	return config;
 }
 
+/** Host only, for the usage log. The key and the path never belong there. */
+function aiEndpointHost(baseUrl: string): string {
+	try {
+		return new URL(normalizeAiBaseUrl(baseUrl)).host;
+	} catch {
+		return '';
+	}
+}
+
+/**
+ * The usage recorder for one run of requests, or null when the user turned
+ * tracking off. The model and endpoint are filled in here because they are what
+ * is being billed — the request layer reports numbers, not names.
+ */
+function aiUsageRecorder(config: AiChatConfig, settings: Settings) {
+	if (settings.ai?.recordUsage === false) return null;
+
+	const host = aiEndpointHost(config.baseUrl);
+	const model = (config.model || '').trim() || 'unknown';
+
+	return (notice: AiRequestUsage & { purpose?: AiUsagePurpose; segments?: number }): void => {
+		void recordAiUsage({
+			...notice,
+			model,
+			host,
+			purpose: notice.purpose || 'translate',
+			segments: notice.segments || 0
+		}).catch(error => debugLog('AI usage', 'could not record:', error));
+	};
+}
+
 interface AiTranslateRequest {
 	texts?: unknown;
 	targetLang?: string;
@@ -476,6 +515,7 @@ interface AiTranslateRequest {
 }
 
 async function aiTranslateRequest(request: AiTranslateRequest): Promise<(string | null)[]> {
+	const settings = await loadSettings();
 	const config = await requireAiConfig(true);
 
 	if (!Array.isArray(request.texts) || !request.texts.length) {
@@ -490,7 +530,8 @@ async function aiTranslateRequest(request: AiTranslateRequest): Promise<(string 
 	const options: TranslateOptions = {
 		targetLang: (request.targetLang || '').trim() || 'en',
 		sourceLang: (request.sourceLang || '').trim(),
-		prompt: typeof request.prompt === 'string' ? request.prompt : ''
+		prompt: typeof request.prompt === 'string' ? request.prompt : '',
+		onUsage: aiUsageRecorder(config, settings) || undefined
 	};
 
 	const started = Date.now();
@@ -511,7 +552,39 @@ async function aiTestRequest(request: { baseUrl?: string; apiKey?: string; model
 		}
 		: null;
 	const config = overrides || await requireAiConfig(false);
-	return pingAiModel(config);
+	// Testing unsaved credentials is not the saved model being billed, so only a
+	// test against the saved configuration is recorded.
+	const recorder = overrides ? null : aiUsageRecorder(config, await loadSettings());
+	return pingAiModel(config, {
+		onUsage: recorder
+			? (usage) => recorder({ ...usage, purpose: 'test' })
+			: undefined
+	});
+}
+
+/**
+ * Settings → AI usage panel: one window of the log, folded into the numbers the
+ * page shows. Pricing is read here rather than sent from the page, so the panel
+ * and the recorder agree on what a token costs.
+ */
+async function aiUsageSummaryRequest(request: { window?: unknown }): Promise<unknown> {
+	const settings = await loadSettings();
+	const entries = await getAiUsage();
+	const now = Date.now();
+	const days = Number(request.window);
+	const windowDays = Number.isFinite(days) && days > 0 ? Math.floor(days) : 0;
+
+	return {
+		entries: entries.length,
+		summary: summarizeAiUsage(entries, {
+			since: windowDays ? now - (windowDays - 1) * 24 * 60 * 60 * 1000 : 0,
+			// The chart keeps its own 14-day rhythm whatever window was asked for.
+			days: windowDays === 1 ? 1 : windowDays > 0 ? Math.min(windowDays, 30) : 14,
+			pricing: parseAiPricing(settings.ai?.priceInput, settings.ai?.priceOutput),
+			now
+		}),
+		recorded: settings.ai?.recordUsage !== false
+	};
 }
 
 browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime.MessageSender, sendResponse: (response?: any) => void): true | undefined => {
@@ -975,6 +1048,20 @@ browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime
 			return true;
 		}
 
+		if (typedRequest.action === "aiUsage") {
+			aiUsageSummaryRequest(typedRequest as any)
+				.then((result) => sendResponse({ success: true, ...(result as object) }))
+				.catch((error) => respondAiError(sendResponse, error));
+			return true;
+		}
+
+		if (typedRequest.action === "aiUsageClear") {
+			clearAiUsage()
+				.then(() => sendResponse({ success: true }))
+				.catch((error) => respondAiError(sendResponse, error));
+			return true;
+		}
+
 		// For other actions that use sendResponse
 		if (typedRequest.action === "extractContent" ||
 			typedRequest.action === "ensureContentScriptLoaded" ||
@@ -985,7 +1072,9 @@ browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime
 			typedRequest.action === "craftGetFolders" ||
 			typedRequest.action === "craftSave" ||
 			typedRequest.action === "aiTranslate" ||
-			typedRequest.action === "aiTest") {
+			typedRequest.action === "aiTest" ||
+			typedRequest.action === "aiUsage" ||
+			typedRequest.action === "aiUsageClear") {
 			return true;
 		}
 	}

@@ -101,6 +101,15 @@
 	"aiOpenSettings": {
 		"message": "AI settings"
 	},
+	"aiPriceDescription": {
+		"message": "Optional, in the currency your provider bills in. The cost is a reference worked out from your own numbers, not an invoice. Leave empty to hide it."
+	},
+	"aiPriceInput": {
+		"message": "Price per million tokens — input"
+	},
+	"aiPriceOutput": {
+		"message": "Price per million tokens — output"
+	},
 	"aiPromptReset": {
 		"message": "Translation prompt reset to the built-in default."
 	},
@@ -156,6 +165,69 @@
 	},
 	"aiTranslationHeading": {
 		"message": "Immersive translation"
+	},
+	"aiUsageClear": {
+		"message": "Clear usage data"
+	},
+	"aiUsageCost": {
+		"message": "Reference cost"
+	},
+	"aiUsageDaily": {
+		"message": "Tokens per day, last $1 days"
+	},
+	"aiUsageDescription": {
+		"message": "What the endpoint has been asked to do, kept on this device only and never synced. Requests are counted; cache hits are not — they are shown as what they saved."
+	},
+	"aiUsageEmpty": {
+		"message": "Nothing has been translated yet."
+	},
+	"aiUsageEstimatedNote": {
+		"message": "$1 of $2 requests are estimated — those endpoints returned no token counts, so the size of the text was measured instead."
+	},
+	"aiUsageHeading": {
+		"message": "Usage"
+	},
+	"aiUsageModelColumn": {
+		"message": "Model"
+	},
+	"aiUsageMonth": {
+		"message": "Last 30 days"
+	},
+	"aiUsageAll": {
+		"message": "All time"
+	},
+	"aiUsageOff": {
+		"message": "Usage tracking is off, so nothing is being recorded."
+	},
+	"aiUsagePerRequest": {
+		"message": "Per request"
+	},
+	"aiUsageRecord": {
+		"message": "Keep usage on this device"
+	},
+	"aiUsageRecordDescription": {
+		"message": "One line per request, kept for 180 days. Turning this off keeps nothing and removes what is already here."
+	},
+	"aiUsageRequests": {
+		"message": "Requests"
+	},
+	"aiUsageSaved": {
+		"message": "Saved by cache"
+	},
+	"aiUsageTokensIn": {
+		"message": "Input tokens"
+	},
+	"aiUsageTokensOut": {
+		"message": "Output tokens"
+	},
+	"aiUsageToday": {
+		"message": "Today"
+	},
+	"aiUsageWeek": {
+		"message": "Last 7 days"
+	},
+	"aiUsageWindow": {
+		"message": "Show"
 	},
 	"apiKeyMissing": {
 		"message": "No API key"

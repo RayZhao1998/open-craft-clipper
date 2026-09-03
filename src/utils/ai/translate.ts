@@ -9,7 +9,7 @@
 //     punctuation) never hit the network;
 //   * results are cached per model+language so scrolling back is free.
 
-import { AiChatConfig, ChatMessage, chatCompletion, truncationHint } from './chat';
+import { AiChatConfig, AiRequestUsage, ChatMessage, chatCompletion, estimateTokens, truncationHint } from './chat';
 
 export const MAX_BATCH_CHARS = 1500;
 export const MAX_BATCH_SEGMENTS = 12;
@@ -113,6 +113,20 @@ export interface TranslateOptions {
 	sourceLang?: string;
 	/** User notes appended to the contract; may be empty. */
 	prompt?: string;
+	/**
+	 * Cost accounting, called once per network batch and once for the cache hits
+	 * of a call. Reporting lives with the caller (the background), which is the
+	 * only place that knows the model and endpoint being billed.
+	 */
+	onUsage?: (usage: TranslateUsage) => void;
+}
+
+/** One entry in the usage log: a batch that went out, or a cache payoff. */
+export interface TranslateUsage extends AiRequestUsage {
+	/** `cache` is not a request — it is what the cache meant we did not send. */
+	purpose: 'translate' | 'cache';
+	/** Segments in the batch, or segments served from the cache. */
+	segments: number;
 }
 
 export function renderTranslatePrompt(options: TranslateOptions): string {
@@ -458,7 +472,10 @@ export async function translateBatch(
 	const result = await chatCompletion(config, messages, {
 		// No max_tokens: a cap of our own is what truncates thinking models mid-
 		// answer. The batch is already small, and the endpoint's own limit applies.
-		tolerateTruncation: true
+		tolerateTruncation: true,
+		onUsage: options.onUsage
+			? (usage: AiRequestUsage) => options.onUsage?.({ ...usage, purpose: 'translate', segments: texts.length })
+			: undefined
 	});
 
 	const translations = parseTranslateResponse(result.text, texts.length);
@@ -495,11 +512,33 @@ export async function translateTexts(
 	const cacheKeys = texts.map(text => translationCacheKey(config, options, text));
 
 	const todo: number[] = [];
+	let cachedPrompt = 0;
+	let cachedCompletion = 0;
+	let cachedCount = 0;
 	for (let i = 0; i < texts.length; i++) {
 		const cached = translationCache.get(cacheKeys[i]);
-		if (cached !== undefined) out[i] = cached;
-		else todo.push(i);
+		if (cached !== undefined) {
+			out[i] = cached;
+			// What this segment would have cost. Estimates, and marked as such.
+			cachedCount++;
+			cachedPrompt += estimateTokens(texts[i]);
+			cachedCompletion += estimateTokens(cached);
+		} else {
+			todo.push(i);
+		}
 	}
+
+	if (cachedCount && options.onUsage) {
+		options.onUsage({
+			purpose: 'cache',
+			segments: cachedCount,
+			promptTokens: cachedPrompt,
+			completionTokens: cachedCompletion,
+			estimated: true,
+			durationMs: 0
+		});
+	}
+
 	if (!todo.length) return out;
 
 	const indexToText = todo.map(index => texts[index]);

@@ -24,7 +24,10 @@ export const defaultAiSettings: AiSettings = {
 	mode: 'bilingual',
 	prompt: '',
 	translateTranscript: true,
-	autoTranslate: false
+	autoTranslate: false,
+	recordUsage: true,
+	priceInput: '',
+	priceOutput: ''
 };
 
 export let generalSettings: Settings = {
@@ -115,6 +118,9 @@ interface StorageData {
 		prompt?: string;
 		translateTranscript?: boolean;
 		autoTranslate?: boolean;
+		recordUsage?: boolean;
+		priceInput?: string;
+		priceOutput?: string;
 	};
 	vaults?: string[];
 	highlighter_settings?: {
@@ -181,7 +187,12 @@ function sanitizeAiSettings(stored: StorageData['ai_settings'] | undefined, fall
 		mode: stored?.mode === 'replacement' ? 'replacement' : (stored?.mode === 'bilingual' ? 'bilingual' : fallback.mode),
 		prompt: text(stored?.prompt, fallback.prompt),
 		translateTranscript: flag(stored?.translateTranscript, fallback.translateTranscript),
-		autoTranslate: flag(stored?.autoTranslate, fallback.autoTranslate)
+		autoTranslate: flag(stored?.autoTranslate, fallback.autoTranslate),
+		recordUsage: flag(stored?.recordUsage, fallback.recordUsage),
+		// Prices are free text on purpose (a yen price, a comma-grouped one); only
+		// the shape is policed here, usage.ts decides whether it means a number.
+		priceInput: text(stored?.priceInput, fallback.priceInput).trim().slice(0, 24),
+		priceOutput: text(stored?.priceOutput, fallback.priceOutput).trim().slice(0, 24)
 	};
 }
 
@@ -373,7 +384,10 @@ export async function saveSettings(settings?: Partial<Settings>): Promise<void> 
 			mode: generalSettings.ai.mode,
 			prompt: generalSettings.ai.prompt,
 			translateTranscript: generalSettings.ai.translateTranscript,
-			autoTranslate: generalSettings.ai.autoTranslate
+			autoTranslate: generalSettings.ai.autoTranslate,
+			recordUsage: generalSettings.ai.recordUsage,
+			priceInput: generalSettings.ai.priceInput,
+			priceOutput: generalSettings.ai.priceOutput
 		},
 		reader_settings: {
 			fontSize: generalSettings.readerSettings.fontSize,

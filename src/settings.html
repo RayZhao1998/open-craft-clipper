@@ -389,6 +389,58 @@
 									</div>
 								</div>
 							</div>
+							<div class="setting-group" id="ai-usage-group">
+								<div class="setting-item setting-item-heading">
+									<h3 data-i18n="aiUsageHeading">Usage</h3>
+									<div class="setting-item-description" data-i18n="aiUsageDescription">
+										What the endpoint has been asked to do, kept on this device only and never synced. Requests are counted; cache hits are not — they are shown as what they saved.
+									</div>
+								</div>
+								<div class="setting-items">
+									<div class="setting-item mod-horizontal mod-toggle">
+										<div class="setting-item-info">
+											<label for="ai-record-usage" data-i18n="aiUsageRecord">Keep usage on this device</label>
+											<div class="setting-item-description" data-i18n="aiUsageRecordDescription">
+												One line per request, kept for 180 days. Turning this off keeps nothing and removes what is already here.
+											</div>
+										</div>
+										<div class="setting-item-control">
+											<div class="checkbox-container">
+												<input type="checkbox" id="ai-record-usage" />
+											</div>
+										</div>
+									</div>
+									<div class="setting-item">
+										<label for="ai-usage-window" data-i18n="aiUsageWindow">Show</label>
+										<select id="ai-usage-window" class="dropdown">
+											<option value="1" data-i18n="aiUsageToday">Today</option>
+											<option value="7" data-i18n="aiUsageWeek">Last 7 days</option>
+											<option value="30" selected data-i18n="aiUsageMonth">Last 30 days</option>
+											<option value="0" data-i18n="aiUsageAll">All time</option>
+										</select>
+									</div>
+									<div class="setting-item is-empty" id="ai-usage-summary">
+										<div class="ai-usage-stats"></div>
+										<div class="ai-usage-bars"></div>
+										<div class="ai-usage-models"></div>
+										<div class="ai-usage-empty" data-i18n="aiUsageEmpty">Nothing has been translated yet.</div>
+									</div>
+									<div class="setting-item">
+										<label for="ai-price-input" data-i18n="aiPriceInput">Price per million tokens — input</label>
+										<div class="setting-item-description" data-i18n="aiPriceDescription">
+											Optional, in the currency your provider bills in. The cost is a reference worked out from your own numbers, not an invoice. Leave empty to hide it.
+										</div>
+										<input type="text" id="ai-price-input" placeholder="0.15" autocomplete="off" spellcheck="false" />
+									</div>
+									<div class="setting-item">
+										<label for="ai-price-output" data-i18n="aiPriceOutput">Price per million tokens — output</label>
+										<input type="text" id="ai-price-output" placeholder="0.60" autocomplete="off" spellcheck="false" />
+									</div>
+									<div class="setting-item">
+										<button type="button" id="ai-usage-clear" class="btn btn-secondary" data-i18n="aiUsageClear">Clear usage data</button>
+									</div>
+								</div>
+							</div>
 						</form>
 					</div>
 

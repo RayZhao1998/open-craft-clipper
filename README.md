@@ -35,6 +35,7 @@ Reader mode can translate the page you are reading, bilingually, without sending
 - Only the text within one viewport above and below the screen is queued; nothing is sent while you are scrolling; results are cached.
 - Works for YouTube too — the description keeps its lines, and caption lines are translated near the screen without breaking player seeking.
 - The translation prompt is editable (tone, glossary, domain context), with the output contract appended for you.
+- **Usage** (issue #1): Settings → AI shows requests, input and output tokens, what the cache saved, and an optional reference cost — kept on this device only, never synced.
 
 Usage, cost controls and the prompt format: [docs/AI translation.md](docs/AI%20translation.md)
 

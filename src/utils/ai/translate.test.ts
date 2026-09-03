@@ -280,6 +280,32 @@ describe('translateTexts', () => {
 		expect(out[1]).toBeNull();
 	});
 
+	test('reports each batch it sent, and what the cache meant it did not', async () => {
+		// Unique wording and language: the translation cache is shared in this file.
+		const config = { baseUrl: 'https://api.openai.com/v1', apiKey: 'sk-test', model: 'usage-model' };
+		const texts = ['usage-alpha sentence', 'usage-beta sentence'];
+		mockedChat.mockImplementation(async (_config, messages, options) => {
+			const inputs = JSON.parse(messages[1].content as string) as string[];
+			options?.onUsage?.({ promptTokens: 800, completionTokens: 120, estimated: false, durationMs: 42 });
+			return { text: JSON.stringify({ t: inputs.map(text => `ok:${text}`) }) };
+		});
+
+		const notices: Record<string, unknown>[] = [];
+		await translateTexts(texts, config, { targetLang: 'sv', onUsage: u => notices.push(u as unknown as Record<string, unknown>) });
+
+		expect(notices).toHaveLength(1);
+		expect(notices[0]).toMatchObject({ purpose: 'translate', segments: 2, promptTokens: 800, completionTokens: 120, estimated: false });
+
+		// Same segments again: no request goes out, and the notice says what that saved.
+		const cacheNotices: Record<string, unknown>[] = [];
+		await translateTexts(texts, config, { targetLang: 'sv', onUsage: u => cacheNotices.push(u as unknown as Record<string, unknown>) });
+
+		expect(mockedChat).toHaveBeenCalledTimes(1);
+		expect(cacheNotices).toHaveLength(1);
+		expect(cacheNotices[0]).toMatchObject({ purpose: 'cache', segments: 2, estimated: true });
+		expect(cacheNotices[0].promptTokens).toBeGreaterThan(0);
+	});
+
 	test('throws when nothing could be translated so the caller can back off', async () => {
 		mockedChat.mockRejectedValue(new Error('401 key rejected'));
 

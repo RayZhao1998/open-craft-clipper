@@ -101,6 +101,14 @@ export interface AiSettings {
 	translateTranscript: boolean;
 	/** Start translating as soon as Reader opens, instead of waiting for the button. */
 	autoTranslate: boolean;
+	/** Keep a local log of what each request cost, for the usage panel. */
+	recordUsage: boolean;
+	/**
+	 * Optional price per million tokens, in whatever currency the provider bills
+	 * in. Empty leaves the cost line off rather than showing a wrong zero.
+	 */
+	priceInput: string;
+	priceOutput: string;
 }
 
 export interface ReaderSettings {

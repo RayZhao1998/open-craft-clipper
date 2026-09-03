@@ -86,6 +86,15 @@
 	"aiOpenSettings": {
 		"message": "AI 设置"
 	},
+	"aiPriceDescription": {
+		"message": "可选，用你服务商标价的货币。费用是按你自己填的数字算出来的参考值，不是账单。留空则不显示。"
+	},
+	"aiPriceInput": {
+		"message": "每百万 token 单价 — 输入"
+	},
+	"aiPriceOutput": {
+		"message": "每百万 token 单价 — 输出"
+	},
 	"aiPromptReset": {
 		"message": "翻译提示词已恢复为内置默认。"
 	},
@@ -156,6 +165,69 @@
 	},
 	"alwaysShowHighlightsDescription": {
 		"message": "加载页面时显示已保存的高亮内容。关闭此选项则仅在高亮模式激活时显示高亮。"
+	},
+	"aiUsageAll": {
+		"message": "全部"
+	},
+	"aiUsageClear": {
+		"message": "清除用量数据"
+	},
+	"aiUsageCost": {
+		"message": "参考费用"
+	},
+	"aiUsageDaily": {
+		"message": "每日 tokens（近 $1 天）"
+	},
+	"aiUsageDescription": {
+		"message": "记录翻译对端点的每一次调用，只存在本机、不随设置同步。请求会计数；缓存命中不算请求，单独显示为它省下的量。"
+	},
+	"aiUsageEmpty": {
+		"message": "还没有翻译过任何内容。"
+	},
+	"aiUsageEstimatedNote": {
+		"message": "$2 次请求里有 $1 次是估算值 —— 那些端点没有返回 token 统计，只能按文本长度折算。"
+	},
+	"aiUsageHeading": {
+		"message": "用量"
+	},
+	"aiUsageModelColumn": {
+		"message": "模型"
+	},
+	"aiUsageMonth": {
+		"message": "近 30 天"
+	},
+	"aiUsageOff": {
+		"message": "用量记录已关闭，当前不再记录任何请求。"
+	},
+	"aiUsagePerRequest": {
+		"message": "平均每次"
+	},
+	"aiUsageRecord": {
+		"message": "在本机保留用量记录"
+	},
+	"aiUsageRecordDescription": {
+		"message": "每次请求记一行，保留 180 天。关掉则不再记录，并删除已有记录。"
+	},
+	"aiUsageRequests": {
+		"message": "请求数"
+	},
+	"aiUsageSaved": {
+		"message": "缓存省下"
+	},
+	"aiUsageTokensIn": {
+		"message": "输入 tokens"
+	},
+	"aiUsageTokensOut": {
+		"message": "输出 tokens"
+	},
+	"aiUsageToday": {
+		"message": "今日"
+	},
+	"aiUsageWeek": {
+		"message": "近 7 天"
+	},
+	"aiUsageWindow": {
+		"message": "查看"
 	},
 	"apiKeyMissing": {
 		"message": "无 API 密钥"
