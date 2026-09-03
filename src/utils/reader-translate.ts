@@ -386,11 +386,12 @@ function pump(): void {
 		const texts: string[] = [];
 
 		batch.blocks.forEach((block, index) => {
-			const key = translationCacheKey(
-				{ model: settings!.model },
-				{ targetLang: settings!.targetLang, prompt: settings!.prompt },
-				block.text
-			);
+			const key = translationCacheKey({
+				baseUrl: settings!.baseUrl,
+				model: settings!.model,
+				targetLang: settings!.targetLang,
+				prompt: settings!.prompt
+			}, block.text);
 			const hit = translationCache.get(key);
 			if (hit !== undefined) {
 				block.state = 'done';
@@ -428,7 +429,7 @@ async function runBatch(batch: Batch): Promise<void> {
 		return;
 	}
 
-	const { targetLang, prompt } = settings;
+	const { baseUrl, targetLang, prompt } = settings;
 	// Show where the request is working, not just that something is happening.
 	blocks.forEach(markLoading);
 
@@ -453,7 +454,7 @@ async function runBatch(batch: Batch): Promise<void> {
 				block.state = 'done';
 				attachTranslation(block, value);
 				translationCache.set(
-					translationCacheKey({ model: settings!.model }, { targetLang, prompt }, block.text),
+					translationCacheKey({ baseUrl, model: settings!.model, targetLang, prompt }, block.text),
 					value
 				);
 			} else if (block.attempts >= MAX_ATTEMPTS) {

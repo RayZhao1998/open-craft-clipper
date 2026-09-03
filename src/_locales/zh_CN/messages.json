@@ -50,6 +50,18 @@
 	"aiBaseUrlDescription": {
 		"message": "OpenAI 风格端点：https://api.openai.com/v1、代理或网关地址，或本地服务（如 http://127.0.0.1:11434）——系统会自动补上 /chat/completions。"
 	},
+	"aiCacheClear": {
+		"message": "清除已记住的译文"
+	},
+	"aiCacheEmpty": {
+		"message": "还没记住任何内容。"
+	},
+	"aiCacheOff": {
+		"message": "已关闭，不会再记住新的译文。"
+	},
+	"aiCacheStats": {
+		"message": "已记住 $1 段译文 · 约 $2 个字符"
+	},
 	"aiCustomLanguage": {
 		"message": "自定义语言代码…"
 	},
@@ -85,6 +97,12 @@
 	},
 	"aiOpenSettings": {
 		"message": "AI 设置"
+	},
+	"aiPersistTranslations": {
+		"message": "在本机记住翻译结果"
+	},
+	"aiPersistTranslationsDescription": {
+		"message": "已译段落保留 90 天，重开同一篇文章不再花钱。原文与译文都只存本机：不随设置同步，也不包含在设置导出里。"
 	},
 	"aiPriceDescription": {
 		"message": "可选，用你服务商标价的货币。费用是按你自己填的数字算出来的参考值，不是账单。留空则不显示。"

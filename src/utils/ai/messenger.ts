@@ -86,3 +86,25 @@ export async function requestAiUsageClear(): Promise<void> {
 	const response = await browser.runtime.sendMessage({ action: 'aiUsageClear' }) as { error?: string } | undefined;
 	if (response?.error) throw new Error(response.error);
 }
+
+export interface AiCachePanelData {
+	/** Remembered translations on this device. */
+	count: number;
+	/** Their size in characters, which is what the budget counts — not bytes on disk. */
+	chars: number;
+	/** Whether persistence is on right now, so the panel can say why it is empty. */
+	persisted: boolean;
+}
+
+export async function requestAiCacheStats(): Promise<AiCachePanelData> {
+	const response = await browser.runtime.sendMessage({ action: 'aiCache' }) as
+		(Partial<AiCachePanelData> & { error?: string }) | undefined;
+
+	if (!response || response.error) throw new Error(response?.error || 'The background did not answer.');
+	return { count: response.count ?? 0, chars: response.chars ?? 0, persisted: response.persisted !== false };
+}
+
+export async function requestAiCacheClear(): Promise<void> {
+	const response = await browser.runtime.sendMessage({ action: 'aiCacheClear' }) as { error?: string } | undefined;
+	if (response?.error) throw new Error(response.error);
+}

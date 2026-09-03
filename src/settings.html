@@ -410,6 +410,23 @@
 											</div>
 										</div>
 									</div>
+									<div class="setting-item mod-horizontal mod-toggle">
+										<div class="setting-item-info">
+											<label for="ai-persist-translations" data-i18n="aiPersistTranslations">Remember translations on this device</label>
+											<div class="setting-item-description" data-i18n="aiPersistTranslationsDescription">
+												Translated paragraphs are kept for 90 days, so re-opening an article costs nothing. The text and its translation stay on this device: never synced, and not part of the settings export.
+											</div>
+										</div>
+										<div class="setting-item-control">
+											<div class="checkbox-container">
+												<input type="checkbox" id="ai-persist-translations" />
+											</div>
+										</div>
+									</div>
+									<div class="setting-item">
+										<div id="ai-cache-stats" class="ai-usage-note"></div>
+										<button type="button" id="ai-cache-clear" class="btn btn-secondary" data-i18n="aiCacheClear">Clear translations</button>
+									</div>
 									<div class="setting-item">
 										<label for="ai-usage-window" data-i18n="aiUsageWindow">Show</label>
 										<select id="ai-usage-window" class="dropdown">

@@ -74,6 +74,18 @@
 	"aiBaseUrlDescription": {
 		"message": "OpenAI-style endpoint: https://api.openai.com/v1, a proxy or gateway URL, or a local server such as http://127.0.0.1:11434 — /chat/completions is added for you."
 	},
+	"aiCacheClear": {
+		"message": "Clear translations"
+	},
+	"aiCacheEmpty": {
+		"message": "Nothing has been remembered yet."
+	},
+	"aiCacheOff": {
+		"message": "Turned off, so nothing new is remembered."
+	},
+	"aiCacheStats": {
+		"message": "$1 translations remembered · about $2 characters of text"
+	},
 	"aiCustomLanguage": {
 		"message": "Custom code…"
 	},
@@ -100,6 +112,12 @@
 	},
 	"aiOpenSettings": {
 		"message": "AI settings"
+	},
+	"aiPersistTranslations": {
+		"message": "Remember translations on this device"
+	},
+	"aiPersistTranslationsDescription": {
+		"message": "Translated paragraphs are kept for 90 days, so re-opening an article costs nothing. The text and its translation stay on this device: never synced, and not part of the settings export."
 	},
 	"aiPriceDescription": {
 		"message": "Optional, in the currency your provider bills in. The cost is a reference worked out from your own numbers, not an invoice. Leave empty to hide it."

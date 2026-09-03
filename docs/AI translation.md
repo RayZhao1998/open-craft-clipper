@@ -60,6 +60,19 @@ Captions are the most expensive part of a video, so they are optional: **Transla
 | After consecutive failures | 3 — translating stops and the error is shown |
 | Code, quotes, numbers | never sent |
 | Text already in the target language | never sent |
+| Text translated on this device before | served from the cache; nothing is sent (see Remembering translations) |
+
+## Remembering translations
+
+A finished paragraph is kept, so the next visit to the same text costs nothing. The memory is the difference between a cache you can feel and one that only exists while the tab stays open:
+
+- **It survives closing the browser.** Translations are stored in IndexedDB, not in the request layer's memory — the background of an extension is stopped after roughly half a minute of idleness, and anything held there is gone with it.
+- **90 days, then it is dropped**, whatever its age rank. The database is also capped by entry count and total characters; the oldest paragraphs give way first.
+- **What counts as the same text**: the endpoint, the model, both languages and the whole custom prompt are part of the key. Switch provider, model or target language, or edit the prompt — even past its fortieth character, where the old key stopped counting — and the text is translated again rather than served from the previous arrangement.
+- **Only finished translations are stored.** A failed or partial segment is never remembered as a result.
+- **It is on this device only** — never in sync, never in the settings export — and **Settings → AI** shows how much is remembered and clears it. Turning the switch off keeps what is there and remembers nothing new.
+
+The text and its translation are what sit on disk, which is the same category of thing a browser's own page cache holds, with the difference that you can see how large it is and delete it. The Usage panel counts remembered segments as what they saved rather than as requests, including the ones read back from disk.
 
 ## Usage
 

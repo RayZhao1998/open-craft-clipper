@@ -9,7 +9,8 @@
 //     punctuation) never hit the network;
 //   * results are cached per model+language so scrolling back is free.
 
-import { AiChatConfig, AiRequestUsage, ChatMessage, chatCompletion, estimateTokens, truncationHint } from './chat';
+import { AiChatConfig, AiRequestUsage, ChatMessage, chatCompletion, estimateTokens, normalizeAiBaseUrl, truncationHint } from './chat';
+import type { TranslationStore } from './translation-store';
 
 export const MAX_BATCH_CHARS = 1500;
 export const MAX_BATCH_SEGMENTS = 12;
@@ -113,6 +114,13 @@ export interface TranslateOptions {
 	sourceLang?: string;
 	/** User notes appended to the contract; may be empty. */
 	prompt?: string;
+	/**
+	 * Persistent tier of the cache (see translation-store.ts). Only the background
+	 * passes one: IndexedDB opened from a content script belongs to the page being
+	 * translated, not to the extension. Without it the in-memory cache is the whole
+	 * story, which is how translation behaved before there was a store.
+	 */
+	store?: TranslationStore;
 	/**
 	 * Cost accounting, called once per network batch and once for the cache hits
 	 * of a call. Reporting lives with the caller (the background), which is the
@@ -450,8 +458,55 @@ export class TranslateCache {
 
 export const translationCache = new TranslateCache();
 
-export function translationCacheKey(config: Pick<AiChatConfig, 'model'>, options: TranslateOptions, text: string): string {
-	return [config.model, options.targetLang, (options.sourceLang || ''), (options.prompt || '').slice(0, 40), text].join('\u0000');
+/**
+ * Fingerprint of the whole prompt. The key used to carry its first 40 characters,
+ * so editing a glossary or a tone note further down left every cached translation
+ * valid, and the page kept serving what the old prompt produced. The length rides
+ * along with the hash as a cheap second check.
+ */
+export function promptFingerprint(prompt: string): string {
+	let hash = 0x811c9dc5;
+	for (let i = 0; i < prompt.length; i++) {
+		hash ^= prompt.charCodeAt(i);
+		// FNV-1a: not for secrets, it only has to not collide across the handful of
+		// prompts one user keeps, and it has to stay synchronous.
+		hash = Math.imul(hash, 0x01000193);
+	}
+	return prompt.length + ':' + (hash >>> 0).toString(36);
+}
+
+function endpointHost(baseUrl?: string): string {
+	if (!baseUrl) return '';
+	try {
+		return new URL(normalizeAiBaseUrl(baseUrl)).host.toLowerCase();
+	} catch {
+		return '';
+	}
+}
+
+/** Everything that has to agree for a cached translation to be this translation. */
+export interface TranslateCacheScope {
+	baseUrl?: string;
+	model: string;
+	targetLang: string;
+	sourceLang?: string;
+	prompt?: string;
+}
+
+/**
+ * The endpoint is part of the key because two providers answering the same model
+ * name do not answer it the same way; without it, switching provider served the
+ * other one's output.
+ */
+export function translationCacheKey(scope: TranslateCacheScope, text: string): string {
+	return [
+		endpointHost(scope.baseUrl),
+		scope.model,
+		scope.targetLang,
+		scope.sourceLang || '',
+		promptFingerprint(scope.prompt || ''),
+		text
+	].join('\u0000');
 }
 
 export interface TranslateBatchResult {
@@ -509,7 +564,14 @@ export async function translateTexts(
 	onBatchDone?: (indices: number[], translations: (string | null)[]) => void
 ): Promise<(string | null)[]> {
 	const out: (string | null)[] = new Array(texts.length).fill(null);
-	const cacheKeys = texts.map(text => translationCacheKey(config, options, text));
+	const scope: TranslateCacheScope = {
+		baseUrl: config.baseUrl,
+		model: config.model,
+		targetLang: options.targetLang,
+		sourceLang: options.sourceLang,
+		prompt: options.prompt
+	};
+	const cacheKeys = texts.map(text => translationCacheKey(scope, text));
 
 	const todo: number[] = [];
 	let cachedPrompt = 0;
@@ -526,6 +588,30 @@ export async function translateTexts(
 		} else {
 			todo.push(i);
 		}
+	}
+
+	// The disk tier, asked once for the whole list: one transaction is the cheapest
+	// way to find out that this article was already paid for. It runs before the
+	// usage notice below, so a hit read from disk counts as what it saved.
+	if (todo.length && options.store) {
+		const hits = await options.store.lookup(todo.map(index => cacheKeys[index]));
+		const remaining: number[] = [];
+		for (const index of todo) {
+			const hit = hits[cacheKeys[index]];
+			if (hit === undefined) {
+				remaining.push(index);
+				continue;
+			}
+			out[index] = hit;
+			// Back into the session cache as well: the next call in this document
+			// should not have to ask the disk again either.
+			translationCache.set(cacheKeys[index], hit);
+			cachedCount++;
+			cachedPrompt += estimateTokens(texts[index]);
+			cachedCompletion += estimateTokens(hit);
+		}
+		todo.length = 0;
+		todo.push(...remaining);
 	}
 
 	if (cachedCount && options.onUsage) {
@@ -547,6 +633,7 @@ export async function translateTexts(
 	const queue = [...batches];
 	const workers: Promise<void>[] = [];
 	const errors: Error[] = [];
+	const learned: Record<string, string> = {};
 
 	const runBatch = async (indices: number[]) => {
 		const batchTexts = indices.map(index => texts[index]);
@@ -557,6 +644,7 @@ export async function translateTexts(
 				if (value) {
 					out[index] = value;
 					translationCache.set(cacheKeys[index], value);
+					learned[cacheKeys[index]] = value;
 				}
 			});
 			onBatchDone?.(indices, result.translations);
@@ -575,6 +663,13 @@ export async function translateTexts(
 		})());
 	}
 	await Promise.all(workers);
+
+	// Nothing waits for this write: the answer is already in `out`. A failed put
+	// costs the next read, not this one — and only translations that actually
+	// arrived are in here, never a null.
+	if (options.store && Object.keys(learned).length) {
+		void options.store.record(learned);
+	}
 
 	if (errors.length && out.every(value => value === null)) {
 		throw errors[0];

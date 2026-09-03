@@ -7,7 +7,7 @@ import type { AiSettings } from '../types/types';
 import { LANGUAGE_OPTIONS } from '../utils/ai/translate';
 import { maskAiSecrets, normalizeAiBaseUrl, parseAiExtraParams } from '../utils/ai/chat';
 import { isLocalEndpoint } from '../utils/ai/config';
-import { requestAiTest, requestAiUsage, requestAiUsageClear } from '../utils/ai/messenger';
+import { requestAiTest, requestAiUsage, requestAiUsageClear, requestAiCacheStats, requestAiCacheClear } from '../utils/ai/messenger';
 import type { AiUsagePanelData } from '../utils/ai/messenger';
 import type { AiUsageSummary } from '../utils/ai/usage';
 import { getMessage } from '../utils/i18n';
@@ -304,6 +304,29 @@ async function initializeUsagePanel(): Promise<void> {
 		windowSelect.addEventListener('change', () => { void refreshUsage(); });
 	}
 
+	initializeSettingToggle('ai-persist-translations', generalSettings.ai.persistTranslations !== false, async (checked) => {
+		await setAiSetting('persistTranslations', checked);
+		// Switching it off deletes nothing: the database simply stops being read and
+		// written, and the button to clear it stays where it is. The usage log does
+		// clear on its switch, because there a stale list would misreport what is
+		// still being tracked.
+		await refreshCacheStats();
+	});
+
+	const clearCache = document.getElementById('ai-cache-clear');
+	if (clearCache) {
+		clearCache.addEventListener('click', async () => {
+			try {
+				await requestAiCacheClear();
+			} catch (error: unknown) {
+				showStatus('error', error instanceof Error ? error.message : String(error));
+			}
+			await refreshCacheStats();
+		});
+	}
+
+	await refreshCacheStats();
+
 	const savePrices = debounce(() => {
 		const input = document.getElementById('ai-price-input') as HTMLInputElement | null;
 		const output = document.getElementById('ai-price-output') as HTMLInputElement | null;
@@ -333,6 +356,30 @@ async function initializeUsagePanel(): Promise<void> {
 	}
 
 	await refreshUsage();
+}
+
+async function refreshCacheStats(): Promise<void> {
+	const line = document.getElementById('ai-cache-stats');
+	if (!line) return;
+
+	try {
+		const stats = await requestAiCacheStats();
+		if (stats.count) {
+			// Characters, not bytes: that is what the budget counts. Guessing at the
+			// database's own on-disk size would produce a number nobody can check.
+			line.textContent = getMessage('aiCacheStats', [
+				tokenFormatter.format(stats.count),
+				formatTokens(stats.chars)
+			]);
+		} else {
+			line.textContent = stats.persisted
+				? getMessage('aiCacheEmpty') || 'Nothing remembered yet.'
+				: getMessage('aiCacheOff') || 'Turned off, so nothing new is remembered.';
+		}
+	} catch {
+		// The count is decoration beside a control that works without it.
+		line.textContent = '';
+	}
 }
 
 function usageWindowDays(): number {

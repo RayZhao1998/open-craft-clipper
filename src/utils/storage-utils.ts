@@ -26,6 +26,7 @@ export const defaultAiSettings: AiSettings = {
 	translateTranscript: true,
 	autoTranslate: false,
 	recordUsage: true,
+	persistTranslations: true,
 	priceInput: '',
 	priceOutput: ''
 };
@@ -119,6 +120,7 @@ interface StorageData {
 		translateTranscript?: boolean;
 		autoTranslate?: boolean;
 		recordUsage?: boolean;
+		persistTranslations?: boolean;
 		priceInput?: string;
 		priceOutput?: string;
 	};
@@ -189,6 +191,7 @@ function sanitizeAiSettings(stored: StorageData['ai_settings'] | undefined, fall
 		translateTranscript: flag(stored?.translateTranscript, fallback.translateTranscript),
 		autoTranslate: flag(stored?.autoTranslate, fallback.autoTranslate),
 		recordUsage: flag(stored?.recordUsage, fallback.recordUsage),
+		persistTranslations: flag(stored?.persistTranslations, fallback.persistTranslations),
 		// Prices are free text on purpose (a yen price, a comma-grouped one); only
 		// the shape is policed here, usage.ts decides whether it means a number.
 		priceInput: text(stored?.priceInput, fallback.priceInput).trim().slice(0, 24),
@@ -386,6 +389,7 @@ export async function saveSettings(settings?: Partial<Settings>): Promise<void> 
 			translateTranscript: generalSettings.ai.translateTranscript,
 			autoTranslate: generalSettings.ai.autoTranslate,
 			recordUsage: generalSettings.ai.recordUsage,
+			persistTranslations: generalSettings.ai.persistTranslations,
 			priceInput: generalSettings.ai.priceInput,
 			priceOutput: generalSettings.ai.priceOutput
 		},

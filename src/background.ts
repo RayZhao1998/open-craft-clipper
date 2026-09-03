@@ -35,6 +35,7 @@ import {
 	getAiUsage
 } from './utils/ai/usage';
 import type { AiUsagePurpose } from './utils/ai/usage';
+import { getTranslationStore } from './utils/ai/translation-store';
 const YOUTUBE_EMBED_RULE_ID = 9001;
 const YOUTUBE_INNERTUBE_RULE_ID = 9002;
 
@@ -531,7 +532,11 @@ async function aiTranslateRequest(request: AiTranslateRequest): Promise<(string 
 		targetLang: (request.targetLang || '').trim() || 'en',
 		sourceLang: (request.sourceLang || '').trim(),
 		prompt: typeof request.prompt === 'string' ? request.prompt : '',
-		onUsage: aiUsageRecorder(config, settings) || undefined
+		onUsage: aiUsageRecorder(config, settings) || undefined,
+		// The background is the only place allowed to open the translation database:
+		// in a content script, IndexedDB belongs to the page being read. Turning
+		// persistence off leaves the in-memory cache, which is what there was before.
+		store: settings.ai?.persistTranslations === false ? undefined : getTranslationStore() || undefined
 	};
 
 	const started = Date.now();
@@ -1062,6 +1067,25 @@ browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime
 			return true;
 		}
 
+		if (typedRequest.action === "aiCache") {
+			Promise.all([getTranslationStore()?.stats(), loadSettings()])
+				.then(([stats, settings]) => sendResponse({
+					success: true,
+					count: stats?.count ?? 0,
+					chars: stats?.chars ?? 0,
+					persisted: settings.ai?.persistTranslations !== false
+				}))
+				.catch((error) => respondAiError(sendResponse, error));
+			return true;
+		}
+
+		if (typedRequest.action === "aiCacheClear") {
+			getTranslationStore()?.clear()
+				.then(() => sendResponse({ success: true }))
+				.catch((error) => respondAiError(sendResponse, error));
+			return true;
+		}
+
 		// For other actions that use sendResponse
 		if (typedRequest.action === "extractContent" ||
 			typedRequest.action === "ensureContentScriptLoaded" ||
@@ -1074,7 +1098,9 @@ browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime
 			typedRequest.action === "aiTranslate" ||
 			typedRequest.action === "aiTest" ||
 			typedRequest.action === "aiUsage" ||
-			typedRequest.action === "aiUsageClear") {
+			typedRequest.action === "aiUsageClear" ||
+			typedRequest.action === "aiCache" ||
+			typedRequest.action === "aiCacheClear") {
 			return true;
 		}
 	}

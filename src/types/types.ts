@@ -104,6 +104,11 @@ export interface AiSettings {
 	/** Keep a local log of what each request cost, for the usage panel. */
 	recordUsage: boolean;
 	/**
+	 * Remember finished translations in IndexedDB so re-opening a page costs
+	 * nothing. Off leaves the in-session cache only, as before.
+	 */
+	persistTranslations: boolean;
+	/**
 	 * Optional price per million tokens, in whatever currency the provider bills
 	 * in. Empty leaves the cost line off rather than showing a wrong zero.
 	 */

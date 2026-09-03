@@ -73,6 +73,7 @@ export const generalSettings: Settings = {
 		translateTranscript: true,
 		autoTranslate: false,
 		recordUsage: true,
+		persistTranslations: true,
 		priceInput: '',
 		priceOutput: '',
 	},

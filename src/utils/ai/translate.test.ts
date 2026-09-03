@@ -6,11 +6,13 @@ import {
 	parseTranslateResponse,
 	renderTranslatePrompt,
 	splitLongSegment,
+	translationCache,
 	translationCacheKey,
 	translateTexts,
 	TranslateCache,
 	TRANSLATE_CONTRACT
 } from './translate';
+import { createMemoryDriver, createTranslationStore } from './translation-store';
 import * as chat from './chat';
 
 vi.mock('./chat', async () => {
@@ -312,10 +314,63 @@ describe('translateTexts', () => {
 		await expect(translateTexts(['a'], config, { targetLang: 'de' })).rejects.toThrow(/401/);
 	});
 
-	test('cache keys separate model and target language', () => {
-		const base = translationCacheKey({ model: 'mini' }, { targetLang: 'de' }, 'text');
-		expect(base).not.toBe(translationCacheKey({ model: 'big' }, { targetLang: 'de' }, 'text'));
-		expect(base).not.toBe(translationCacheKey({ model: 'mini' }, { targetLang: 'fr' }, 'text'));
+	test('cache keys separate model, language, endpoint and prompt', () => {
+		const base = translationCacheKey({ baseUrl: 'https://api.openai.com/v1', model: 'mini', targetLang: 'de' }, 'text');
+		expect(base).not.toBe(translationCacheKey({ baseUrl: 'https://api.openai.com/v1', model: 'big', targetLang: 'de' }, 'text'));
+		expect(base).not.toBe(translationCacheKey({ baseUrl: 'https://api.openai.com/v1', model: 'mini', targetLang: 'fr' }, 'text'));
+		expect(base).not.toBe(translationCacheKey({ baseUrl: 'https://api.openai.com/v1', model: 'mini', targetLang: 'de', sourceLang: 'en' }, 'text'));
+
+		// Two providers answering the same model name do not answer it the same way.
+		expect(base).not.toBe(translationCacheKey({ baseUrl: 'https://api.deepseek.com/v1', model: 'mini', targetLang: 'de' }, 'text'));
+
+		// The old key carried only the first 40 characters of the prompt, so a glossary
+		// edited below that mark kept serving translations the old prompt produced.
+		const long = 'x'.repeat(40);
+		const withNote = translationCacheKey({ baseUrl: 'https://api.openai.com/v1', model: 'mini', targetLang: 'de', prompt: long + ' glossary: fable -> 无晶圆厂' }, 'text');
+		const edited = translationCacheKey({ baseUrl: 'https://api.openai.com/v1', model: 'mini', targetLang: 'de', prompt: long + ' glossary: fable -> 晶圆代工' }, 'text');
+		expect(withNote).not.toBe(base);
+		expect(withNote).not.toBe(edited);
+	});
+
+	test('a translation read from disk is a hit, and is never re-asked', async () => {
+		const store = createTranslationStore(createMemoryDriver());
+		const config = { baseUrl: 'https://api.openai.com/v1', apiKey: '', model: 'disk-model' };
+		const options = { targetLang: 'it', store };
+		mockedChat.mockImplementation(async (_config, messages) => {
+			const inputs = JSON.parse(messages[1].content as string) as string[];
+			return { text: JSON.stringify({ t: inputs.map(text => `ok:${text}`) }) };
+		});
+
+		const texts = ['disk-alpha', 'disk-beta'];
+		const first = await translateTexts(texts, config, options);
+		expect(first).toEqual(['ok:disk-alpha', 'ok:disk-beta']);
+		expect(mockedChat).toHaveBeenCalledTimes(1);
+
+		// A fresh page has no session cache; the store is what makes the second visit free.
+		translationCache.clear();
+		mockedChat.mockClear();
+		const again = await translateTexts(texts, config, options);
+
+		expect(again).toEqual(first);
+		expect(mockedChat).not.toHaveBeenCalled();
+	});
+
+	test('a different prompt does not read the old prompt out of disk', async () => {
+		const store = createTranslationStore(createMemoryDriver());
+		const config = { baseUrl: 'https://api.openai.com/v1', apiKey: '', model: 'prompt-model' };
+		mockedChat.mockImplementation(async (_config, messages) => {
+			const inputs = JSON.parse(messages[1].content as string) as string[];
+			return { text: JSON.stringify({ t: inputs.map(text => `v2:${text}`) }) };
+		});
+
+		await translateTexts(['prompt-case'], config, { targetLang: 'tr', prompt: 'formal register', store });
+		translationCache.clear();
+		mockedChat.mockClear();
+
+		const out = await translateTexts(['prompt-case'], config, { targetLang: 'tr', prompt: 'casual register', store });
+
+		expect(mockedChat).toHaveBeenCalledTimes(1);
+		expect(out).toEqual(['v2:prompt-case']);
 	});
 });
 
