@@ -1,6 +1,6 @@
 import browser from 'webextension-polyfill';
 import { detectBrowser } from './utils/browser-detection';
-import { updateCurrentActiveTab, isValidUrl, isBlankPage, isNormalPageUrl } from './utils/active-tab-manager';
+import { updateCurrentActiveTab, isValidUrl, isBlankPage, isNormalPageUrl, isRestrictedUrl } from './utils/active-tab-manager';
 import { TextHighlightData } from './utils/highlighter';
 import { debounce } from './utils/debounce';
 import { Settings } from './types/types';
@@ -15,6 +15,14 @@ import {
 	toCraftErrorMessage
 } from './utils/craft/api';
 import { CraftSaveResult } from './utils/craft/client';
+import {
+	getAutoReaderConfig,
+	shouldAutoReader,
+	invalidateAutoReaderConfig,
+	suppressAutoReader,
+	isAutoReaderSuppressed,
+	clearAutoReaderSuppression
+} from './utils/auto-reader';
 import { AiChatConfig, maskAiSecrets, pingAiModel } from './utils/ai/chat';
 import { getAiStatus, resolveAiConfig } from './utils/ai/config';
 import { translateTexts } from './utils/ai/translate';
@@ -294,6 +302,9 @@ async function exitReaderPageIfNeeded(tabId: number, readerUrl?: string): Promis
 	}
 
 	if (originalUrl) {
+		// Leaving the standalone Reader page counts as opting out in this tab,
+		// otherwise the load below would open Reader again automatically.
+		void suppressAutoReader(tabId);
 		await browser.tabs.update(tabId, { url: originalUrl });
 		readerModeState[tabId] = false;
 		debouncedUpdateContextMenu(tabId);
@@ -621,6 +632,11 @@ browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime
 			if (tabId) {
 				readerModeState[tabId] = typedRequest.isActive;
 				debouncedUpdateContextMenu(tabId);
+				// Turning Reader off by hand means "not in this tab" — otherwise the
+				// reload it triggers would push the page straight back into Reader.
+				if (typedRequest.isActive === false) {
+					void suppressAutoReader(tabId);
+				}
 			}
 			if (typedRequest.isActive === true) {
 				incrementStat('readerMode', undefined, undefined, sender.tab.url, sender.tab.title)
@@ -1277,6 +1293,73 @@ async function injectReaderScript(tabId: number) {
 	}
 }
 
+// --- Auto Reader ------------------------------------------------------------
+// Settings → Reader can name sites, or specific links, that open in Reader on
+// their own. utils/auto-reader decides; this is the part that drives the tab.
+
+const autoReaderPending = new Set<number>();
+
+async function maybeAutoEnableReader(tabId: number, url: string | undefined): Promise<void> {
+	if (!url || !isNormalPageUrl(url) || isRestrictedUrl(url)) return;
+
+	const config = await getAutoReaderConfig();
+	if (!config.enabled) return;
+
+	if (!shouldAutoReader(config, url)) {
+		// The tab moved on to a page the user did not opt into. Drop the manual
+		// opt-out so a later matching page opens Reader again, and so a recycled
+		// tab id cannot carry an old opt-out into an unrelated tab.
+		clearAutoReaderSuppression(tabId);
+		return;
+	}
+
+	if (readerModeState[tabId]) return;
+	if (await isAutoReaderSuppressed(tabId)) return;
+	if (autoReaderPending.has(tabId)) return;
+
+	// Only a document that has finished loading may be turned into Reader. A
+	// URL change also fires at commit time, while the previous document is still
+	// on screen during an ordinary navigation — the status:complete event that
+	// follows is the one that should act. Same-document (SPA) navigations are
+	// already complete, so they pass.
+	let tab: browser.Tabs.Tab;
+	try {
+		tab = await browser.tabs.get(tabId);
+	} catch {
+		return;
+	}
+	if (tab.status !== 'complete') return;
+	if (tab.url && url && tab.url !== url) return;
+
+	autoReaderPending.add(tabId);
+	try {
+		await ensureContentScriptLoadedInBackground(tabId);
+		if (!await injectReaderScript(tabId)) return;
+
+		const response = await browser.tabs.sendMessage(tabId, { action: "toggleReaderMode" }) as { success?: boolean; isActive?: boolean };
+		if (response?.success) {
+			readerModeState[tabId] = response.isActive ?? true;
+			debouncedUpdateContextMenu(tabId);
+		}
+	} catch (error) {
+		debugLog('AutoReader', 'Could not open Reader automatically in tab', tabId, error);
+	} finally {
+		autoReaderPending.delete(tabId);
+	}
+}
+
+// Registered at module scope so a service worker that restarts is not waiting
+// on browser detection while pages load. changeInfo.url covers same-document
+// (SPA) navigations, status covers ordinary loads.
+browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+	if (!changeInfo.url && changeInfo.status !== 'complete') return;
+	void maybeAutoEnableReader(tabId, changeInfo.url ?? tab.url);
+});
+
+browser.tabs.onRemoved.addListener((tabId) => {
+	clearAutoReaderSuppression(tabId);
+});
+
 // When set to 'reader' or 'embedded', clear the popup so action.onClicked fires
 // instead, handling the action directly without briefly opening the popup.
 const validOpenBehaviors: Settings['openBehavior'][] = ['popup', 'embedded', 'reader'];
@@ -1327,6 +1410,9 @@ browser.action.onClicked.addListener(async (tab) => {
 browser.storage.onChanged.addListener((changes, area) => {
 	if (area === 'sync' && changes.general_settings) {
 		updateActionPopup(parseOpenBehavior((changes.general_settings.newValue as Record<string, string>)?.openBehavior));
+	}
+	if (area === 'sync' && changes.reader_settings) {
+		invalidateAutoReaderConfig();
 	}
 });
 

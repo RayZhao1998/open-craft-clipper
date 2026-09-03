@@ -739,6 +739,38 @@
 								</div>
 							</div>
 							<div class="setting-group">
+								<div class="setting-item setting-item-heading">
+									<h3 data-i18n="readerAutoReader">Auto Reader</h3>
+									<div class="setting-item-description" data-i18n="readerAutoReaderHeadingDescription">
+										Open the pages you read most in Reader on their own, instead of pressing the Reader button on every one of them.
+									</div>
+								</div>
+								<div class="setting-items">
+									<div class="setting-item mod-horizontal mod-toggle">
+										<div class="setting-item-info">
+											<label for="reader-auto-enable" data-i18n="readerAutoReaderEnable">Open Reader automatically</label>
+											<div class="setting-item-description" data-i18n="readerAutoReaderEnableDescription">
+												Open a page in Reader as soon as it finishes loading, when its address matches a rule below.
+											</div>
+										</div>
+										<div class="setting-item-control">
+											<div class="checkbox-container">
+												<input type="checkbox" id="reader-auto-enable" />
+											</div>
+										</div>
+									</div>
+									<div class="setting-item">
+										<div class="setting-item-info">
+											<label for="reader-auto-patterns" data-i18n="readerAutoReaderSites">Sites and links</label>
+											<div class="setting-item-description" data-i18n="readerAutoReaderSitesDescription">
+												One rule per line. A domain also covers its subdomains; add a path to limit it to that path. A full address matches its start, /regex/ matches the whole address, and - at the start carves an exception out of the rest. Turning Reader off in a tab stops it from reopening there.
+											</div>
+										</div>
+										<textarea id="reader-auto-patterns" rows="5" spellcheck="false" data-i18n="readerAutoReaderSitesPlaceholder" placeholder="example.com&#10;news.example.com/blog&#10;-news.example.com/comments&#10;https://example.com/long-reads/"></textarea>
+									</div>
+								</div>
+							</div>
+							<div class="setting-group">
 								<div class="setting-item setting-item-heading"><h3 data-i18n="advanced">Advanced</h3></div>
 								<div class="setting-items">
 									<div class="setting-item">

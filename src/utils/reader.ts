@@ -167,7 +167,11 @@ export class Reader {
 		pinPlayer: true,
 		autoScroll: true,
 		highlightActiveLine: true,
-		customCss: ''
+		customCss: '',
+		// Read by the background, not by the view; kept so the type stays whole
+		// when stored reader settings are spread over these defaults.
+		autoReaderEnabled: false,
+		autoReaderPatterns: []
 	};
 
 	private static async loadSettings(): Promise<void> {

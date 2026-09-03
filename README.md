@@ -40,6 +40,17 @@ Usage, cost controls and the prompt format: [docs/AI translation.md](docs/AI%20t
 
 All AI logic lives in `src/utils/ai/*` plus `src/utils/reader-translate.ts`; requests go through the background page so the key never reaches a content script. Everything else in the page — highlights, selection, the markdown that gets saved — is left alone.
 
+## This fork: Auto Reader
+
+Reader can open pages on its own. List the sites or links you always read cleanly, and Reader opens them the moment they finish loading — no toolbar click per article.
+
+- A rule is a domain (subdomains included), optionally narrowed to a path, a full address prefix, or a `/regex/`. A leading `-` carves an exception out of the rest.
+- Turning Reader off in a tab keeps it off there: the page you just left is not pushed back into Reader by the next load.
+
+Configure it in **Settings → Reader → Auto Reader**. Rule format and limits: [docs/Auto Reader.md](docs/Auto%20Reader.md)
+
+Matching and the per-tab opt-out live in `src/utils/auto-reader.ts`; the background script only injects and toggles.
+
 ## Get started
 
 Install the extension by downloading it from the official directory for your browser:

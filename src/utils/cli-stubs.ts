@@ -39,6 +39,8 @@ export const generalSettings: Settings = {
 		autoScroll: true,
 		highlightActiveLine: true,
 		customCss: '',
+		autoReaderEnabled: false,
+		autoReaderPatterns: [],
 	},
 	stats: {
 		addToObsidian: 0,

@@ -59,7 +59,9 @@ export let generalSettings: Settings = {
 		pinPlayer: true,
 		autoScroll: true,
 		highlightActiveLine: true,
-		customCss: ''
+		customCss: '',
+		autoReaderEnabled: false,
+		autoReaderPatterns: []
 	},
 	stats: {
 		addToObsidian: 0,
@@ -136,6 +138,8 @@ interface StorageData {
 		autoScroll?: boolean;
 		highlightActiveLine?: boolean;
 		customCss?: string;
+		autoReaderEnabled?: boolean;
+		autoReaderPatterns?: string[];
 	};
 	interpreter_settings?: {
 		interpreterModel?: string;
@@ -218,7 +222,9 @@ export async function loadSettings(): Promise<Settings> {
 			pinPlayer: true,
 			autoScroll: true,
 			highlightActiveLine: true,
-			customCss: ''
+			customCss: '',
+			autoReaderEnabled: false,
+			autoReaderPatterns: []
 		},
 		stats: {
 			addToObsidian: 0,
@@ -284,7 +290,13 @@ export async function loadSettings(): Promise<Settings> {
 			pinPlayer: data.reader_settings?.pinPlayer ?? defaultSettings.readerSettings.pinPlayer,
 			autoScroll: data.reader_settings?.autoScroll ?? defaultSettings.readerSettings.autoScroll,
 			highlightActiveLine: data.reader_settings?.highlightActiveLine ?? defaultSettings.readerSettings.highlightActiveLine,
-			customCss: data.reader_settings?.customCss ?? defaultSettings.readerSettings.customCss
+			customCss: data.reader_settings?.customCss ?? defaultSettings.readerSettings.customCss,
+			autoReaderEnabled: data.reader_settings?.autoReaderEnabled ?? defaultSettings.readerSettings.autoReaderEnabled,
+			// Storage is user-editable: only keep real lines of text, and cap the
+			// list so a corrupted value cannot slow every navigation down.
+			autoReaderPatterns: Array.isArray(data.reader_settings?.autoReaderPatterns)
+				? data.reader_settings.autoReaderPatterns.filter((line): line is string => typeof line === 'string').slice(0, 100)
+				: defaultSettings.readerSettings.autoReaderPatterns
 		},
 		stats: { ...defaultSettings.stats, ...data.stats },
 		history: data.history || defaultSettings.history,
@@ -378,7 +390,9 @@ export async function saveSettings(settings?: Partial<Settings>): Promise<void> 
 			pinPlayer: generalSettings.readerSettings.pinPlayer,
 			autoScroll: generalSettings.readerSettings.autoScroll,
 			highlightActiveLine: generalSettings.readerSettings.highlightActiveLine,
-			customCss: generalSettings.readerSettings.customCss
+			customCss: generalSettings.readerSettings.customCss,
+			autoReaderEnabled: generalSettings.readerSettings.autoReaderEnabled,
+			autoReaderPatterns: generalSettings.readerSettings.autoReaderPatterns
 		},
 		stats: generalSettings.stats
 	});

@@ -966,6 +966,27 @@
 	"readerAppearanceLight": {
 		"message": "浅色"
 	},
+	"readerAutoReader": {
+		"message": "自动阅读器"
+	},
+	"readerAutoReaderEnable": {
+		"message": "自动打开阅读器"
+	},
+	"readerAutoReaderEnableDescription": {
+		"message": "页面加载完成后，只要地址匹配下方的规则，就自动进入阅读器。"
+	},
+	"readerAutoReaderHeadingDescription": {
+		"message": "把常读的页面自动交给阅读器，不必每页都点一次阅读器按钮。"
+	},
+	"readerAutoReaderSites": {
+		"message": "站点与链接"
+	},
+	"readerAutoReaderSitesDescription": {
+		"message": "每行一条规则。写域名会连同子域名一起匹配；加上路径可限定到该路径。写完整网址则按前缀匹配，/正则/ 匹配整个网址，行首的 - 表示从其余规则中排除。在某个标签页里手动关闭阅读器后，该标签页不会再自动打开。"
+	},
+	"readerAutoReaderSitesPlaceholder": {
+		"message": "example.com\nnews.example.com/blog\n-news.example.com/comments\nhttps://example.com/long-reads/"
+	},
 	"readerAutoScroll": {
 		"message": "自动滚动"
 	},

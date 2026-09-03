@@ -119,6 +119,14 @@ export interface ReaderSettings {
 	autoScroll: boolean;
 	highlightActiveLine: boolean;
 	customCss: string;
+	/** Open pages in Reader on their own, when the address matches a rule. */
+	autoReaderEnabled: boolean;
+	/**
+	 * One rule per line: a domain (its subdomains included), optionally narrowed
+	 * to a path; `http(s)://…` is a prefix, `/regex/` is a regex, and a leading
+	 * `-` excludes. Kept as lines so the settings textarea round-trips.
+	 */
+	autoReaderPatterns: string[];
 }
 
 export interface Settings {

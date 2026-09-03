@@ -966,6 +966,27 @@
 	"readerAppearanceLight": {
 		"message": "Light"
 	},
+	"readerAutoReader": {
+		"message": "Auto Reader"
+	},
+	"readerAutoReaderEnable": {
+		"message": "Open Reader automatically"
+	},
+	"readerAutoReaderEnableDescription": {
+		"message": "Open a page in Reader as soon as it finishes loading, when its address matches a rule below."
+	},
+	"readerAutoReaderHeadingDescription": {
+		"message": "Open the pages you read most in Reader on their own, instead of pressing the Reader button on every one of them."
+	},
+	"readerAutoReaderSites": {
+		"message": "Sites and links"
+	},
+	"readerAutoReaderSitesDescription": {
+		"message": "One rule per line. A domain also covers its subdomains; add a path to limit it to that path. A full address matches its start, /regex/ matches the whole address, and - at the start carves an exception out of the rest. Turning Reader off in a tab stops it from reopening there."
+	},
+	"readerAutoReaderSitesPlaceholder": {
+		"message": "example.com\nnews.example.com/blog\n-news.example.com/comments\nhttps://example.com/long-reads/"
+	},
 	"readerAutoScroll": {
 		"message": "Auto-scroll"
 	},

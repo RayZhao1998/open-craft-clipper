@@ -394,6 +394,21 @@ export async function initializeReaderSettings() {
 		});
 	}
 
+	initializeSettingToggle('reader-auto-enable', generalSettings.readerSettings.autoReaderEnabled, (checked) => {
+		saveSettings({ ...generalSettings, readerSettings: { ...generalSettings.readerSettings, autoReaderEnabled: checked } });
+	});
+
+	// Stored as the lines that were typed, so what comes back from storage is
+	// what the textarea shows again; utils/auto-reader interprets them.
+	const autoPatternsInput = document.getElementById('reader-auto-patterns') as HTMLTextAreaElement;
+	if (autoPatternsInput) {
+		autoPatternsInput.value = generalSettings.readerSettings.autoReaderPatterns.join('\n');
+		autoPatternsInput.addEventListener('input', debounce(() => {
+			const patterns = autoPatternsInput.value.split('\n').map(line => line.trim()).filter(Boolean);
+			saveSettings({ ...generalSettings, readerSettings: { ...generalSettings.readerSettings, autoReaderPatterns: patterns } });
+		}, 500));
+	}
+
 	const customCssInput = document.getElementById('reader-custom-css') as HTMLTextAreaElement;
 	if (customCssInput) {
 		customCssInput.value = generalSettings.readerSettings.customCss ?? '';
