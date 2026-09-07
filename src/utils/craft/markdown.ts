@@ -45,12 +45,22 @@ export function stripFrontmatter(content: string): string {
 	return content.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
 }
 
+/**
+ * Popup checkbox properties store a real boolean, not `"true"`/`"false"`.
+ * Coerce anything the DOM hands us into the markdown we actually write.
+ */
+export function propertyValueText(value: unknown): string {
+	if (typeof value === 'boolean') return value ? 'true' : '';
+	if (value == null) return '';
+	return String(value).trim();
+}
+
 /** One callout per non-empty property: `<callout>**source**: …</callout>`. */
 export function propertiesToCallouts(properties: Property[]): string[] {
 	const callouts: string[] = [];
 
 	for (const property of properties) {
-		const value = (property.value ?? '').trim();
+		const value = propertyValueText(property.value);
 		if (!value) continue;
 		callouts.push(`<callout>**${property.name}**: ${value}</callout>`);
 	}

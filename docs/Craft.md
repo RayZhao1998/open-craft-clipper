@@ -14,7 +14,7 @@ This fork of Obsidian Web Clipper adds a second save destination: [Craft](https:
 
 ## Choosing the destination
 
-- **Global default:** Settings → General → *Save behavior* → *Add to Craft* (only listed when Craft is enabled).
+- **Global default:** Settings → Craft → *Clipper main button* → *Add to Craft* (also under Settings → General → *Save behavior*).
 - **Per template:** Template → *Save to* → `Craft`. A template pinned to Craft hides Vault/Note-location fields and locks *Behavior* to "create new note", because the Craft API only creates documents.
 - **Per clip:** the main button plus the `⌄` menu always offer the other app.
 
@@ -40,7 +40,7 @@ Craft has no YAML frontmatter, so template **properties become header callouts**
 - **Header tags:** inserted above the caption, template variables allowed (`{{tags}}`).
 - **Custom header:** replaces the whole built-in header; uses the same template syntax as note content.
 - **Wiki links:** `[[link]]` → plain text (default) or an `obsidian://search` link.
-- **Body conversions:** `> [!tip] Title` → `<callout>`, `![[image.png]]` / relative `<img>` → absolute remote URL, `==text==` → **bold**, `%%comments%%` removed. Code blocks and inline code are never rewritten.
+- **Body conversions:** `> [!tip] Title` → `<callout>`, `![[image.png]]` / relative `<img>` → absolute remote URL, `==highlights==` kept (Craft yellow highlight), `%%comments%%` removed. Code blocks and inline code are never rewritten.
 
 Images are **kept as remote URLs** (Craft fetches them); nothing is uploaded to the space, so hotlink-protected or short-lived image URLs can break later.
 

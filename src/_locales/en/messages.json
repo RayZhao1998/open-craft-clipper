@@ -531,6 +531,12 @@
 	"enableAiDescription": {
 		"message": "Turns on immersive translation in Reader using any OpenAI-compatible endpoint. Requests are made by the extension, never by the page you are reading."
 	},
+	"craftMainButton": {
+		"message": "Clipper main button"
+	},
+	"craftMainButtonDescription": {
+		"message": "What the popup's main button does. The other destination stays in the menu next to it. A template can still override this."
+	},
 	"enableCraft": {
 		"message": "Save to Craft"
 	},

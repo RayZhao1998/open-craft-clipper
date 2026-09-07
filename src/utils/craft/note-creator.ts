@@ -4,8 +4,8 @@
 import { CraftSettings, Property } from '../../types/types';
 import { CraftApiError } from './api';
 import { craftSave, CraftSaveResult } from './client';
-import { buildCraftDocument } from './markdown';
-import { adaptMarkdownForCraft } from './syntax';
+import { buildCraftDocument, propertyValueText } from './markdown';
+import { adaptMarkdownForCraft, promoteImagesToBlocks } from './syntax';
 import { getMessage } from '../i18n';
 
 export interface CraftClipInput {
@@ -49,16 +49,22 @@ export async function saveToCraft({
 		baseUrl: sourceUrl || undefined
 	};
 
-	const markdown = buildCraftDocument({
+	// Run image promotion on the assembled document too: property callouts
+	// wrap values on one line, which would put `![...](...)` back into an
+	// inline context and Craft rejects that ("Expected inline markdown, got image").
+	const markdown = promoteImagesToBlocks(buildCraftDocument({
 		body: adaptMarkdownForCraft(body, syntaxOptions),
-		properties: properties.map(property => ({
-			...property,
-			value: property.value ? adaptMarkdownForCraft(property.value, syntaxOptions) : property.value
-		})),
+		properties: properties.map(property => {
+			const value = propertyValueText(property.value);
+			return {
+				...property,
+				value: value ? adaptMarkdownForCraft(value, syntaxOptions) : value
+			};
+		}),
 		header,
 		tags: craft.tags,
 		propertiesAs: craft.propertiesAs
-	});
+	}));
 
 	return craftSave({
 		title: title.trim() || 'Untitled clip',

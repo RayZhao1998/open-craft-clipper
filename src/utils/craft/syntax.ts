@@ -75,11 +75,9 @@ export function removeComments(markdown: string): string {
 	);
 }
 
-/** `==text==` → `**text**` (Craft has no highlight syntax). */
+/** Craft treats `==text==` as a yellow highlight — leave it alone. */
 export function convertHighlights(markdown: string): string {
-	return mapOutsideCode(markdown, text =>
-		text.replace(/==([^=\n]+)==/g, '**$1**')
-	);
+	return markdown;
 }
 
 function parseTarget(rawTarget: string): { target: string; alias?: string; heading: string } {
@@ -254,11 +252,104 @@ function tidy(markdown: string): string {
 		.trim();
 }
 
+/**
+ * Craft's markdown importer rejects lists whose first item is empty
+ * ("The first item in any list cannot be empty"). Drop marker-only lines
+ * outside fenced code; `***` / `---` horizontal rules are not list items.
+ */
+export function removeEmptyListItems(markdown: string): string {
+	return mapOutsideFences(markdown, text =>
+		text.replace(/^( {0,3}(?:[-*+]|\d+[.)])[ \t]*)$/gm, '')
+	);
+}
+
+// Markdown image, optional title, optional <> around the URL.
+const MD_IMAGE = /!\[[^\]]*\]\((?:<[^>\s]+>|[^\s)]+)(?:\s+(?:"[^"]*"|'[^']*'))?\)/;
+const HTML_IMG = /<img\b[^>]*>/i;
+const IMAGE_TOKEN = new RegExp(`(?:${MD_IMAGE.source}|${HTML_IMG.source})`, 'gi');
+const LINKED_IMAGE = new RegExp(
+	`\\[(${MD_IMAGE.source})\\]\\((?:<[^>\\s]+>|[^\\s)]+)(?:\\s+(?:"[^"]*"|'[^']*'))?\\)`,
+	'g'
+);
+
+function htmlImgToMarkdown(tag: string): string {
+	const alt = tag.match(/\balt=["']([^"']*)["']/i)?.[1] ?? '';
+	const src = tag.match(/\bsrc=["']([^"']*)["']/i)?.[1] ?? '';
+	return src ? `![${alt}](${src})` : '';
+}
+
+function normalizeImageToken(token: string): string {
+	return token[0] === '<' ? htmlImgToMarkdown(token) : token;
+}
+
+/** `![alt](src)` / `<img>` → `[alt](src)` so it is legal in inline-only Craft tags. */
+function imageToLink(token: string): string {
+	const markdown = normalizeImageToken(token);
+	const match = markdown.match(/^!\[([^\]]*)\]\((.*)\)$/);
+	if (!match) return token;
+	const alt = match[1].trim() || 'image';
+	return `[${alt}](${match[2]})`;
+}
+
+function replaceImageTokens(text: string, replacer: (token: string) => string): string {
+	IMAGE_TOKEN.lastIndex = 0;
+	return text.replace(IMAGE_TOKEN, replacer);
+}
+
+/**
+ * Craft treats images as blocks, not inline nodes. A clip of a typical article
+ * often has `Hello ![x](url)` or `[![x](url)](link)`, which the importer
+ * rejects with "Expected inline markdown, got image". Pull those images out
+ * onto their own lines (and unwrap linked images) so they parse as blocks.
+ *
+ * Callouts, captions and highlights are inline-only: an image there becomes a
+ * link instead of being split out, so we never break the wrapping tags.
+ */
+export function promoteImagesToBlocks(markdown: string): string {
+	return mapOutsideCode(markdown, text => {
+		let result = text.replace(LINKED_IMAGE, '$1');
+		result = result.replace(
+			/<(callout|caption|highlight)\b([^>]*)>([\s\S]*?)<\/\1>/gi,
+			(_full, tag: string, attrs: string, inner: string) =>
+				`<${tag}${attrs}>${replaceImageTokens(inner, imageToLink)}</${tag}>`
+		);
+		return result.split(/\n{2,}/).map(promoteImagesInBlock).join('\n\n');
+	});
+}
+
+function promoteImagesInBlock(block: string): string {
+	IMAGE_TOKEN.lastIndex = 0;
+	if (!IMAGE_TOKEN.test(block)) return block;
+
+	const parts: string[] = [];
+	let last = 0;
+	IMAGE_TOKEN.lastIndex = 0;
+	for (const match of block.matchAll(IMAGE_TOKEN)) {
+		const index = match.index ?? 0;
+		parts.push(block.slice(last, index));
+		parts.push(normalizeImageToken(match[0]));
+		last = index + match[0].length;
+	}
+	parts.push(block.slice(last));
+
+	const nonImage = parts.filter((_, index) => index % 2 === 0).join('');
+	if (!nonImage.trim()) {
+		return parts.filter((part, index) => index % 2 === 1 && part).join('\n\n');
+	}
+
+	return parts
+		.map(part => part.trim())
+		.filter(Boolean)
+		.join('\n\n');
+}
+
 export function adaptMarkdownForCraft(markdown: string, options: CraftSyntaxOptions = {}): string {
 	let result = removeComments(markdown);
 	result = convertCallouts(result);
 	result = convertWikiLinks(result, options);
 	result = convertHighlights(result);
 	result = absolutizeImages(result, options.baseUrl);
+	result = promoteImagesToBlocks(result);
+	result = removeEmptyListItems(result);
 	return tidy(result);
 }

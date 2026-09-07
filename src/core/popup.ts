@@ -619,12 +619,15 @@ async function initializeUI() {
 	}
 }
 
-function showError(messageKey: string): void {
+function showError(messageKey: string, detail?: string): void {
 	const errorMessage = document.querySelector('.error-message') as HTMLElement;
 	const clipper = document.querySelector('.clipper') as HTMLElement;
 
 	if (errorMessage && clipper) {
-		errorMessage.textContent = getMessage(messageKey);
+		const text = getMessage(messageKey);
+		errorMessage.textContent = detail && detail !== text && detail !== messageKey
+			? `${text} ${detail}`
+			: text;
 		errorMessage.style.display = 'flex';
 		clipper.style.display = 'none';
 
@@ -1474,11 +1477,15 @@ async function handleClipCraft(): Promise<void> {
 		}
 	} catch (error) {
 		console.error('Error in handleClipCraft:', error);
-		showError('failedToSaveToCraft');
+		const detail = error instanceof Error ? error.message : String(error);
+		if (/extension context invalidated|message port closed|extension was reloaded/i.test(detail)) {
+			showError('pleaseReload');
+		} else {
+			showError('failedToSaveToCraft', detail);
+		}
 		if (clipButton && originalButtonText) {
 			clipButton.textContent = originalButtonText;
 		}
-		throw error;
 	}
 }
 

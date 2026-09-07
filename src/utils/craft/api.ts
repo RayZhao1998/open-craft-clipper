@@ -109,14 +109,11 @@ async function request<T>(apiUrl: string, path: string, init?: RequestInit): Pro
 		throw new CraftApiError(0, 'Could not reach Craft. Check your internet connection.');
 	}
 
+	const text = await response.text();
+	const parsed = parseJsonBody(text);
+
 	if (!response.ok) {
-		let detail = '';
-		try {
-			const body = await response.json();
-			detail = body?.message || body?.error || '';
-		} catch {
-			// Ignore non-JSON error bodies
-		}
+		const detail = (parsed && (parsed.message || parsed.error)) || '';
 
 		if (response.status === 401 || response.status === 404) {
 			throw new CraftApiError(
@@ -127,7 +124,17 @@ async function request<T>(apiUrl: string, path: string, init?: RequestInit): Pro
 		throw new CraftApiError(response.status, detail || `Craft API request failed (${response.status}).`);
 	}
 
-	return (await response.json()) as T;
+	// POST /blocks can return 200 with an empty body after a successful insert.
+	return parsed as T;
+}
+
+function parseJsonBody(text: string): any {
+	if (!text.trim()) return null;
+	try {
+		return JSON.parse(text);
+	} catch {
+		return null;
+	}
 }
 
 export async function getConnection(apiUrl: string): Promise<ConnectionInfo> {
@@ -161,6 +168,35 @@ export async function createDocument(
 	return doc;
 }
 
+export async function deleteDocuments(apiUrl: string, documentIds: string[]): Promise<void> {
+	if (!documentIds.length) return;
+	await request(apiUrl, '/documents', {
+		method: 'DELETE',
+		body: JSON.stringify({ documentIds })
+	});
+}
+
+/**
+ * Create a document and write its body. If the body write fails, the empty
+ * document is moved to Trash so Craft is not left with a title-only clip.
+ */
+export async function createDocumentWithMarkdown(
+	apiUrl: string,
+	title: string,
+	markdown: string,
+	folderId: string | null
+): Promise<CreatedDocument> {
+	const created = await createDocument(apiUrl, title, folderId);
+	if (!markdown.trim()) return created;
+	try {
+		await appendMarkdown(apiUrl, created.id, markdown);
+		return created;
+	} catch (error) {
+		await deleteDocuments(apiUrl, [created.id]).catch(() => {});
+		throw error;
+	}
+}
+
 /** Max size (in bytes, UTF-8) of a single POST /blocks markdown payload. */
 export const MAX_CHUNK_BYTES = 100_000;
 
@@ -178,13 +214,16 @@ export async function appendMarkdown(
 	const chunks = splitMarkdownIntoChunks(markdown, maxChunkBytes);
 	for (const chunk of chunks) {
 		if (!chunk.trim()) continue;
-		await request(apiUrl, '/blocks', {
+		const result = await request(apiUrl, '/blocks', {
 			method: 'POST',
 			body: JSON.stringify({
 				markdown: chunk,
 				position: { position: 'end', pageId }
 			})
 		});
+		if (result == null) {
+			throw new CraftApiError(0, 'Craft did not confirm the content was saved.');
+		}
 	}
 }
 

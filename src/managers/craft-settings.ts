@@ -2,8 +2,9 @@
 // link (with a live connection test), default folder picker and document
 // format options.
 
-import { generalSettings, saveSettings } from '../utils/storage-utils';
+import { generalSettings, saveSettings, SaveBehavior } from '../utils/storage-utils';
 import { CraftSettings } from '../types/types';
+import { updateSaveBehaviorCraftOption } from './general-settings';
 import { normalizeApiUrl, toCraftErrorMessage } from '../utils/craft/api';
 import { craftTestConnection } from '../utils/craft/client';
 import {
@@ -25,10 +26,12 @@ export async function initializeCraftSettings(): Promise<void> {
 
 	initializeSettingToggle('craft-enabled-toggle', generalSettings.craft.enabled, (checked) => {
 		saveSettings({ ...generalSettings, craft: { ...generalSettings.craft, enabled: checked } });
+		updateSaveBehaviorCraftOption();
 	});
 
 	initializeApiUrlField();
 	initializeFolderControls();
+	initializeMainButtonDropdown();
 	initializeFormatControls();
 
 	const debouncedSaveTextFields = debounce(() => saveTextFields(), 500);
@@ -200,6 +203,19 @@ function renderFolderOptions(select: HTMLSelectElement, options: CraftFolderOpti
 	if (options.some(option => option.id === previous)) {
 		select.value = previous;
 	}
+}
+
+function initializeMainButtonDropdown(): void {
+	const dropdown = document.getElementById('craft-main-button') as HTMLSelectElement | null;
+	if (!dropdown) return;
+
+	dropdown.value = generalSettings.saveBehavior === 'addToCraft' ? 'addToCraft' : 'addToObsidian';
+	dropdown.addEventListener('change', () => {
+		const value = dropdown.value as SaveBehavior;
+		saveSettings({ saveBehavior: value });
+		const general = document.getElementById('save-behavior-dropdown') as HTMLSelectElement | null;
+		if (general) general.value = value;
+	});
 }
 
 function initializeFormatControls(): void {

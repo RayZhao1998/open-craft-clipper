@@ -367,17 +367,34 @@ function initializeSaveBehaviorDropdown(): void {
     const dropdown = document.getElementById('save-behavior-dropdown') as HTMLSelectElement;
     if (!dropdown) return;
 
-    // Only offer Craft once it is enabled and configured below.
+    updateSaveBehaviorCraftOption();
+    dropdown.value = generalSettings.saveBehavior;
+    dropdown.addEventListener('change', () => {
+        const newValue = dropdown.value as SaveBehavior;
+        saveSettings({ saveBehavior: newValue });
+        const craftMain = document.getElementById('craft-main-button') as HTMLSelectElement | null;
+        if (craftMain && (newValue === 'addToCraft' || newValue === 'addToObsidian')) {
+            craftMain.value = newValue;
+        }
+    });
+}
+
+/** Show or hide "Add to Craft" in General → Save behavior when Craft is toggled. */
+export function updateSaveBehaviorCraftOption(): void {
+    const dropdown = document.getElementById('save-behavior-dropdown') as HTMLSelectElement | null;
+    if (!dropdown) return;
+
     const craftOption = dropdown.querySelector('option[value="addToCraft"]') as HTMLOptionElement | null;
     if (craftOption) {
         craftOption.hidden = !generalSettings.craft.enabled;
     }
 
-    dropdown.value = generalSettings.saveBehavior;
-    dropdown.addEventListener('change', () => {
-        const newValue = dropdown.value as SaveBehavior;
-        saveSettings({ saveBehavior: newValue });
-    });
+    if (!generalSettings.craft.enabled && dropdown.value === 'addToCraft') {
+        dropdown.value = 'addToObsidian';
+        saveSettings({ saveBehavior: 'addToObsidian' });
+        const craftMain = document.getElementById('craft-main-button') as HTMLSelectElement | null;
+        if (craftMain) craftMain.value = 'addToObsidian';
+    }
 }
 
 export function resetDefaultTemplate(): void {

@@ -25,8 +25,22 @@ interface CraftMessageResponse<T> {
 	error?: string;
 }
 
+function isExtensionContextLost(error: unknown): boolean {
+	const message = error instanceof Error ? error.message : String(error);
+	return /extension context invalidated/i.test(message)
+		|| /message port closed/i.test(message);
+}
+
 async function sendCraftMessage<T>(request: Record<string, unknown>): Promise<T> {
-	const response = await browser.runtime.sendMessage(request) as CraftMessageResponse<T> | undefined;
+	let response: CraftMessageResponse<T> | undefined;
+	try {
+		response = await browser.runtime.sendMessage(request) as CraftMessageResponse<T> | undefined;
+	} catch (error) {
+		if (isExtensionContextLost(error)) {
+			throw new CraftApiError(0, 'The extension was reloaded. Refresh this page and try again.');
+		}
+		throw error;
+	}
 	if (!response || response.success !== true) {
 		throw new CraftApiError(0, response?.error || 'Craft request failed.');
 	}

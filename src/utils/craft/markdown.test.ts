@@ -21,6 +21,15 @@ describe('propertiesToCallouts', () => {
 			'<callout>**draft**: true</callout>',
 		]);
 	});
+
+	test('checkbox booleans from the popup DOM do not crash and skip unchecked', () => {
+		expect(propertiesToCallouts([
+			{ name: 'starred', value: true as unknown as string },
+			{ name: 'archived', value: false as unknown as string },
+		])).toEqual([
+			'<callout>**starred**: true</callout>',
+		]);
+	});
 });
 
 describe('stripFrontmatter', () => {

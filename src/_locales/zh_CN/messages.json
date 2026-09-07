@@ -531,6 +531,12 @@
 	"enableAiDescription": {
 		"message": "在阅读模式中通过任意 OpenAI 兼容端点进行沉浸式翻译。请求由扩展发出，你正在阅读的页面拿不到密钥。"
 	},
+	"craftMainButton": {
+		"message": "剪藏主按钮"
+	},
+	"craftMainButtonDescription": {
+		"message": "弹窗主按钮执行的操作。另一个目标仍在旁边的菜单里。模板仍可单独覆盖。"
+	},
 	"enableCraft": {
 		"message": "保存到 Craft"
 	},

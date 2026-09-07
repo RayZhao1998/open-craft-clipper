@@ -10,8 +10,7 @@ import { incrementStat, loadSettings } from './utils/storage-utils';
 import {
 	getConnection,
 	getFolders,
-	createDocument,
-	appendMarkdown,
+	createDocumentWithMarkdown,
 	toCraftErrorMessage
 } from './utils/craft/api';
 import { CraftSaveResult } from './utils/craft/client';
@@ -442,7 +441,9 @@ async function requireCraftApiUrl(): Promise<string> {
 }
 
 function respondCraftError(sendResponse: (response?: any) => void, error: unknown): void {
-	sendResponse({ success: false, error: toCraftErrorMessage(error) });
+	const message = toCraftErrorMessage(error);
+	console.error('Craft request failed:', message);
+	sendResponse({ success: false, error: message });
 }
 
 // ---------------------------------------------------------------------------
@@ -1022,10 +1023,12 @@ browser.runtime.onMessage.addListener((request: unknown, sender: browser.Runtime
 			const { title, markdown, folderId } = typedRequest as any;
 			requireCraftApiUrl()
 				.then(async (apiUrl) => {
-					const created = await createDocument(apiUrl, (title || '').trim() || 'Untitled clip', folderId ?? null);
-					if (markdown) {
-						await appendMarkdown(apiUrl, created.id, markdown);
-					}
+					const created = await createDocumentWithMarkdown(
+						apiUrl,
+						(title || '').trim() || 'Untitled clip',
+						markdown || '',
+						folderId ?? null
+					);
 					const result: CraftSaveResult = {
 						documentId: created.id,
 						clickableLink: created.clickableLink

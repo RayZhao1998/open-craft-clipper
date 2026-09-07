@@ -80,8 +80,8 @@ describe('removeComments', () => {
 });
 
 describe('convertHighlights', () => {
-	test('turns highlights bold, but not inside code', () => {
-		expect(convertHighlights('This is ==important== and `==not==`')).toBe('This is **important** and `==not==`');
+	test('keeps ==highlights== — Craft renders them as yellow', () => {
+		expect(convertHighlights('This is ==important== and `==not==`')).toBe('This is ==important== and `==not==`');
 	});
 });
 
@@ -120,7 +120,7 @@ describe('adaptMarkdownForCraft', () => {
 
 		const result = adaptMarkdownForCraft(source, { baseUrl: BASE });
 
-		expect(result).toContain('This links to a concept with **emphasis**.');
+		expect(result).toContain('This links to a concept with ==emphasis==.');
 		expect(result).toContain('<callout>"A quote"\n\n— Someone</callout>');
 		expect(result).toContain('![Figure](https://example.com/img/figure.png)');
 		expect(result).toContain('const link = "[[Concept]]";');
@@ -128,5 +128,44 @@ describe('adaptMarkdownForCraft', () => {
 		// Outside the code sample there must be no Obsidian-only syntax left.
 		expect(result.split('```')[0]).not.toContain('[[');
 		expect(result.split('```')[0]).not.toContain('> [!');
+	});
+
+	test('drops empty list items — Craft rejects "the first item in any list cannot be empty"', () => {
+		expect(adaptMarkdownForCraft('- \n- real item\n\n1.\n2. second')).toBe('- real item\n\n2. second');
+	});
+
+	test('leaves empty-looking list markers inside fenced code', () => {
+		const md = '```\n-\n- still code\n```';
+		expect(adaptMarkdownForCraft(md)).toBe(md);
+	});
+
+	test('promotes inline images to their own blocks (Craft rejects inline images)', () => {
+		expect(adaptMarkdownForCraft('Hello ![cat](https://ex.com/cat.png) world'))
+			.toBe('Hello\n\n![cat](https://ex.com/cat.png)\n\nworld');
+	});
+
+	test('unwraps linked images [![alt](src)](href) into a block image', () => {
+		expect(adaptMarkdownForCraft('[![cat](https://ex.com/cat.png)](https://ex.com/post)'))
+			.toBe('![cat](https://ex.com/cat.png)');
+	});
+
+	test('leaves a standalone image block alone', () => {
+		expect(adaptMarkdownForCraft('![cat](https://ex.com/cat.png)'))
+			.toBe('![cat](https://ex.com/cat.png)');
+	});
+
+	test('does not rewrite images inside fenced code', () => {
+		const md = '```md\nHello ![cat](https://ex.com/cat.png) world\n```';
+		expect(adaptMarkdownForCraft(md)).toBe(md);
+	});
+
+	test('turns an inline HTML img into its own markdown image block', () => {
+		expect(adaptMarkdownForCraft('Hello <img src="https://ex.com/cat.png" alt="cat"> world'))
+			.toBe('Hello\n\n![cat](https://ex.com/cat.png)\n\nworld');
+	});
+
+	test('turns images inside callouts into links so the tags stay intact', () => {
+		expect(adaptMarkdownForCraft('<callout>**image**: ![cover](https://ex.com/cover.png)</callout>'))
+			.toBe('<callout>**image**: [cover](https://ex.com/cover.png)</callout>');
 	});
 });
