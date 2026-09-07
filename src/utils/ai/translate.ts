@@ -31,6 +31,7 @@ export const TRANSLATE_CONTRACT = [
 	'- Keep the meaning, tone, tense and register of the source. Do not add explanations.',
 	'- Leave URLs, code, file names, numbers, units, emoji, @mentions and hashtags untouched.',
 	'- Keep proper nouns as-is unless there is a widely used $TARGET$ form; you may add the original in parentheses on first mention.',
+	'- Segments may contain Markdown inline formatting: **bold**, *italic*, `code`, [text](url), ==highlight==. Keep the same markers on the corresponding words in the translation. Do not add formatting the source did not have. Do not wrap the answer in a quote or callout.',
 	'- If a segment needs no translation (code, a URL, numbers, an emoji, already in $TARGET$), return it unchanged.',
 	'- Segments are standalone fragments: never join them into a paragraph and never quote the input back.'
 ].join('\n');

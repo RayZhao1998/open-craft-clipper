@@ -34,7 +34,7 @@ Reader mode can translate the page you are reading, bilingually, without sending
 - Configure any OpenAI-compatible endpoint (base URL + key + model) in **Settings → AI**, with a connection test.
 - Only the text within one viewport above and below the screen is queued; nothing is sent while you are scrolling.
 - **Remembered, not re-requested**: finished paragraphs are cached in IndexedDB for 90 days, so re-opening an article costs nothing — and the key covers endpoint, model, languages and the whole prompt, so changing any of them translates again instead of serving the old answer.
-- Works for YouTube too — the description keeps its lines, and caption lines are translated near the screen without breaking player seeking.
+- Works for YouTube too — the description keeps its lines, caption lines are translated near the screen, and each translation is lined up with its caption: it is underlined as the video speaks it, and clicking a translated phrase jumps the player to that moment.
 - The translation prompt is editable (tone, glossary, domain context), with the output contract appended for you.
 - **Usage** (issue #1): Settings → AI shows requests, input and output tokens, what the cache saved, and an optional reference cost — kept on this device only, never synced.
 

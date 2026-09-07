@@ -14,7 +14,8 @@
 //
 // The source element is never rewritten: the translation is inserted as a
 // sibling (or appended inside for list items and table cells), which keeps
-// highlight anchors, the transcript player and the clipped markdown untouched.
+// highlight anchors and the transcript player intact. Clipping copies those
+// sibling translations as ordinary paragraphs so the note stays bilingual.
 
 import browser from './browser-polyfill';
 import { generalSettings, loadSettings } from './storage-utils';
@@ -136,11 +137,121 @@ export function extractBlockText(el: HTMLElement): string {
 		node = walker.nextNode();
 	}
 
-	return parts.join('')
+	return tidyExtracted(parts.join(''));
+}
+
+const MARKUP_CHROME_SELECTOR = [
+	'pre', 'script', 'style', 'noscript',
+	'button', 'select', 'option', 'textarea', 'input', 'svg', 'math',
+	'.reader-translation', '.reader-translate-toast', '.timestamp', '.transcript-scrub-track',
+	'.footnote-anchor', '.footnote-popover',
+	'.obsidian-reader-settings', '.obsidian-reader-nav', '.obsidian-reader-footer',
+	'.obsidian-reader-outline', '.obsidian-reader-left-sidebar', '.obsidian-reader-clip-dropdown',
+	'.obsidian-selection-action', '.obsidian-highlighter-menu', '.obsidian-highlighter-overlays',
+	'.player-toggles', '.player-container', '.comment-actions'
+].join(', ');
+
+function tidyExtracted(text: string): string {
+	return text
 		.replace(/[ \t]*\n[ \t]*/g, '\n')
 		.replace(/[ \t]{2,}/g, ' ')
 		.replace(/\n{2,}/g, '\n')
 		.trim();
+}
+
+/**
+ * Same text as extractBlockText, with Markdown markers for the inline
+ * formatting the model should keep (**bold**, *italic*, `code`, links).
+ */
+export function extractBlockMarkdown(el: HTMLElement): string {
+	return tidyExtracted(markdownFromNode(el, el));
+}
+
+function markdownFromNode(node: Node, root: HTMLElement): string {
+	if (node.nodeType === Node.TEXT_NODE) {
+		return (node.nodeValue || '').replace(/\s+/g, ' ');
+	}
+	if (node.nodeType !== Node.ELEMENT_NODE) return '';
+
+	const el = node as HTMLElement;
+	if (el !== root && el.closest(MARKUP_CHROME_SELECTOR)) return '';
+	if (el.tagName === 'BR') return '\n';
+
+	const inner = Array.from(el.childNodes).map(child => markdownFromNode(child, root)).join('');
+
+	switch (el.tagName) {
+		case 'STRONG':
+		case 'B':
+			return inner.trim() ? `**${inner.trim()}**` : inner;
+		case 'EM':
+		case 'I':
+			return inner.trim() ? `*${inner.trim()}*` : inner;
+		case 'CODE':
+		case 'KBD':
+		case 'SAMP':
+			return inner ? `\`${inner.replace(/`/g, '')}\`` : '';
+		case 'MARK':
+			return inner.trim() ? `==${inner.trim()}==` : inner;
+		case 'A': {
+			const href = (el.getAttribute('href') || '').trim();
+			if (!inner.trim()) return inner;
+			if (!href || /^(javascript:|data:)/i.test(href)) return inner;
+			return `[${inner.trim()}](${href})`;
+		}
+		default:
+			return inner;
+	}
+}
+
+/** Turn a model string that may contain inline Markdown into DOM nodes. */
+export function renderInlineMarkdown(doc: Document, text: string): DocumentFragment {
+	const fragment = doc.createDocumentFragment();
+	const lines = (text || '').split('\n');
+	lines.forEach((line, index) => {
+		if (index > 0) fragment.appendChild(doc.createElement('br'));
+		appendInlineMarkdown(doc, fragment, line);
+	});
+	return fragment;
+}
+
+function appendInlineMarkdown(doc: Document, parent: Node, text: string): void {
+	const token = /\*\*([^*]+)\*\*|\*([^*]+)\*|==([^=]+)==|`([^`]+)`|\[([^\]]+)\]\(([^)]+)\)/g;
+	let last = 0;
+	let match: RegExpExecArray | null;
+	while ((match = token.exec(text))) {
+		if (match.index > last) {
+			parent.appendChild(doc.createTextNode(text.slice(last, match.index)));
+		}
+		if (match[1] != null) {
+			const strong = doc.createElement('strong');
+			strong.textContent = match[1];
+			parent.appendChild(strong);
+		} else if (match[2] != null) {
+			const em = doc.createElement('em');
+			em.textContent = match[2];
+			parent.appendChild(em);
+		} else if (match[3] != null) {
+			const mark = doc.createElement('mark');
+			mark.textContent = match[3];
+			parent.appendChild(mark);
+		} else if (match[4] != null) {
+			const code = doc.createElement('code');
+			code.textContent = match[4];
+			parent.appendChild(code);
+		} else {
+			const link = doc.createElement('a');
+			link.setAttribute('href', match[6]);
+			appendInlineMarkdown(doc, link, match[5]);
+			parent.appendChild(link);
+		}
+		last = match.index + match[0].length;
+	}
+	if (last < text.length) parent.appendChild(doc.createTextNode(text.slice(last)));
+}
+
+function fillTranslationNode(node: HTMLElement, text: string): void {
+	node.replaceChildren();
+	node.appendChild(renderInlineMarkdown(node.ownerDocument, text));
 }
 
 /** Deepest block-level elements only: a blockquote is translated per <p>. */
@@ -173,7 +284,8 @@ function discoverBlocks(root: HTMLElement): TranslatableBlock[] {
 	for (const el of findTranslatableElements(root)) {
 		if (blocks.has(el)) continue;
 
-		const text = extractBlockText(el);
+		const plain = extractBlockText(el);
+		const text = extractBlockMarkdown(el) || plain;
 		const transcript = isTranscriptBlock(el);
 		const block: TranslatableBlock = {
 			el,
@@ -189,7 +301,7 @@ function discoverBlocks(root: HTMLElement): TranslatableBlock[] {
 		// Captions are the most expensive part of a video, so they are opt-in.
 		const skip = transcript && settings && !settings.translateTranscript
 			? { skip: true as const }
-			: shouldSkipTranslation(text, settings?.targetLang || '', 2);
+			: shouldSkipTranslation(plain, settings?.targetLang || '', 2);
 		if (skip.skip) {
 			block.state = 'skipped';
 			el.setAttribute('data-reader-translate-source', 'skipped');
@@ -264,6 +376,9 @@ function createTranslationNode(text: string, targetLang: string, block: Translat
 	// be hidden on its own in "translation only" mode).
 	const tag = block.el.tagName === 'LI' ? 'li' : (block.el.tagName === 'SPAN' ? 'span' : 'div');
 	const node = doc.createElement(tag);
+	// `reader-translation-segment` is how the transcript player finds a caption's
+	// translation: it lines the two up, so the playback highlight and click-to-seek
+	// work in either language.
 	node.className = 'reader-translation'
 		+ (block.transcript ? ' reader-translation-segment' : '')
 		+ (tag === 'li' ? ' reader-translation-item' : '');
@@ -276,12 +391,7 @@ function createTranslationNode(text: string, targetLang: string, block: Translat
 		node.classList.add('is-rtl');
 	}
 
-	// Model output is never trusted with innerHTML: newlines become <br> by hand.
-	const lines = text.split('\n');
-	lines.forEach((line, index) => {
-		if (index > 0) node.appendChild(doc.createElement('br'));
-		node.appendChild(doc.createTextNode(line));
-	});
+	if (text) fillTranslationNode(node, text);
 
 	return node;
 }
@@ -322,7 +432,7 @@ function attachTranslation(block: TranslatableBlock, text: string): void {
 		// The placeholder is already in the right place; it becomes the answer.
 		block.node.classList.remove('is-loading');
 		block.node.removeAttribute('aria-hidden');
-		block.node.textContent = text;
+		fillTranslationNode(block.node, text);
 		return;
 	}
 

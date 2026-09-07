@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, test, expect } from 'vitest';
-import { extractBlockText } from './reader-translate';
+import { extractBlockMarkdown, extractBlockText, renderInlineMarkdown } from './reader-translate';
 
 function firstBlock(markup: string): HTMLElement {
 	const wrapper = document.createElement('div');
@@ -58,5 +58,27 @@ describe('extractBlockText', () => {
 	test('returns an empty string for a block with nothing but chrome', () => {
 		const el = firstBlock('<p><code>npm install</code><span>   </span></p>');
 		expect(extractBlockText(el)).toBe('');
+	});
+});
+
+describe('extractBlockMarkdown', () => {
+	test('keeps bold, italic and links as Markdown', () => {
+		const el = firstBlock('<p>The <strong>quick</strong> <em>brown</em> <a href="https://ex.com">fox</a>.</p>');
+		expect(extractBlockMarkdown(el)).toBe('The **quick** *brown* [fox](https://ex.com).');
+	});
+
+	test('keeps inline code as backticks instead of dropping it', () => {
+		const el = firstBlock('<p>Run <code>npm ci</code> now</p>');
+		expect(extractBlockMarkdown(el)).toBe('Run `npm ci` now');
+	});
+});
+
+describe('renderInlineMarkdown', () => {
+	test('turns **bold** into a <strong>', () => {
+		const fragment = renderInlineMarkdown(document, 'Hello **world** today');
+		const wrap = document.createElement('div');
+		wrap.appendChild(fragment);
+		expect(wrap.querySelector('strong')?.textContent).toBe('world');
+		expect(wrap.textContent).toBe('Hello world today');
 	});
 });

@@ -1,32 +1,189 @@
 import { getMessage } from './i18n';
+import {
+	SENT_END,
+	SOFT_STOP,
+	TextSpan,
+	alignCaption,
+	isSentBoundary,
+	isSentOrSoftBoundary,
+	isWordStep,
+	mapSpanToTranslation
+} from './reader-transcript-align';
 
-// CJK-aware text boundary helpers
-const SENT_END = /[.!?。！？]/;
-const SOFT_STOP = /[,、，]/;
-const CJK_SENT_END = /[。！？]/;
-const CJK_PUNCT = /[。！？、，]/;
-const CJK_CHAR = /[\u3040-\u309F\u30A0-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]/;
-
-// CJK punctuation doesn't require trailing whitespace
-function isSentBoundary(text: string, punctPos: number, nextPos: number): boolean {
-	const ch = text[punctPos];
-	if (CJK_SENT_END.test(ch)) return true;
-	if (/[.!?]/.test(ch)) return nextPos >= text.length || /\s/.test(text[nextPos]);
-	return false;
+/**
+ * A block of text the player can measure and highlight as one string. Both the
+ * spoken caption line and its translation come through here; a translation may
+ * contain hard breaks, so it is a list of text nodes rather than one.
+ */
+export interface TextMirror {
+	text: string;
+	/** Top of the line a character sits on; undefined while that line is not rendered. */
+	lineTop(pos: number): number | undefined;
+	/** Range covering [from, to), or null when the span is empty. */
+	range(from: number, to: number): Range | null;
+	/** Where a caret sits in this text, as a flat offset; -1 when it is elsewhere. */
+	flatOffset(node: Node, offset: number): number;
 }
 
-function isSentOrSoftBoundary(text: string, punctPos: number, nextPos: number): boolean {
-	const ch = text[punctPos];
-	if (CJK_PUNCT.test(ch)) return true;
-	if (/[.!?,]/.test(ch)) return nextPos >= text.length || /\s/.test(text[nextPos]);
-	return false;
+// Exported for tests. Together with `speechSpan` this is the contract for which
+// characters of a caption line the player is pointing at.
+export function createMirror(el: HTMLElement | null): TextMirror | null {
+	if (!el) return null;
+
+	const doc = el.ownerDocument;
+	const nodes: Text[] = [];
+	const lengths: number[] = [];
+	const walker = doc.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+	let node = walker.nextNode() as Text | null;
+	while (node) {
+		nodes.push(node);
+		lengths.push(node.textContent?.length || 0);
+		node = walker.nextNode() as Text | null;
+	}
+
+	const total = lengths.reduce((sum, len) => sum + len, 0);
+	if (!total) return null;
+
+	const bases: number[] = [];
+	let base = 0;
+	for (const len of lengths) { bases.push(base); base += len; }
+
+	const locate = (pos: number) => {
+		let remaining = Math.max(0, Math.min(total, pos));
+		for (let i = 0; i < nodes.length; i++) {
+			if (remaining < lengths[i] || (remaining === lengths[i] && i === nodes.length - 1)) {
+				return { node: nodes[i] as Node, offset: remaining };
+			}
+			remaining -= lengths[i];
+		}
+		return { node: nodes[nodes.length - 1] as Node, offset: lengths[lengths.length - 1] };
+	};
+
+	const range = (from: number, to: number): Range | null => {
+		if (to <= from) return null;
+		const start = locate(from);
+		const end = locate(to);
+		const out = doc.createRange();
+		out.setStart(start.node, start.offset);
+		out.setEnd(end.node, end.offset);
+		return out;
+	};
+
+	return {
+		text: nodes.map(n => n.textContent || '').join(''),
+		lineTop(pos: number) {
+			if (pos >= total) return undefined;
+			// A document with no layout at all — a detached node, a test runner — has
+			// no lines to measure; callers then bound the span by punctuation instead.
+			const rects = range(pos, Math.min(total, pos + 1))?.getClientRects?.();
+			return rects?.[0]?.top;
+		},
+		range,
+		flatOffset(caret: Node, offset: number) {
+			const index = nodes.indexOf(caret as Text);
+			return index < 0 ? -1 : bases[index] + offset;
+		}
+	};
 }
 
-// In CJK text each character acts as its own word
-function isWordStep(text: string, pos: number): boolean {
-	if (CJK_CHAR.test(text[pos])) return true;
-	if (pos > 0 && CJK_CHAR.test(text[pos - 1]) && !CJK_CHAR.test(text[pos]) && /\S/.test(text[pos])) return true;
-	return false;
+/** The caption row's own text, and the translation that may sit under it. */
+const spokenTextOf = (seg: HTMLElement) => createMirror(seg.querySelector('.transcript-segment-text'));
+const translationOf = (seg: HTMLElement) => createMirror(seg.querySelector('.reader-translation-segment'));
+
+// The row a caption occupies grows once its translation is inserted, and the
+// player measures against the spoken line rather than the pair. In "translation
+// only" the original is hidden and has no box of its own, so the row is the
+// translation.
+function spokenRect(seg: HTMLElement): DOMRect {
+	const text = seg.querySelector('.transcript-segment-text') as HTMLElement | null;
+	const rect = text?.getBoundingClientRect();
+	if (rect && rect.height > 0) return rect;
+	return seg.getBoundingClientRect();
+}
+
+/**
+ * The words being spoken right now: from the start of the current sentence (or
+ * the start of the line, before the first break) to the next sentence or clause
+ * break, capped at three lines so a run-on caption does not light up a paragraph.
+ *
+ * The line limits need the text to be rendered. When it is not — the original is
+ * hidden in "translation only" mode — the scan falls back to sentence boundaries
+ * and a character budget, which stops a span running to the end of the line.
+ */
+export function speechSpan(mirror: TextMirror, charPos: number, fromLineStart: boolean): TextSpan | null {
+	const text = mirror.text;
+	const total = text.length;
+	const lineY = mirror.lineTop(charPos);
+	const hasLines = lineY !== undefined;
+
+	let start = 0;
+	if (!fromLineStart) {
+		start = charPos;
+		let lineChanges = 0;
+		let lastY = lineY;
+		while (start > 0) {
+			if (isSentBoundary(text, start - 1, start)) {
+				while (start < charPos && /\s/.test(text[start])) start++;
+				break;
+			}
+			// Nothing to measure: stop where two lines of caption would have ended.
+			if (!hasLines && charPos - start > 40) break;
+			// Check line changes in steps to reduce layout queries
+			if (hasLines && (start % 8 === 0 || start === 1)) {
+				const y = mirror.lineTop(start - 1);
+				if (y !== undefined && lastY !== undefined && Math.abs(y - lastY) > 2) {
+					lineChanges++;
+					if (lineChanges >= 2) break;
+					lastY = y;
+				}
+			}
+			start--;
+		}
+	}
+
+	let end = charPos + 1;
+	let lines = 0;
+	let forwardLastY = lineY;
+	while (end < total && lines < 3) {
+		if (hasLines && (end % 8 === 0 || end === charPos + 1)) {
+			const y = mirror.lineTop(end);
+			if (y === undefined) break;
+			if (forwardLastY !== undefined && Math.abs(y - forwardLastY) > 2) {
+				lines++;
+				if (lines >= 3) break;
+				forwardLastY = y;
+			}
+		}
+		// The same fallback at the forward end: three lines' worth of characters.
+		if (!hasLines && end - charPos > 60) break;
+		if (end > charPos + 1 && isSentOrSoftBoundary(text, end - 1, end)) break;
+		end++;
+	}
+
+	return end > start ? { start, end } : null;
+}
+
+/**
+ * Shorten a span until it fits inside `maxLines` lines of its own, so a
+ * translation that merged three sentences into one still does not underline the
+ * whole row. An unmeasurable span is cut by characters instead.
+ */
+function capToLines(mirror: TextMirror, from: number, to: number, maxLines: number): number {
+	const firstY = mirror.lineTop(from);
+	if (firstY === undefined) return Math.min(to, from + 60);
+
+	let lastY = firstY;
+	let lines = 0;
+	for (let pos = from + 4; pos < to; pos += 4) {
+		const y = mirror.lineTop(pos);
+		if (y === undefined) break;
+		if (Math.abs(y - lastY) > 2) {
+			lines++;
+			if (lines >= maxLines) return pos;
+			lastY = y;
+		}
+	}
+	return to;
 }
 
 interface TranscriptSettings {
@@ -223,7 +380,7 @@ export function wireTranscript(
 
 	currentPosButton.addEventListener('click', () => {
 		if (activeSegment) {
-			const rect = activeSegment.getBoundingClientRect();
+			const rect = spokenRect(activeSegment);
 			const stickyOffset = scroll.getStickyOffset();
 			const targetY = (window.pageYOffset || doc.documentElement.scrollTop)
 				+ rect.top - stickyOffset - 20;
@@ -262,7 +419,7 @@ export function wireTranscript(
 				segments[newIndex].classList.add('is-active');
 				// Auto-scroll to keep active segment visible
 				if (autoScrollEnabled && !suppressScroll && Date.now() - lastUserScroll > AUTO_SCROLL_COOLDOWN) {
-					const rect = segments[newIndex].getBoundingClientRect();
+					const rect = spokenRect(segments[newIndex]);
 					const stickyOffset = scroll.getStickyOffset();
 					const targetY = (window.pageYOffset || doc.documentElement.scrollTop)
 						+ rect.top - stickyOffset - 20;
@@ -288,7 +445,7 @@ export function wireTranscript(
 		}
 		// Show floating button when active segment is out of view
 		if (activeSegment) {
-			const rect = activeSegment.getBoundingClientRect();
+			const rect = spokenRect(activeSegment);
 			const stickyOffset = scroll.getStickyOffset();
 			const isVisible = rect.bottom > stickyOffset && rect.top < window.innerHeight;
 			currentPosButton.classList.toggle('is-visible', !isVisible);
@@ -297,86 +454,17 @@ export function wireTranscript(
 		}
 		// Update progress line on the scrub track
 		if (activeSegment && activeIndex >= 0) {
-			const segRect = activeSegment.getBoundingClientRect();
+			const rowRect = spokenRect(activeSegment);
 			const trackRect = scrubTrack.getBoundingClientRect();
 			const start = segmentTimes[activeIndex];
 			const end = getSegmentEnd(activeIndex);
 			const segProgress = Math.min(1, Math.max(0, (currentTime - start) / (end - start)));
-			const yInTrack = (segRect.top - trackRect.top) + segProgress * segRect.height;
+			const yInTrack = (rowRect.top - trackRect.top) + segProgress * rowRect.height;
 			const trackProgress = yInTrack / trackRect.height;
 			scrubTrack.style.setProperty('--track-progress', (trackProgress * 100) + '%');
 
-			// Update playback highlight — underline the current line
-			if (playbackHighlight && highlightEnabled) {
-				playbackHighlight.clear();
-				const textEl = activeSegment.querySelector('.transcript-segment-text');
-				const textNode = textEl?.firstChild;
-				if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-					const totalLen = (textNode.textContent || '').length;
-					const charPos = Math.min(totalLen - 1, Math.max(0, Math.round(segProgress * totalLen)));
-
-					// Find lines around the current position
-					const probe = doc.createRange();
-					const getLineY = (pos: number) => {
-						probe.setStart(textNode!, Math.min(pos, totalLen - 1));
-						probe.setEnd(textNode!, Math.min(pos + 1, totalLen));
-						return probe.getClientRects()[0]?.top;
-					};
-
-					const lineY = getLineY(charPos);
-					if (lineY === undefined) return;
-
-					// Scan backward to find start of current sentence
-					// but limit to ~2 lines back so run-ons don't over-highlight
-					const text = textNode.textContent || '';
-					let hlStart = 0;
-					if (segProgress > 0.05) {
-						hlStart = charPos;
-						let backLineChanges = 0;
-						let backLastY = lineY;
-						while (hlStart > 0) {
-							if (isSentBoundary(text, hlStart - 1, hlStart)) {
-								while (hlStart < charPos && /\s/.test(text[hlStart])) hlStart++;
-								break;
-							}
-							// Check line changes in steps to reduce layout queries
-							if (hlStart % 8 === 0 || hlStart === 1) {
-								const y = getLineY(hlStart - 1);
-								if (y !== undefined && Math.abs(y - backLastY) > 2) {
-									backLineChanges++;
-									if (backLineChanges >= 2) break;
-									backLastY = y;
-								}
-							}
-							hlStart--;
-						}
-					}
-
-					// Scan forward: up to 3 lines total, stop at sentence end or comma
-					let hlEnd = charPos + 1;
-					let fwdLines = 0;
-					let fwdLastY = lineY;
-					while (hlEnd < totalLen && fwdLines < 3) {
-						// Check line changes in steps
-						if (hlEnd % 8 === 0 || hlEnd === charPos + 1) {
-							const y = getLineY(hlEnd);
-							if (y === undefined) break;
-							if (Math.abs(y - fwdLastY) > 2) {
-								fwdLines++;
-								if (fwdLines >= 3) break;
-								fwdLastY = y;
-							}
-						}
-						if (hlEnd > charPos + 1 && isSentOrSoftBoundary(text, hlEnd - 1, hlEnd)) break;
-						hlEnd++;
-					}
-
-					const range = doc.createRange();
-					range.setStart(textNode, hlStart);
-					range.setEnd(textNode, hlEnd);
-					playbackHighlight.add(range);
-				}
-			}
+			// Underline the words being spoken, in both languages
+			paintPlayback(activeSegment, segProgress);
 		}
 	};
 
@@ -533,6 +621,35 @@ export function wireTranscript(
 		(CSS as any).highlights.set('transcript-hover', hoverHighlight);
 	}
 
+	// Underline the words being spoken right now, in both lines of the row: the
+	// caption, and the translation lined up against it.
+	const paintPlayback = (seg: HTMLElement, segProgress: number) => {
+		if (!playbackHighlight) return;
+		playbackHighlight.clear();
+		if (!highlightEnabled) return;
+
+		const spoken = spokenTextOf(seg);
+		if (!spoken) return;
+
+		const total = spoken.text.length;
+		const charPos = Math.min(total - 1, Math.max(0, Math.round(segProgress * total)));
+		const span = speechSpan(spoken, charPos, segProgress <= 0.05);
+		if (!span) return;
+
+		const inOriginal = spoken.range(span.start, span.end);
+		if (inOriginal) playbackHighlight.add(inOriginal);
+
+		// The translation has no timings of its own: the span is mapped onto it
+		// sentence by sentence, then capped by the translation's own lines, so a model
+		// that merged three sentences into one still does not underline the whole row.
+		const translated = translationOf(seg);
+		if (!translated) return;
+		const mirrored = mapSpanToTranslation(spoken.text, translated.text, span);
+		if (mirrored.end <= mirrored.start) return;
+		const inTranslation = translated.range(mirrored.start, capToLines(translated, mirrored.start, mirrored.end, 3));
+		if (inTranslation) playbackHighlight.add(inTranslation);
+	};
+
 	const getCaretNode = (x: number, y: number): { node: Node; offset: number } | null => {
 		if ('caretPositionFromPoint' in doc) {
 			const pos = (doc as any).caretPositionFromPoint(x, y);
@@ -593,10 +710,13 @@ export function wireTranscript(
 	const updateHoverHighlight = (e: MouseEvent) => {
 		if (!hoverHighlight) return;
 		hoverHighlight.clear();
-		const seg = (e.target as HTMLElement).closest('.transcript-segment-text');
-		if (!seg) return;
+		// Either language can be looked up word by word: the spoken line, or the
+		// translation sitting under it.
+		const textEl = (e.target as HTMLElement)
+			.closest('.transcript-segment-text, .reader-translation-segment') as HTMLElement | null;
+		if (!textEl || !textEl.closest('.transcript-segment')) return;
 		const caret = getCaretNode(e.clientX, e.clientY);
-		if (!caret || caret.node.nodeType !== Node.TEXT_NODE || !seg.contains(caret.node)) return;
+		if (!caret || caret.node.nodeType !== Node.TEXT_NODE || !textEl.contains(caret.node)) return;
 		const range = getHoverRange(caret.node, caret.offset);
 		if (range) hoverHighlight.add(range);
 	};
@@ -613,7 +733,7 @@ export function wireTranscript(
 	// Position from first segment to bottom
 	const positionTrack = () => {
 		const transcriptRect = transcript.getBoundingClientRect();
-		const firstSegRect = segments[0].getBoundingClientRect();
+		const firstSegRect = spokenRect(segments[0]);
 		scrubTrack.style.top = (firstSegRect.top - transcriptRect.top) + 'px';
 	};
 	positionTrack();
@@ -621,7 +741,7 @@ export function wireTranscript(
 	const getTimeFromY = (clientY: number): number => {
 		// Find which segment the Y position falls within
 		for (let i = segments.length - 1; i >= 0; i--) {
-			const rect = segments[i].getBoundingClientRect();
+			const rect = spokenRect(segments[i]);
 			if (clientY >= rect.top) {
 				const progress = Math.min(1, (clientY - rect.top) / rect.height);
 				const start = segmentTimes[i];
@@ -651,6 +771,24 @@ export function wireTranscript(
 		scrubbing = false;
 	});
 
+	// Where inside the line a click landed, in the original's coordinates: a click
+	// on the caption reads straight off the caret, a click on its translation is
+	// lined back up with the words of the original it stands for.
+	const charOffsetInSegment = (seg: HTMLElement, spoken: TextMirror, clientX: number, clientY: number): number => {
+		const caret = getCaretNode(clientX, clientY);
+		if (!caret || caret.node.nodeType !== Node.TEXT_NODE) return spoken.text.length;
+
+		const inOriginal = spoken.flatOffset(caret.node, caret.offset);
+		if (inOriginal >= 0) return inOriginal;
+
+		const translated = translationOf(seg);
+		const inTranslation = translated ? translated.flatOffset(caret.node, caret.offset) : -1;
+		if (translated && inTranslation >= 0) {
+			return alignCaption(spoken.text, translated.text).toSource(inTranslation);
+		}
+		return spoken.text.length;
+	};
+
 	// Click anywhere in a segment to seek to that position
 	transcript.addEventListener('click', (e: MouseEvent) => {
 		// Don't seek if highlighter is active or user was selecting text
@@ -666,25 +804,33 @@ export function wireTranscript(
 		const start = segmentTimes[idx];
 		const end = getSegmentEnd(idx);
 
-		// Use caret position to estimate character-level progress
-		const textEl = seg.querySelector('.transcript-segment-text');
-		if (textEl) {
-			const totalLen = (textEl.textContent || '').length;
-			if (totalLen > 0) {
-				const caret = getCaretNode(e.clientX, e.clientY);
-				let charOffset = totalLen;
-				if (caret && caret.node.nodeType === Node.TEXT_NODE && textEl.contains(caret.node)) {
-					charOffset = caret.offset;
-				}
-				const progress = Math.min(1, Math.max(0, charOffset / totalLen));
-				seekTo(start + progress * (end - start));
-				return;
-			}
+		// Which character of the line the click landed on, and therefore which moment
+		// of it. With no caption text at all, fall back to how far down the row it was.
+		const spoken = spokenTextOf(seg);
+		if (spoken) {
+			const charOffset = charOffsetInSegment(seg, spoken, e.clientX, e.clientY);
+			const progress = Math.min(1, Math.max(0, charOffset / spoken.text.length));
+			seekTo(start + progress * (end - start));
+			return;
 		}
 
 		// Fallback to Y position
-		const rect = seg.getBoundingClientRect();
+		const rect = spokenRect(seg);
 		const progress = Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height));
 		seekTo(start + progress * (end - start));
 	});
+
+	// A caption gains — or loses — its translation at any moment, including while
+	// the video is paused, which changes both what is on screen and how tall the
+	// row is. Re-measure and redraw against the text that is actually there.
+	const rowWatcher = new MutationObserver(() => {
+		if (!doc.contains(transcript)) {
+			rowWatcher.disconnect();
+			return;
+		}
+		const at = lastCurrentTime;
+		lastCurrentTime = -1;
+		if (at >= 0) updateActiveSegment(at);
+	});
+	rowWatcher.observe(transcript, { childList: true, subtree: true });
 }

@@ -33,6 +33,7 @@ describe('renderTranslatePrompt', () => {
 		expect(prompt).toContain('Chinese (Simplified)');
 		expect(prompt).toContain('{"t":');
 		expect(prompt).toContain('Source language: the language of each segment, detected automatically');
+		expect(prompt).toContain('**bold**');
 	});
 
 	test('appends user notes without touching the contract', () => {

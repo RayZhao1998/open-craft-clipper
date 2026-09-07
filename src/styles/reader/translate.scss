@@ -7,13 +7,14 @@
 
 article {
 	.reader-translation {
-		color: var(--text-muted);
-		font-size: 0.95em;
-		line-height: 1.55;
-		margin-top: 0.1em;
+		color: var(--text-normal);
+		font-size: inherit;
+		font-weight: inherit;
+		line-height: inherit;
+		margin-top: 0.35em;
 		margin-bottom: 0.9em;
-		padding-left: 0.85em;
-		border-left: 2px solid var(--background-modifier-border);
+		padding: 0;
+		border: 0;
 		border-radius: 0;
 		overflow-wrap: break-word;
 
@@ -21,30 +22,31 @@ article {
 			color: var(--text-accent);
 		}
 
+		strong, b {
+			font-weight: 700;
+		}
+
 		&.is-rtl {
-			padding-left: 0;
-			padding-right: 0.85em;
-			border-left: 0;
-			border-right: 2px solid var(--background-modifier-border);
 			text-align: start;
 		}
 	}
 
-	// A translated list item is its own <li>, so it inherits the list's rhythm.
+	// A translated list item is its own <li>, so the bullet list stays a list.
 	li.reader-translation {
-		margin-top: 0.05em;
-		padding-left: 0.85em;
-		border-left: 2px solid var(--background-modifier-border);
+		margin-top: 0.15em;
+		padding-left: 0;
+		border: 0;
 	}
 
-	// Headings get the translation inline-ish, without the rule.
+	// Heading translations are body-sized paragraphs, not a second heading
+	// and not a quote.
 	h1, h2, h3, h4, h5, h6 {
 		+ .reader-translation {
-			margin-top: -0.25em;
+			margin-top: 0.15em;
 			margin-bottom: 0.7em;
-			border-left: 0;
-			padding-left: 0;
-			font-weight: 500;
+			font-size: var(--font-text-size, 1em);
+			font-weight: 400;
+			line-height: var(--line-height, 1.6);
 		}
 	}
 
@@ -60,10 +62,23 @@ article {
 	.transcript-segment > .reader-translation {
 		flex: 0 0 100%;
 		display: block;
-		margin: -0.05em 0 0.55em calc(var(--timestamp-width, 5em) + 1.5em);
-		padding-left: 0;
+		box-sizing: border-box;
+		margin: -0.05em 0 0.55em;
+		// The indent is padding, not margin: this box is already 100% of the row, so
+		// a left margin would push its right edge that far outside the column and the
+		// end of every translated line would be cut off.
+		padding-left: calc(var(--timestamp-width, 5em) + 1.5em);
 		border-left: 0;
 		font-size: 0.92em;
+	}
+
+	// Arabic, Hebrew, Persian read from the right, so an indent on the left would
+	// shorten the wrong end of the box. The spoken line sits flush right already,
+	// and carries 0.5em of its own padding.
+	.transcript-segment > .reader-translation.is-rtl {
+		padding-left: 0;
+		padding-right: 0.5em;
+		border-right: 0;
 	}
 
 	// Cells keep both languages even in "translation only" mode: hiding the cell
@@ -109,7 +124,7 @@ article {
 	}
 
 	.transcript-segment > .reader-translation.is-loading {
-		margin: 0.15em 0 0.55em calc(var(--timestamp-width, 5em) + 1.5em);
+		margin: 0.15em 0 0.55em;
 
 		&::before { height: 0.7em; }
 		&::after { height: 0.7em; margin-top: 0.25em; width: 35%; }

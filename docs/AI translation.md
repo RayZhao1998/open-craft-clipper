@@ -5,7 +5,7 @@ title: AI translation
 Reader mode can show an article in two languages at once: the original paragraph, with its translation directly underneath. Translation is done paragraph by paragraph, and only around the part of the page you are actually reading, so a 20,000-word article costs the same per scroll as the screen you can see.
 
 > [!note] Availability
-> AI translation is only available inside **Reader** — the full-page reader and the Reader tab opened from the extension popup. Translations live in the page and are removed when you turn translation off.
+> AI translation is only available inside **Reader** — the full-page reader and the Reader tab opened from the extension popup. Translations sit under each paragraph as ordinary text (same bold/italic/links as the original, not a quote). Clipping a translated Reader page keeps both languages. Translations are removed from the page when you turn translation off.
 
 ## Set up a model
 
@@ -43,6 +43,15 @@ For YouTube pages, Reader translates the same two kinds of text:
 
 - the **video description**, keeping its line breaks (a description is one paragraph with hard breaks, and it is sent as one segment, not one request per line);
 - the **transcript**, caption line by caption line, inserted inside each caption line so clicking a line still jumps the player there.
+
+A translated caption line has no timestamps of its own, so it is lined up with the line it came from sentence by sentence — and that gives it the same behaviour as the original:
+
+- the underline that rides along with the playhead appears in the translation as well, on the sentence the video is speaking there;
+- **clicking a translated phrase jumps the player to the moment those words are spoken**, not merely to the start of the line;
+- hovering a phrase underlines it in either language, the way it does on the original;
+- the red progress line and the scrub track keep measuring the spoken line, so they do not drift as rows grow taller.
+
+In **Translation only** mode this matters more, not less: the original is hidden, and the translation carries the playback highlight on its own. Captions whose translation has not arrived yet, or that were skipped, simply highlight the original.
 
 Captions are the most expensive part of a video, so they are optional: **Translate transcripts** is on by default and can be switched off — the description is still translated. Only the captions near the screen are requested, and timestamps and chapter markers are never sent.
 
