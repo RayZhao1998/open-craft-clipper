@@ -139,6 +139,9 @@
 	"aiTranslateButton": {
 		"message": "翻译"
 	},
+	"aiTranslatingLabel": {
+		"message": "正在翻译…"
+	},
 	"aiTranslateMode": {
 		"message": "布局"
 	},

@@ -26,6 +26,9 @@
 	"advanced": {
 		"message": "進階"
 	},
+	"aiTranslatingLabel": {
+		"message": "翻譯中…"
+	},
 	"allHighlights": {
 		"message": "所有螢光標記"
 	},

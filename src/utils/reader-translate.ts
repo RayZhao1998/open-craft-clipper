@@ -407,13 +407,27 @@ function insertTranslationNode(block: TranslatableBlock, node: HTMLElement): voi
 	}
 }
 
-/** A shimmering stand-in while the translation of this block is in flight. */
+/**
+ * A visible stand-in (spinner + label) while the translation of this block is
+ * in flight. An empty placeholder just reads as unexplained blank space under
+ * the sentence being translated.
+ */
 function markLoading(block: TranslatableBlock): void {
 	if (!docRef || block.node) return;
 
 	const node = createTranslationNode('', settings?.targetLang || '', block);
 	node.classList.add('is-loading');
 	node.setAttribute('aria-hidden', 'true');
+
+	const spinner = docRef.createElement('span');
+	spinner.className = 'reader-translation-spinner';
+	node.appendChild(spinner);
+
+	const label = docRef.createElement('span');
+	label.className = 'reader-translation-label';
+	label.textContent = getMessage('aiTranslatingLabel') || 'Translating…';
+	node.appendChild(label);
+
 	block.node = node;
 	insertTranslationNode(block, node);
 }
